@@ -28,7 +28,7 @@ export const createAuth = (context: GenericCtx<DataModel>) =>
     database: authComponent.adapter(context),
     socialProviders: socialProviders(),
     emailAndPassword: { enabled: process.env.AUTH_DEV_PASSWORD === '1', requireEmailVerification: false },
-    plugins: [crossDomain({ siteUrl }), convex({ authConfig })],
+    plugins: [crossDomain({ siteUrl }), convex({ authConfig })]
   });
 
 export async function currentUser(context: GenericCtx<DataModel>) {
@@ -39,6 +39,6 @@ export const providers = query({
   args: {},
   handler: async () => ({
     github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
-    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-  }),
+    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
+  })
 });

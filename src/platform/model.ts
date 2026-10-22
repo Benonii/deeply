@@ -42,16 +42,50 @@ function registerPackRefs(refs: Record<string, unknown> | undefined) {
 
 export function fromBuiltin(course: BuiltinCourse): ShellCourse {
   if (course.format === 'pack') registerPackRefs(course.pack.codeRefs);
-  const base = { base: `/c/${course.id}`, id: course.id, title: course.title, tagline: course.tagline, summary: course.summary, kind: course.kind, brand: course.brand, pages: course.pages ?? [] };
+  const base = {
+    base: `/c/${course.id}`,
+    id: course.id,
+    title: course.title,
+    tagline: course.tagline,
+    summary: course.summary,
+    kind: course.kind,
+    brand: course.brand,
+    pages: course.pages ?? []
+  };
   if (course.format === 'react') {
-    return { ...base, modules: course.modules.map((courseModule) => ({ id: courseModule.id, n: courseModule.n, title: courseModule.title, kicker: courseModule.kicker, minutes: courseModule.minutes, summary: courseModule.summary, status: 'ready', Component: courseModule.Component })) };
+    return {
+      ...base,
+      modules: course.modules.map((courseModule) => ({
+        id: courseModule.id,
+        n: courseModule.n,
+        title: courseModule.title,
+        kicker: courseModule.kicker,
+        minutes: courseModule.minutes,
+        summary: courseModule.summary,
+        status: 'ready',
+        Component: courseModule.Component
+      }))
+    };
   }
   return { ...base, modules: packModules(course.pack), challenges: course.pack.challenges };
 }
 
 export type GeneratedCourseDoc = {
-  course: { slug: string; status: string; topic: string; kind: 'concept' | 'repo'; meta?: GeneratedCourseMeta; error?: string };
-  modules: { n: number; status: ShellModule['status']; outline?: GeneratedModuleDetails; pack?: ModulePack; error?: string }[];
+  course: {
+    slug: string;
+    status: string;
+    topic: string;
+    kind: 'concept' | 'repo';
+    meta?: GeneratedCourseMeta;
+    error?: string;
+  };
+  modules: {
+    n: number;
+    status: ShellModule['status'];
+    outline?: GeneratedModuleDetails;
+    pack?: ModulePack;
+    error?: string;
+  }[];
 };
 
 export function fromGenerated(doc: GeneratedCourseDoc, fallbackBrand: Brand): ShellCourse {
@@ -80,8 +114,8 @@ export function fromGenerated(doc: GeneratedCourseDoc, fallbackBrand: Brand): Sh
           minutes: details.minutes ?? 20,
           summary: details.summary ?? '',
           status: courseModule.status,
-          pack: courseModule.status === 'ready' ? courseModule.pack : undefined,
+          pack: courseModule.status === 'ready' ? courseModule.pack : undefined
         };
-      }),
+      })
   };
 }

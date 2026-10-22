@@ -16,17 +16,17 @@ export const DEEPLY_BRAND: Brand = {
     accent: '#c9f0ff',
     accent2: '#ff8f70',
     accent3: '#a99bff',
-    onAccent: '#001018',
+    onAccent: '#001018'
   },
   fonts: { display: 'Unbounded', body: 'Geist', mono: 'JetBrains Mono' },
   shader: { kind: 'dither', colors: ['#000000', '#3a3a3a'] },
-  source: 'designed',
+  source: 'designed'
 };
 
 const FALLBACK = {
   display: 'ui-sans-serif, system-ui, sans-serif',
   body: 'ui-sans-serif, system-ui, sans-serif',
-  mono: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+  mono: 'ui-monospace, SFMono-Regular, Menlo, monospace'
 };
 
 export function brandVars(brand: Brand): React.CSSProperties {
@@ -47,7 +47,7 @@ export function brandVars(brand: Brand): React.CSSProperties {
     '--on-accent': colors.onAccent,
     '--font-display': `'${brand.fonts.display}', ${FALLBACK.display}`,
     '--font-body': `'${brand.fonts.body}', ${FALLBACK.body}`,
-    '--font-mono': `'${brand.fonts.mono}', ${FALLBACK.mono}`,
+    '--font-mono': `'${brand.fonts.mono}', ${FALLBACK.mono}`
   } as React.CSSProperties;
 }
 
@@ -60,7 +60,7 @@ export function useBrandFonts(brand: Brand) {
       const name = encodeURIComponent(family).replace(/%20/g, '+');
       for (const href of [
         `https://fonts.googleapis.com/css2?family=${name}:wght@400;500;600;700;800&display=swap`,
-        `https://fonts.googleapis.com/css2?family=${name}&display=swap`,
+        `https://fonts.googleapis.com/css2?family=${name}&display=swap`
       ]) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -72,30 +72,45 @@ export function useBrandFonts(brand: Brand) {
 }
 
 export function shaderColors(brand: Brand) {
-  return brand.shader?.colors ?? [brand.colors.bg, brand.colors.accent3, brand.colors.accent2, brand.colors.accent, brand.colors.bg];
+  return (
+    brand.shader?.colors ?? [
+      brand.colors.bg,
+      brand.colors.accent3,
+      brand.colors.accent2,
+      brand.colors.accent,
+      brand.colors.bg
+    ]
+  );
 }
 
 const COLOR = /^(#[0-9a-fA-F]{3,8}|(rgb|hsl|oklch|oklab)a?\([0-9.,%\s/-]+\))$/;
 const FONT = /^[A-Za-z0-9 ]{2,40}$/;
 const SHADER_KINDS = ['mesh', 'grain', 'dither'] as const;
-const isShaderKind = (value: unknown): value is (typeof SHADER_KINDS)[number] => SHADER_KINDS.some((kind) => kind === value);
+const isShaderKind = (value: unknown): value is (typeof SHADER_KINDS)[number] =>
+  SHADER_KINDS.some((kind) => kind === value);
 export function sanitizeBrand(input: unknown, fallback: Brand = DEEPLY_BRAND): Brand {
   if (!input || typeof input !== 'object') return fallback;
   const brand = input as UntrustedBrand;
-  const readColor = (value: unknown) => (typeof value === 'string' && COLOR.test(value.trim()) ? value.trim() : undefined);
+  const readColor = (value: unknown) =>
+    typeof value === 'string' && COLOR.test(value.trim()) ? value.trim() : undefined;
   const readFont = (value: unknown) => (typeof value === 'string' && FONT.test(value) ? value : undefined);
   const colors = Object.fromEntries(
-    Object.entries(fallback.colors).map(([key, value]) => [key, readColor(brand.colors?.[key]) ?? value]),
+    Object.entries(fallback.colors).map(([key, value]) => [key, readColor(brand.colors?.[key]) ?? value])
   ) as Brand['colors'];
   const font = (fontKey: keyof Brand['fonts']) => readFont(brand.fonts?.[fontKey]) ?? fallback.fonts[fontKey];
-  const shaderColors = Array.isArray(brand.shader?.colors) ? brand.shader.colors.filter((color: unknown): color is string => typeof color === 'string' && COLOR.test(color)) : [];
+  const shaderColors = Array.isArray(brand.shader?.colors)
+    ? brand.shader.colors.filter((color: unknown): color is string => typeof color === 'string' && COLOR.test(color))
+    : [];
   const shaderKind = brand.shader?.kind;
   return {
     name: typeof brand.name === 'string' ? brand.name.slice(0, 60) : fallback.name,
     colors,
     fonts: { display: font('display'), body: font('body'), mono: font('mono') },
-    shader: isShaderKind(shaderKind) && shaderColors.length >= 2 ? { kind: shaderKind, colors: shaderColors.slice(0, 5) } : undefined,
-    source: typeof brand.source === 'string' ? brand.source.slice(0, 200) : undefined,
+    shader:
+      isShaderKind(shaderKind) && shaderColors.length >= 2
+        ? { kind: shaderKind, colors: shaderColors.slice(0, 5) }
+        : undefined,
+    source: typeof brand.source === 'string' ? brand.source.slice(0, 200) : undefined
   };
 }
 

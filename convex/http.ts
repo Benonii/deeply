@@ -16,8 +16,8 @@ polar.registerRoutes(http, {
         return;
       }
       await context.runMutation(internal.wallet.credit, { userId, credits, ref: `polar:${event.data.id}` });
-    },
-  },
+    }
+  }
 });
 
 export default http;

@@ -11,7 +11,7 @@ type PackKey = keyof typeof DEFAULT_PACK_CREDITS;
 
 const productIds = {
   small: process.env.POLAR_PRODUCT_CREDITS_SMALL ?? '',
-  large: process.env.POLAR_PRODUCT_CREDITS_LARGE ?? '',
+  large: process.env.POLAR_PRODUCT_CREDITS_LARGE ?? ''
 };
 
 export const polar = new Polar<DataModel, typeof productIds>(components.polar, {
@@ -19,12 +19,13 @@ export const polar = new Polar<DataModel, typeof productIds>(components.polar, {
     const user = await authComponent.getAuthUser(context as Parameters<typeof authComponent.getAuthUser>[0]);
     return { userId: user._id, email: user.email };
   },
-  products: productIds,
+  products: productIds
 });
 
 function packForProduct(productId: string | null | undefined): PackKey | null {
   if (!productId) return null;
-  for (const packKey of Object.keys(productIds) as PackKey[]) if (productIds[packKey] && productIds[packKey] === productId) return packKey;
+  for (const packKey of Object.keys(productIds) as PackKey[])
+    if (productIds[packKey] && productIds[packKey] === productId) return packKey;
   return null;
 }
 
@@ -33,7 +34,10 @@ export const packs = query({
   handler: async (context) => {
     const all = await polar.listProducts(context);
     const configured = Object.fromEntries(
-      (Object.keys(productIds) as PackKey[]).map((packKey) => [packKey, all.find((product) => productIds[packKey] && product.id === productIds[packKey])]),
+      (Object.keys(productIds) as PackKey[]).map((packKey) => [
+        packKey,
+        all.find((product) => productIds[packKey] && product.id === productIds[packKey])
+      ])
     ) as Record<PackKey, (typeof all)[number] | undefined>;
     const out: { key: PackKey; name: string; credits: number; priceCents: number | null; currency: string }[] = [];
     for (const key of Object.keys(DEFAULT_PACK_CREDITS) as PackKey[]) {
@@ -47,11 +51,11 @@ export const packs = query({
         name: configuredProduct.name,
         credits,
         priceCents: price && 'priceAmount' in price ? (price.priceAmount ?? null) : null,
-        currency: (price && 'priceCurrency' in price ? price.priceCurrency : undefined) ?? 'usd',
+        currency: (price && 'priceCurrency' in price ? price.priceCurrency : undefined) ?? 'usd'
       });
     }
     return out;
-  },
+  }
 });
 
 export const checkout = action({
@@ -72,21 +76,21 @@ export const checkout = action({
         email: user.email,
         origin: site,
         successUrl: success,
-        metadata: { userId: user._id, pack },
+        metadata: { userId: user._id, pack }
       });
       return { url: session.url };
     } catch (error) {
       console.error('Polar checkout failed', error);
       return { error: 'Checkout is unavailable right now. Try again shortly.' };
     }
-  },
+  }
 });
 
 export const syncProducts = internalAction({
   args: {},
   handler: async (context) => {
     await polar.syncProducts(context);
-  },
+  }
 });
 
 export async function creditsForOrder(order: {
@@ -99,8 +103,7 @@ export async function creditsForOrder(order: {
     (order.customer?.metadata?.userId as string | undefined) ??
     order.customer?.externalId ??
     null;
-  const pack = packForProduct(order.productId) ?? ((order.metadata?.pack as PackKey | undefined) ?? null);
+  const pack = packForProduct(order.productId) ?? (order.metadata?.pack as PackKey | undefined) ?? null;
   const credits = pack ? DEFAULT_PACK_CREDITS[pack] : 0;
   return { userId, pack, credits };
 }
-

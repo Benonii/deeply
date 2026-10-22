@@ -14,7 +14,7 @@ type Handlers = { onAuth: () => void };
 export const LEVELS: { level: SimplifyLevel; label: string; hint: string }[] = [
   { level: 1, label: 'Plainer', hint: 'Same depth, less jargon' },
   { level: 2, label: "Like I'm new", hint: 'Assumes no background' },
-  { level: 3, label: "Like I'm 12", hint: 'Everyday words and analogies' },
+  { level: 3, label: "Like I'm 12", hint: 'Everyday words and analogies' }
 ];
 
 let simplifier: Simplifier | null = null;
@@ -30,7 +30,9 @@ function useAvailable() {
   useEffect(() => {
     const rerender = () => force((count) => count + 1);
     subs.add(rerender);
-    return () => { subs.delete(rerender); };
+    return () => {
+      subs.delete(rerender);
+    };
   }, []);
   return !!simplifier;
 }
@@ -38,7 +40,9 @@ function useAvailable() {
 export function readableText(element: HTMLElement | null | undefined) {
   if (!element) return '';
   const clone = element.cloneNode(true) as HTMLElement;
-  clone.querySelectorAll('.copy-btn, .simp, .simplified, .copyable-bar, .code-actions').forEach((node) => node.remove());
+  clone
+    .querySelectorAll('.copy-btn, .simp, .simplified, .copyable-bar, .code-actions')
+    .forEach((node) => node.remove());
   return (clone.innerText || clone.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
 }
 
@@ -58,9 +62,25 @@ export function useSimplify(getText: () => string, context: () => string) {
     try {
       const result = await simplifier({ text, level, context: context() });
       if (result.status === 'ok') setState({ kind: 'done', level, text: result.text, cached: result.cached });
-      else if (result.status === 'auth') { setState({ kind: 'msg', level, msg: 'Sign in to simplify explanations. New accounts get free credits.' }); handlers.onAuth(); }
-      else if (result.status === 'credits') setState({ kind: 'msg', level, msg: <>You're out of credits. <a href="#/account">Get more credits</a></> });
-      else if (result.status === 'rate') setState({ kind: 'msg', level, msg: `That's a lot of simplifying at once. Try again in ${Math.max(1, Math.ceil(result.retryAfterMs / 1000))}s.` });
+      else if (result.status === 'auth') {
+        setState({ kind: 'msg', level, msg: 'Sign in to simplify explanations. New accounts get free credits.' });
+        handlers.onAuth();
+      } else if (result.status === 'credits')
+        setState({
+          kind: 'msg',
+          level,
+          msg: (
+            <>
+              You're out of credits. <a href="#/account">Get more credits</a>
+            </>
+          )
+        });
+      else if (result.status === 'rate')
+        setState({
+          kind: 'msg',
+          level,
+          msg: `That's a lot of simplifying at once. Try again in ${Math.max(1, Math.ceil(result.retryAfterMs / 1000))}s.`
+        });
       else setState({ kind: 'msg', level, msg: `Couldn't simplify this: ${result.message}` });
     } catch (error) {
       setState({ kind: 'msg', level, msg: 'Couldn’t reach the simplifier. Check your connection and try again.' });
@@ -75,11 +95,18 @@ export function SimplifyMenu({ onPick, busy }: { onPick: (level: SimplifyLevel) 
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
-    const close = (event: MouseEvent) => { if (!ref.current?.contains(event.target as Node)) setOpen(false); };
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false); };
+    const close = (event: MouseEvent) => {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
     document.addEventListener('mousedown', close);
     document.addEventListener('keydown', closeOnEscape);
-    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', closeOnEscape); };
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
   }, [open]);
   return (
     <div className="simp" ref={ref}>
@@ -89,16 +116,29 @@ export function SimplifyMenu({ onPick, busy }: { onPick: (level: SimplifyLevel) 
         aria-haspopup="menu"
         aria-expanded={open}
         title={available ? 'Explain this in plainer words' : 'Simplify needs the Deeply backend (not connected here)'}
-        onClick={(event) => { event.stopPropagation(); setOpen(!open); }}
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen(!open);
+        }}
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M4 7h16M7 12h10M10 17h4" /></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+          <path d="M4 7h16M7 12h10M10 17h4" />
+        </svg>
         <span>{busy ? 'Simplifying…' : 'Simplify'}</span>
       </button>
       {open && (
         <div className="simp-menu" role="menu">
           {LEVELS.map((levelOption) => (
-            <button key={levelOption.level} role="menuitem" onClick={() => { setOpen(false); onPick(levelOption.level); }}>
-              <b>{levelOption.label}</b><span>{levelOption.hint}</span>
+            <button
+              key={levelOption.level}
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                onPick(levelOption.level);
+              }}
+            >
+              <b>{levelOption.label}</b>
+              <span>{levelOption.hint}</span>
             </button>
           ))}
         </div>
@@ -107,7 +147,15 @@ export function SimplifyMenu({ onPick, busy }: { onPick: (level: SimplifyLevel) 
   );
 }
 
-export function SimplifiedView({ state, onClose, onLevel }: { state: State; onClose: () => void; onLevel: (level: SimplifyLevel) => void }) {
+export function SimplifiedView({
+  state,
+  onClose,
+  onLevel
+}: {
+  state: State;
+  onClose: () => void;
+  onLevel: (level: SimplifyLevel) => void;
+}) {
   if (state.kind === 'idle') return null;
   const label = LEVELS.find((levelOption) => levelOption.level === state.level)!.label;
   return (
@@ -115,12 +163,28 @@ export function SimplifiedView({ state, onClose, onLevel }: { state: State; onCl
       <div className="simplified-head">
         <span className="simplified-kicker">Simplified · {label}</span>
         <span className="simplified-actions">
-          {state.kind === 'done' && state.level < 3 && <button className="link" onClick={() => onLevel((state.level + 1) as SimplifyLevel)}>Simpler still</button>}
-          <button className="link" onClick={onClose}>Show original only</button>
+          {state.kind === 'done' && state.level < 3 && (
+            <button className="link" onClick={() => onLevel((state.level + 1) as SimplifyLevel)}>
+              Simpler still
+            </button>
+          )}
+          <button className="link" onClick={onClose}>
+            Show original only
+          </button>
         </span>
       </div>
-      {state.kind === 'loading' && <div className="simplified-loading"><span /><span /><span /></div>}
-      {state.kind === 'done' && <div className="simplified-text"><Markdown text={state.text} /></div>}
+      {state.kind === 'loading' && (
+        <div className="simplified-loading">
+          <span />
+          <span />
+          <span />
+        </div>
+      )}
+      {state.kind === 'done' && (
+        <div className="simplified-text">
+          <Markdown text={state.text} />
+        </div>
+      )}
       {state.kind === 'msg' && <p className="simplified-msg">{state.msg}</p>}
     </div>
   );

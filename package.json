@@ -9,7 +9,10 @@
     "convex": "convex dev",
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p convex",
     "verify-code": "node --experimental-strip-types --no-warnings scripts/verify-code.mjs ${SRC_REF:-../src-ref}",
-    "fetch-sources": "sh scripts/fetch-sources.sh"
+    "fetch-sources": "sh scripts/fetch-sources.sh",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format ."
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.1.0",
@@ -26,6 +29,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.4",
     "@farmfe/cli": "^1.0.5",
     "@farmfe/core": "^1.7.11",
     "@farmfe/plugin-react": "^1.2.6",

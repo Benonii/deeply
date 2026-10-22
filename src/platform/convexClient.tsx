@@ -13,7 +13,9 @@ const URL_KEY = 'convex-academy-url';
 export function getConvexUrl(): string | undefined {
   const env = process.env.FARM_CONVEX_URL;
   let stored: string | null = null;
-  try { stored = localStorage.getItem(URL_KEY); } catch {}
+  try {
+    stored = localStorage.getItem(URL_KEY);
+  } catch {}
   return stored || env || undefined;
 }
 export function setConvexUrl(url: string | null) {
@@ -24,7 +26,6 @@ export function setConvexUrl(url: string | null) {
   location.reload();
 }
 
-
 export type Frame = { id: number; dir: 'up' | 'down'; t: number; type: string; raw: string };
 const frames: Frame[] = [];
 const frameListeners = new Set<() => void>();
@@ -33,7 +34,9 @@ let frameId = 0;
 function record(direction: 'up' | 'down', data: unknown) {
   if (typeof data !== 'string') return;
   let type = 'binary';
-  try { type = JSON.parse(data).type ?? 'unknown'; } catch {}
+  try {
+    type = JSON.parse(data).type ?? 'unknown';
+  } catch {}
   frames.push({ id: frameId++, dir: direction, t: Date.now(), type, raw: data });
   if (frames.length > 300) frames.shift();
   frameListeners.forEach((listener) => listener());
@@ -61,7 +64,9 @@ export function useFrames() {
   useEffect(() => {
     const rerender = () => force((count) => count + 1);
     frameListeners.add(rerender);
-    return () => { frameListeners.delete(rerender); };
+    return () => {
+      frameListeners.delete(rerender);
+    };
   }, []);
   return frames;
 }
@@ -69,7 +74,6 @@ export function clearFrames() {
   frames.length = 0;
   frameListeners.forEach((listener) => listener());
 }
-
 
 export function deviceId() {
   try {
@@ -101,14 +105,16 @@ function ProgressSync() {
       const local = getProgress();
       setProgress({
         done: { ...remote.done, ...local.done },
-        challenges: { ...remote.challenges, ...local.challenges },
+        challenges: { ...remote.challenges, ...local.challenges }
       });
     }
   }, [remote]);
 
   useEffect(() => {
     if (!hydrated.current) return;
-    const timer = setTimeout(() => { save({ deviceId: id, ...progress }).catch(() => {}); }, 600);
+    const timer = setTimeout(() => {
+      save({ deviceId: id, ...progress }).catch(() => {});
+    }, 600);
     return () => clearTimeout(timer);
   }, [progress, id, save]);
   return null;

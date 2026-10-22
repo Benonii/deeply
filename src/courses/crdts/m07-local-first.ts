@@ -36,11 +36,23 @@ export const m07: ModulePack = {
         'Layers and typical choices',
         ['Layer', 'Responsibility', 'Examples'],
         ['Document model', 'CRDT types and merge rules', 'Yjs, Automerge, Loro'],
-        ['Local persistence', 'Store updates/snapshots durably on device', 'IndexedDB, OPFS, SQLite (mobile/desktop), y-indexeddb, automerge-repo storage adapters'],
+        [
+          'Local persistence',
+          'Store updates/snapshots durably on device',
+          'IndexedDB, OPFS, SQLite (mobile/desktop), y-indexeddb, automerge-repo storage adapters'
+        ],
         ['Sync protocol', 'Find and exchange missing updates', 'Yjs sync step 1/2, Automerge sync protocol'],
         ['Transport', 'Move bytes between peers', 'WebSocket to a relay, WebRTC, BroadcastChannel between tabs'],
-        ['Sync server (optional)', 'Relay, store, back up, authorize', 'y-websocket server, Hocuspocus, automerge-repo sync server, PartyKit-style rooms'],
-        ['Presence', 'Ephemeral state: cursors, selections, who is online', 'y-protocols awareness, ephemeral messages'],
+        [
+          'Sync server (optional)',
+          'Relay, store, back up, authorize',
+          'y-websocket server, Hocuspocus, automerge-repo sync server, PartyKit-style rooms'
+        ],
+        [
+          'Presence',
+          'Ephemeral state: cursors, selections, who is online',
+          'y-protocols awareness, ephemeral messages'
+        ],
         ['App state', 'UI derived from the document', 'Subscribe to document change events']
       ),
       code(
@@ -82,7 +94,7 @@ declare function renderPresence(users: unknown[]): void;
           { id: 'ws', label: 'Connect relay', sub: 'WebSocket', col: 1, row: 2, tone: 'purple' },
           { id: 'hs', label: 'Handshake', sub: 'state vectors', col: 2, row: 2, tone: 'purple' },
           { id: 'live', label: 'Live updates', sub: 'both directions', col: 3, row: 1, tone: 'red' },
-          { id: 'save', label: 'Persist', sub: 'every update', col: 4, row: 1, tone: 'yellow' },
+          { id: 'save', label: 'Persist', sub: 'every update', col: 4, row: 1, tone: 'yellow' }
         ],
         edges: [
           { id: 'e1', from: 'open', to: 'idb' },
@@ -91,26 +103,55 @@ declare function renderPresence(users: unknown[]): void;
           { id: 'e4', from: 'ws', to: 'hs' },
           { id: 'e5', from: 'hs', to: 'live' },
           { id: 'e6', from: 'ui', to: 'live' },
-          { id: 'e7', from: 'live', to: 'save' },
+          { id: 'e7', from: 'live', to: 'save' }
         ],
         steps: [
-          { title: 'Open by id', text: 'The app knows a document id. Nothing about opening it requires the network.', nodes: ['open'] },
-          { title: 'Load from local storage', text: 'Stored updates (or a snapshot plus later updates) are read from IndexedDB and applied to an empty Y.Doc.', nodes: ['idb'], edges: ['e1'] },
-          { title: 'Render immediately', text: 'The UI shows the last state this device knew. No spinner. The user can start editing.', nodes: ['ui'], edges: ['e2'] },
-          { title: 'Connect in parallel', text: 'Meanwhile the provider opens a WebSocket to the relay for room doc-42. If it fails, the app keeps working and retries.', nodes: ['ws'], edges: ['e3'] },
-          { title: 'Exchange what each side is missing', text: 'Sync step 1 sends a state vector; step 2 returns the missing updates. Offline edits made in the meantime are included.', nodes: ['hs'], edges: ['e4'] },
-          { title: 'Steady state', text: 'Local edits are applied, persisted and broadcast; remote updates are applied, persisted and rendered. Local storage stays the source of truth.', nodes: ['live', 'save'], edges: ['e5', 'e6', 'e7'] },
-        ],
+          {
+            title: 'Open by id',
+            text: 'The app knows a document id. Nothing about opening it requires the network.',
+            nodes: ['open']
+          },
+          {
+            title: 'Load from local storage',
+            text: 'Stored updates (or a snapshot plus later updates) are read from IndexedDB and applied to an empty Y.Doc.',
+            nodes: ['idb'],
+            edges: ['e1']
+          },
+          {
+            title: 'Render immediately',
+            text: 'The UI shows the last state this device knew. No spinner. The user can start editing.',
+            nodes: ['ui'],
+            edges: ['e2']
+          },
+          {
+            title: 'Connect in parallel',
+            text: 'Meanwhile the provider opens a WebSocket to the relay for room doc-42. If it fails, the app keeps working and retries.',
+            nodes: ['ws'],
+            edges: ['e3']
+          },
+          {
+            title: 'Exchange what each side is missing',
+            text: 'Sync step 1 sends a state vector; step 2 returns the missing updates. Offline edits made in the meantime are included.',
+            nodes: ['hs'],
+            edges: ['e4']
+          },
+          {
+            title: 'Steady state',
+            text: 'Local edits are applied, persisted and broadcast; remote updates are applied, persisted and rendered. Local storage stays the source of truth.',
+            nodes: ['live', 'save'],
+            edges: ['e5', 'e6', 'e7']
+          }
+        ]
       })
     ),
     section(
       'protocols',
       'Sync protocols',
       p(
-        '**Yjs (y-protocols)** uses three message types over any transport: *SyncStep1* (my state vector), *SyncStep2* (the update you are missing, computed from your state vector) and *Update* (an incremental update after a local change). Each side sends SyncStep1 on connect and answers the other\'s SyncStep1 with SyncStep2. The exchange takes one round trip.'
+        "**Yjs (y-protocols)** uses three message types over any transport: *SyncStep1* (my state vector), *SyncStep2* (the update you are missing, computed from your state vector) and *Update* (an incremental update after a local change). Each side sends SyncStep1 on connect and answers the other's SyncStep1 with SyncStep2. The exchange takes one round trip."
       ),
       p(
-        '**Automerge**\'s sync protocol works on its change DAG. Each peer keeps a small sync state per peer. Messages carry the sender\'s current **heads** (latest change hashes), the hashes it **needs**, and a **Bloom filter** summarizing the changes it has since the last heads both sides agreed on. The receiver sends any changes not in the filter. A few rounds may be needed when histories diverged widely; false positives in the filter are resolved by explicit need requests (approximate description; see the Automerge sync docs).'
+        "**Automerge**'s sync protocol works on its change DAG. Each peer keeps a small sync state per peer. Messages carry the sender's current **heads** (latest change hashes), the hashes it **needs**, and a **Bloom filter** summarizing the changes it has since the last heads both sides agreed on. The receiver sends any changes not in the filter. A few rounds may be needed when histories diverged widely; false positives in the filter are resolved by explicit need requests (approximate description; see the Automerge sync docs)."
       ),
       callout(
         'deep',
@@ -119,9 +160,14 @@ declare function renderPresence(users: unknown[]): void;
       ),
       check(
         'A Yjs client reconnects after a week offline. What does it send first?',
-        ['Its entire document', 'Its state vector (SyncStep1)', 'A list of every item id it has', 'Nothing; it waits for the server'],
+        [
+          'Its entire document',
+          'Its state vector (SyncStep1)',
+          'A list of every item id it has',
+          'Nothing; it waits for the server'
+        ],
         1,
-        'It sends its state vector. The server replies with SyncStep2 containing exactly the missing updates, and the client does the same for the server\'s state vector, so the offline edits travel too.'
+        "It sends its state vector. The server replies with SyncStep2 containing exactly the missing updates, and the client does the same for the server's state vector, so the offline edits travel too."
       )
     ),
     section(
@@ -137,7 +183,12 @@ declare function renderPresence(users: unknown[]): void;
       ),
       check(
         'Why does Yjs awareness use timeouts instead of an explicit "I left" message only?',
-        ['Timeouts are cheaper to encode', 'Clients often disappear without saying goodbye (closed laptop, lost network)', 'CRDTs cannot represent removal', 'Awareness is stored on the server'],
+        [
+          'Timeouts are cheaper to encode',
+          'Clients often disappear without saying goodbye (closed laptop, lost network)',
+          'CRDTs cannot represent removal',
+          'Awareness is stored on the server'
+        ],
         1,
         'A client that vanishes cannot send a leave message. Periodic renewal plus a timeout lets everyone else drop stale cursors.'
       )
@@ -146,7 +197,7 @@ declare function renderPresence(users: unknown[]): void;
       'servers',
       'Sync servers: relay, store, authorize',
       p(
-        'Peer-to-peer sounds ideal, but browsers can\'t accept incoming connections, NAT traversal is unreliable, and two peers are rarely online at the same time. Most local-first products use a server anyway, with a narrower job than a traditional backend:'
+        "Peer-to-peer sounds ideal, but browsers can't accept incoming connections, NAT traversal is unreliable, and two peers are rarely online at the same time. Most local-first products use a server anyway, with a narrower job than a traditional backend:"
       ),
       ul(
         '**Relay**: forward updates between connected clients in the same room.',
@@ -194,7 +245,7 @@ declare function canAccess(req: unknown, roomId: string): Promise<boolean>;
 declare function loadDoc(roomId: string): Promise<Y.Doc>;
 declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
 `,
-        'The client side of this toy protocol: on connect, apply the server\'s update, then send Y.encodeStateAsUpdate(doc) so offline edits reach the server; afterwards forward each local update.'
+        "The client side of this toy protocol: on connect, apply the server's update, then send Y.encodeStateAsUpdate(doc) so offline edits reach the server; afterwards forward each local update."
       ),
       flow({
         title: 'A relay server with storage and access control',
@@ -205,7 +256,7 @@ declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
           { id: 'room', label: 'Room doc-42', sub: 'in-memory Y.Doc', col: 2, row: 1, tone: 'plain' },
           { id: 'db', label: 'Storage', sub: 'updates + snapshot', col: 3, row: 0, tone: 'plain' },
           { id: 'fan', label: 'Fan-out', sub: 'to other peers', col: 3, row: 2, tone: 'plain' },
-          { id: 'cmp', label: 'Compaction', sub: 'merge updates', col: 4, row: 0, tone: 'plain' },
+          { id: 'cmp', label: 'Compaction', sub: 'merge updates', col: 4, row: 0, tone: 'plain' }
         ],
         edges: [
           { id: 'e1', from: 'c1', to: 'auth' },
@@ -213,16 +264,44 @@ declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
           { id: 'e3', from: 'auth', to: 'room' },
           { id: 'e4', from: 'room', to: 'db' },
           { id: 'e5', from: 'room', to: 'fan' },
-          { id: 'e6', from: 'db', to: 'cmp' },
+          { id: 'e6', from: 'db', to: 'cmp' }
         ],
         steps: [
-          { title: 'Clients present credentials', text: 'Each connection names a document and carries a token. Client B\'s token only grants read access.', nodes: ['c1', 'c2'] },
-          { title: 'Authorize the connection', text: 'The server checks the token before joining the room. With CRDTs, access control is usually per document: who may read it, who may write to it.', nodes: ['auth'], edges: ['e1', 'e2'] },
-          { title: 'Join the room', text: 'The room holds a live copy of the document. New clients receive what they are missing.', nodes: ['room'], edges: ['e3'] },
-          { title: 'Enforce write permissions', text: 'Updates from a read-only connection are dropped instead of applied. This is the main enforcement point; a peer-to-peer system without a server has no such choke point.', nodes: ['auth', 'room'] },
-          { title: 'Store and forward', text: 'Accepted updates are persisted and sent to every other peer in the room.', nodes: ['db', 'fan'], edges: ['e4', 'e5'] },
-          { title: 'Compact', text: 'Periodically the server merges stored updates into one (Yjs: Y.mergeUpdates, or encode the whole doc). First loads then fetch one blob instead of thousands of tiny updates.', nodes: ['cmp'], edges: ['e6'] },
-        ],
+          {
+            title: 'Clients present credentials',
+            text: "Each connection names a document and carries a token. Client B's token only grants read access.",
+            nodes: ['c1', 'c2']
+          },
+          {
+            title: 'Authorize the connection',
+            text: 'The server checks the token before joining the room. With CRDTs, access control is usually per document: who may read it, who may write to it.',
+            nodes: ['auth'],
+            edges: ['e1', 'e2']
+          },
+          {
+            title: 'Join the room',
+            text: 'The room holds a live copy of the document. New clients receive what they are missing.',
+            nodes: ['room'],
+            edges: ['e3']
+          },
+          {
+            title: 'Enforce write permissions',
+            text: 'Updates from a read-only connection are dropped instead of applied. This is the main enforcement point; a peer-to-peer system without a server has no such choke point.',
+            nodes: ['auth', 'room']
+          },
+          {
+            title: 'Store and forward',
+            text: 'Accepted updates are persisted and sent to every other peer in the room.',
+            nodes: ['db', 'fan'],
+            edges: ['e4', 'e5']
+          },
+          {
+            title: 'Compact',
+            text: 'Periodically the server merges stored updates into one (Yjs: Y.mergeUpdates, or encode the whole doc). First loads then fetch one blob instead of thousands of tiny updates.',
+            nodes: ['cmp'],
+            edges: ['e6']
+          }
+        ]
       })
     ),
     section(
@@ -232,10 +311,10 @@ declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
         'A traditional backend validates every write: "only the owner may change the price". A relay that just merges CRDT updates can\'t easily do this, because an update is an opaque batch of low-level item insertions, and the write is already final on the client that made it. Options, from simplest to most ambitious:'
       ),
       ul(
-        '**Per-document access**: split data into documents along permission boundaries (one doc per project, per user\'s private notes). Enforce read/write per doc at the server.',
+        "**Per-document access**: split data into documents along permission boundaries (one doc per project, per user's private notes). Enforce read/write per doc at the server.",
         '**Validate by decoding**: the server applies the update to its copy, inspects the resulting change, and rejects updates that touch forbidden parts. Possible, but rejected updates leave the client diverged, and you must handle resync.',
         '**End-to-end encryption**: the server stores only ciphertext and cannot read or validate; clients share keys. Revoking access means rotating keys for future data; anything already synced stays readable to whoever had it.',
-        '**Signed, capability-based updates**: each update is signed and carries a proof of authority that every replica can check (research: Ink & Switch\'s Keyhive). Enforcement then works without a trusted server.'
+        "**Signed, capability-based updates**: each update is signed and carries a proof of authority that every replica can check (research: Ink & Switch's Keyhive). Enforcement then works without a trusted server."
       ),
       callout(
         'warn',
@@ -248,7 +327,7 @@ declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
           'Keep billing in the same CRDT doc and trust clients',
           'Put billing in a separate document that only admins can write, enforced at the sync server',
           'Use LWW so admin edits win',
-          'Encrypt the billing section with the team key',
+          'Encrypt the billing section with the team key'
         ],
         1,
         'Splitting along the permission boundary gives a clean enforcement point: the server rejects non-admin writes to that document entirely. Trusting clients or LWW enforces nothing, and a shared team key lets every member write.'
@@ -275,7 +354,7 @@ declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
           'Rename the key in a migration on the server',
           'Write both `title` and `name` from new clients, read `name` falling back to `title`, and keep doing so until old clients are gone',
           'Delete `title` and set `name` on first open',
-          'Use LWW between the two keys',
+          'Use LWW between the two keys'
         ],
         1,
         'Old clients still read and write `title`. Dual-writing and dual-reading keeps both generations working until you can retire the old field.'
@@ -285,7 +364,10 @@ declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
       'recap',
       'Recap',
       terms(
-        ['Local-first', 'Local storage is the source of truth; network sync is an optimization and a collaboration channel.'],
+        [
+          'Local-first',
+          'Local storage is the source of truth; network sync is an optimization and a collaboration channel.'
+        ],
         ['SyncStep1 / SyncStep2', 'Yjs handshake: send state vector; reply with the missing update.'],
         ['Awareness', 'Ephemeral presence state with timeouts, kept outside the document.'],
         ['Relay server', 'Routes, stores, compacts and authorizes, but does not decide merges.'],
@@ -293,7 +375,9 @@ declare function saveUpdate(roomId: string, update: Uint8Array): Promise<void>;
         ['Cambria lens', 'A bidirectional translation between schema versions.']
       ),
       h3('Next'),
-      p('Module 8 asks the uncomfortable question: when should you not use CRDTs at all, and what do hybrid designs look like?')
-    ),
-  ],
+      p(
+        'Module 8 asks the uncomfortable question: when should you not use CRDTs at all, and what do hybrid designs look like?'
+      )
+    )
+  ]
 };

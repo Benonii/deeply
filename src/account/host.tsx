@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 import { getAuthClient } from '../lib/authClient';
@@ -20,7 +20,9 @@ export function AccountHost() {
   useEffect(() => {
     const listener = (nextRequest: SignInRequest) => setRequest(nextRequest);
     listeners.add(listener);
-    return () => { listeners.delete(listener); };
+    return () => {
+      listeners.delete(listener);
+    };
   }, []);
   useEffect(() => {
     if (isAuthenticated) {
@@ -39,7 +41,9 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -61,10 +65,20 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
   const none = providers && !providers.github && !providers.google;
   return (
     <div className="acc-scrim" onClick={onClose}>
-      <div className="acc-dialog" role="dialog" aria-modal="true" aria-labelledby="acc-title" onClick={(event) => event.stopPropagation()}>
-        <button className="acc-x" onClick={onClose} aria-label="Close">✕</button>
+      <div
+        className="acc-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="acc-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="acc-x" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
         <h2 id="acc-title">Sign in</h2>
-        <p className="acc-sub">{reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get free credits.</p>
+        <p className="acc-sub">
+          {reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get free credits.
+        </p>
         <div className="acc-providers">
           {providers?.github && (
             <button className="acc-provider" disabled={!!busy} onClick={() => signIn('github')}>
@@ -95,7 +109,10 @@ function GitHubIcon() {
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.1 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.2-.2-1.7H12Z" />
+      <path
+        fill="#EA4335"
+        d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.1 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.2-.2-1.7H12Z"
+      />
     </svg>
   );
 }

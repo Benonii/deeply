@@ -25,12 +25,11 @@ function repoSummary(repo: RepoContext): string {
     repo.homepage && `homepage: ${repo.homepage}`,
     `README (truncated):\n${repo.readme.slice(0, 12_000)}`,
     `File tree (truncated):\n${repo.tree.slice(0, 400).join('\n')}`,
-    `Source files available to quote (choose module "files" only from these):\n${repo.files.map((file) => `${file.path} (${file.text.split('\n').length} lines)`).join('\n')}`,
+    `Source files available to quote (choose module "files" only from these):\n${repo.files.map((file) => `${file.path} (${file.text.split('\n').length} lines)`).join('\n')}`
   ]
     .filter(Boolean)
     .join('\n\n');
 }
-
 
 export const plan = internalAction({
   args: { courseId: v.id('courses') },
@@ -44,24 +43,38 @@ export const plan = internalAction({
       let context: Id<'_storage'> | undefined;
       if (course.kind === 'repo' && course.repo) {
         await log(actionContext, courseId, `Researching github.com/${course.repo.owner}/${course.repo.name}`);
-        repo = await fetchRepoContext(course.repo.owner, course.repo.name, (message) => log(actionContext, courseId, message));
+        repo = await fetchRepoContext(course.repo.owner, course.repo.name, (message) =>
+          log(actionContext, courseId, message)
+        );
         context = await actionContext.storage.store(new Blob([JSON.stringify(repo)], { type: 'application/json' }));
       }
 
-      await log(actionContext, courseId, isFake() ? 'Planning (fake mode)' : 'Planning modules and visual identity with Claude');
+      await log(
+        actionContext,
+        courseId,
+        isFake() ? 'Planning (fake mode)' : 'Planning modules and visual identity with Claude'
+      );
       const planOut: PlanOutput = isFake()
         ? fakePlan(course.topic, course.kind, repo?.files.map((file) => file.path) ?? [])
         : (
             await generateJson({
-              prompt: planPrompt({ topic: course.topic, kind: course.kind, repoSummary: repo ? repoSummary(repo) : undefined, brandDigest: repo?.brandDigest || undefined }),
+              prompt: planPrompt({
+                topic: course.topic,
+                kind: course.kind,
+                repoSummary: repo ? repoSummary(repo) : undefined,
+                brandDigest: repo?.brandDigest || undefined
+              }),
               schema: PlanOutput,
               lint: lintPlan,
-              maxTokens: 32000,
+              maxTokens: 32000
             })
           ).value;
 
       const known = new Set(repo?.files.map((file) => file.path) ?? []);
-      const outlines = planOut.modules.map((plannedModule) => ({ ...plannedModule, files: plannedModule.files.filter((filePath) => known.has(filePath)) }));
+      const outlines = planOut.modules.map((plannedModule) => ({
+        ...plannedModule,
+        files: plannedModule.files.filter((filePath) => known.has(filePath))
+      }));
       const meta = {
         id: course.slug,
         title: planOut.meta.title,
@@ -70,22 +83,26 @@ export const plan = internalAction({
         kind: course.kind,
         brand: planOut.brand,
         challenges: [],
-        codeRefs: {},
+        codeRefs: {}
       };
       await actionContext.runMutation(internal.generate.state.savePlan, {
         courseId,
         meta,
         outlines,
         context,
-        repo: repo ? { owner: repo.owner, name: repo.name, sha: repo.sha } : undefined,
+        repo: repo ? { owner: repo.owner, name: repo.name, sha: repo.sha } : undefined
       });
     } catch (error) {
-      const retryable = !(error instanceof RepoError) && !(error instanceof GenerationError && /declined|not set/.test(error.message));
-      await actionContext.runMutation(internal.generate.state.planFailed, { courseId, error: (error as Error).message.slice(0, 300), retryable });
+      const retryable =
+        !(error instanceof RepoError) && !(error instanceof GenerationError && /declined|not set/.test(error.message));
+      await actionContext.runMutation(internal.generate.state.planFailed, {
+        courseId,
+        error: (error as Error).message.slice(0, 300),
+        retryable
+      });
     }
-  },
+  }
 });
-
 
 export const writeModule = internalAction({
   args: { courseId: v.id('courses'), n: v.number() },
@@ -98,13 +115,19 @@ export const writeModule = internalAction({
     try {
       await log(actionContext, courseId, `Writing module ${moduleNumber}: ${outline.title}`);
       const repo = await loadContext(actionContext, course.context);
-      const files: RepoFile[] = repo ? outline.files.map((filePath) => repo.files.find((file) => file.path === filePath)).filter((file): file is RepoFile => !!file) : [];
+      const files: RepoFile[] = repo
+        ? outline.files
+            .map((filePath) => repo.files.find((file) => file.path === filePath))
+            .filter((file): file is RepoFile => !!file)
+        : [];
 
       let out: ModuleOutput;
       if (isFake()) {
         out = fakeModule(outline, moduleNumber, files[0]);
       } else {
-        const fileText = files.length ? files.map((file) => `=== ${file.path} ===\n${numbered(file)}`).join('\n\n') : undefined;
+        const fileText = files.length
+          ? files.map((file) => `=== ${file.path} ===\n${numbered(file)}`).join('\n\n')
+          : undefined;
         out = (
           await generateJson({
             prompt: modulePrompt({
@@ -113,11 +136,15 @@ export const writeModule = internalAction({
               kind: course.kind,
               outline,
               n: moduleNumber,
-              allModules: courseModules.map((courseModule) => ({ n: courseModule.n, title: courseModule.outline.title, summary: courseModule.outline.summary })),
-              files: fileText,
+              allModules: courseModules.map((courseModule) => ({
+                n: courseModule.n,
+                title: courseModule.outline.title,
+                summary: courseModule.outline.summary
+              })),
+              files: fileText
             }),
             schema: ModuleOutput,
-            lint: (pack) => lintModule(pack, new Set(pack.codeRefs.map((codeRef) => codeRef.id))),
+            lint: (pack) => lintModule(pack, new Set(pack.codeRefs.map((codeRef) => codeRef.id)))
           })
         ).value;
       }
@@ -132,14 +159,27 @@ export const writeModule = internalAction({
         }
       }
       const { codeRefs: _ignored, ...rest } = out;
-      const pack: ModulePack = stripMissingRefs({ ...rest, n: moduleNumber, id: outline.id }, new Set(Object.keys(refs)));
+      const pack: ModulePack = stripMissingRefs(
+        { ...rest, n: moduleNumber, id: outline.id },
+        new Set(Object.keys(refs))
+      );
       const errs = lintModule(pack, new Set(Object.keys(refs)));
       if (errs.length) throw new GenerationError(errs.slice(0, 3).join('; '));
-      await actionContext.runMutation(internal.generate.state.moduleResult, { courseId, n: moduleNumber, pack, codeRefs: repo ? refs : undefined, dropped });
+      await actionContext.runMutation(internal.generate.state.moduleResult, {
+        courseId,
+        n: moduleNumber,
+        pack,
+        codeRefs: repo ? refs : undefined,
+        dropped
+      });
     } catch (error) {
-      await actionContext.runMutation(internal.generate.state.moduleResult, { courseId, n: moduleNumber, error: (error as Error).message.slice(0, 300) });
+      await actionContext.runMutation(internal.generate.state.moduleResult, {
+        courseId,
+        n: moduleNumber,
+        error: (error as Error).message.slice(0, 300)
+      });
     }
-  },
+  }
 });
 
 function stripMissingRefs(pack: ModulePack, ok: Set<string>): ModulePack {
@@ -153,19 +193,24 @@ function stripMissingRefs(pack: ModulePack, ok: Set<string>): ModulePack {
       ...section,
       blocks: section.blocks.map((block) =>
         block.type === 'flow'
-          ? { ...block, nodes: block.nodes.map((node) => ({ ...node, code: keep(node.code) })), edges: block.edges.map((edge) => ({ ...edge, code: keep(edge.code) })) }
-          : block,
-      ),
-    })),
+          ? {
+              ...block,
+              nodes: block.nodes.map((node) => ({ ...node, code: keep(node.code) })),
+              edges: block.edges.map((edge) => ({ ...edge, code: keep(edge.code) }))
+            }
+          : block
+      )
+    }))
   };
 }
-
 
 export const writeChallenges = internalAction({
   args: { courseId: v.id('courses') },
   handler: async (actionContext, { courseId }) => {
     const course = await actionContext.runQuery(internal.generate.state.getCourse, { courseId });
-    const courseModules = (await actionContext.runQuery(internal.generate.state.getModules, { courseId })).filter((courseModule) => courseModule.status === 'ready');
+    const courseModules = (await actionContext.runQuery(internal.generate.state.getModules, { courseId })).filter(
+      (courseModule) => courseModule.status === 'ready'
+    );
     if (!course || course.challengesStatus !== 'writing') return;
     try {
       await log(actionContext, courseId, 'Writing challenges');
@@ -175,18 +220,32 @@ export const writeChallenges = internalAction({
             await generateJson({
               prompt: challengesPrompt({
                 courseTitle: course.meta?.title ?? course.topic,
-                modules: courseModules.map((courseModule) => ({ n: courseModule.n, title: courseModule.pack.title, summary: courseModule.pack.summary, keyFacts: keyFacts(courseModule.pack as ModulePack) })),
+                modules: courseModules.map((courseModule) => ({
+                  n: courseModule.n,
+                  title: courseModule.pack.title,
+                  summary: courseModule.pack.summary,
+                  keyFacts: keyFacts(courseModule.pack as ModulePack)
+                }))
               }),
               schema: ChallengesOutput,
-              lint: (challengeSet) => challengeSet.challenges.filter((challenge) => challenge.answer >= challenge.options.length).map((challenge) => `${challenge.id}: answer out of range`),
-              maxTokens: 32000,
+              lint: (challengeSet) =>
+                challengeSet.challenges
+                  .filter((challenge) => challenge.answer >= challenge.options.length)
+                  .map((challenge) => `${challenge.id}: answer out of range`),
+              maxTokens: 32000
             })
           ).value;
-      await actionContext.runMutation(internal.generate.state.challengesResult, { courseId, challenges: out.challenges });
+      await actionContext.runMutation(internal.generate.state.challengesResult, {
+        courseId,
+        challenges: out.challenges
+      });
     } catch (error) {
-      await actionContext.runMutation(internal.generate.state.challengesResult, { courseId, error: (error as Error).message.slice(0, 300) });
+      await actionContext.runMutation(internal.generate.state.challengesResult, {
+        courseId,
+        error: (error as Error).message.slice(0, 300)
+      });
     }
-  },
+  }
 });
 
 function keyFacts(pack: ModulePack): string {

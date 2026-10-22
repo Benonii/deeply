@@ -8,14 +8,14 @@ export const ModuleOutline = z.object({
   summary: z.string(),
   minutes: z.number(),
   plan: z.string(),
-  files: z.array(z.string()).default([]),
+  files: z.array(z.string()).default([])
 });
 export type ModuleOutline = z.infer<typeof ModuleOutline>;
 
 export const PlanOutput = z.object({
   meta: z.object({ title: z.string(), tagline: z.string(), summary: z.string() }),
   brand: Brand,
-  modules: z.array(ModuleOutline).min(2).max(9),
+  modules: z.array(ModuleOutline).min(2).max(9)
 });
 export type PlanOutput = z.infer<typeof PlanOutput>;
 
@@ -29,7 +29,7 @@ export const RefRequest = z.object({
   symbol: z.string(),
   summary: z.string(),
   explain: z.string(),
-  notes: z.array(z.object({ line: z.number(), text: z.string() })).optional(),
+  notes: z.array(z.object({ line: z.number(), text: z.string() })).optional()
 });
 
 export const ModuleOutput = ModulePack.extend({ codeRefs: z.array(RefRequest).default([]) });
@@ -40,7 +40,8 @@ export const ChallengesOutput = z.object({ challenges: z.array(Challenge).min(4)
 const HEX = /^#[0-9a-fA-F]{6}$/;
 export function lintPlan(plan: PlanOutput): string[] {
   const errs: string[] = [];
-  for (const [colorName, colorValue] of Object.entries(plan.brand.colors)) if (!HEX.test(colorValue)) errs.push(`brand.colors.${colorName} must be #rrggbb, got ${colorValue}`);
+  for (const [colorName, colorValue] of Object.entries(plan.brand.colors))
+    if (!HEX.test(colorValue)) errs.push(`brand.colors.${colorName} must be #rrggbb, got ${colorValue}`);
   const ids = new Set<string>();
   for (const courseModule of plan.modules) {
     if (ids.has(courseModule.id)) errs.push(`duplicate module id ${courseModule.id}`);

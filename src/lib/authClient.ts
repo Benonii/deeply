@@ -11,7 +11,7 @@ export function convexSiteUrl(convexUrl: string) {
 export function makeAuthClient(convexUrl: string) {
   return createAuthClient({
     baseURL: convexSiteUrl(convexUrl),
-    plugins: [convexClient(), crossDomainClient()],
+    plugins: [convexClient(), crossDomainClient()]
   });
 }
 export type AuthClient = ReturnType<typeof makeAuthClient>;

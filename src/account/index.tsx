@@ -8,7 +8,14 @@ import './account.css';
 
 const api = anyApi;
 
-type Me = { userId: string; name: string; email: string; image: string | null; credits: number; costs: Record<string, number> };
+type Me = {
+  userId: string;
+  name: string;
+  email: string;
+  image: string | null;
+  credits: number;
+  costs: Record<string, number>;
+};
 type Pack = { key: 'small' | 'large'; name: string; credits: number; priceCents: number | null; currency: string };
 type LedgerRow = { id: string; at: number; delta: number; reason: string };
 
@@ -36,7 +43,12 @@ export function AccountButton() {
 function AccountButtonInner() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const me = useQuery(api.wallet.me) as Me | null | undefined;
-  if (isLoading) return <div className="acc-btn acc-btn-ghost" aria-busy="true">…</div>;
+  if (isLoading)
+    return (
+      <div className="acc-btn acc-btn-ghost" aria-busy="true">
+        …
+      </div>
+    );
   if (!isAuthenticated || !me) {
     return (
       <button className="acc-btn" onClick={() => openSignIn()}>
@@ -58,7 +70,9 @@ function Avatar({ me, size = 24 }: { me: Pick<Me, 'image' | 'name' | 'email'>; s
   return me.image ? (
     <img className="acc-avatar" src={me.image} alt="" width={size} height={size} referrerPolicy="no-referrer" />
   ) : (
-    <span className="acc-avatar acc-avatar-initial" style={{ width: size, height: size }}>{initial}</span>
+    <span className="acc-avatar acc-avatar-initial" style={{ width: size, height: size }}>
+      {initial}
+    </span>
   );
 }
 
@@ -67,7 +81,9 @@ export function AccountPage() {
   if (!client) {
     return (
       <div className="acc-page">
-        <header className="acc-head"><h1>Account</h1></header>
+        <header className="acc-head">
+          <h1>Account</h1>
+        </header>
         <p className="acc-muted">Accounts need a Convex backend. This build isn't connected to one.</p>
       </div>
     );
@@ -81,7 +97,7 @@ const REASON_LABEL: Record<string, string> = {
   simplify: 'Simplify',
   generateCourse: 'Course generated',
   refund: 'Refund',
-  admin: 'Adjustment',
+  admin: 'Adjustment'
 };
 
 function AccountPageInner() {
@@ -94,15 +110,24 @@ function AccountPageInner() {
   const [error, setError] = useState<string | null>(null);
   const purchased = /purchase=success/.test(location.hash);
 
-  if (isLoading || me === undefined) return <div className="acc-page"><p className="acc-muted">Loading your account…</p></div>;
+  if (isLoading || me === undefined)
+    return (
+      <div className="acc-page">
+        <p className="acc-muted">Loading your account…</p>
+      </div>
+    );
   if (!isAuthenticated || !me) {
     return (
       <div className="acc-page">
         <header className="acc-head">
           <h1>Account</h1>
-          <p className="acc-lede">Sign in to keep your progress across devices, simplify explanations and generate your own courses.</p>
+          <p className="acc-lede">
+            Sign in to keep your progress across devices, simplify explanations and generate your own courses.
+          </p>
         </header>
-        <button className="acc-primary" onClick={() => openSignIn()}>Sign in</button>
+        <button className="acc-primary" onClick={() => openSignIn()}>
+          Sign in
+        </button>
       </div>
     );
   }
@@ -111,9 +136,15 @@ function AccountPageInner() {
     setBuying(pack);
     setError(null);
     try {
-      const response = (await checkout({ pack, returnUrl: `${location.origin}${location.pathname}#/account?purchase=success` })) as { url: string } | { error: string };
+      const response = (await checkout({
+        pack,
+        returnUrl: `${location.origin}${location.pathname}#/account?purchase=success`
+      })) as { url: string } | { error: string };
       if ('url' in response) location.href = response.url;
-      else { setError(response.error); setBuying(null); }
+      else {
+        setError(response.error);
+        setBuying(null);
+      }
     } catch {
       setError('Checkout failed to start. Try again.');
       setBuying(null);
@@ -130,10 +161,16 @@ function AccountPageInner() {
             <p className="acc-muted">{me.email}</p>
           </div>
         </div>
-        <button className="acc-secondary" onClick={() => getAuthClient()?.signOut()}>Sign out</button>
+        <button className="acc-secondary" onClick={() => getAuthClient()?.signOut()}>
+          Sign out
+        </button>
       </header>
 
-      {purchased && <div className="acc-notice">Payment received. Credits appear here within a few seconds of Polar confirming the order.</div>}
+      {purchased && (
+        <div className="acc-notice">
+          Payment received. Credits appear here within a few seconds of Polar confirming the order.
+        </div>
+      )}
 
       <section className="acc-balance">
         <div>
@@ -141,9 +178,18 @@ function AccountPageInner() {
           <div className="acc-big">{me.credits}</div>
         </div>
         <dl className="acc-costs">
-          <div><dt>Simplify a block</dt><dd>{me.costs.simplify} credit</dd></div>
-          <div><dt>Generate a course</dt><dd>{me.costs.generateCourse} credits</dd></div>
-          <div><dt>Re-reading a simplification</dt><dd>free</dd></div>
+          <div>
+            <dt>Simplify a block</dt>
+            <dd>{me.costs.simplify} credit</dd>
+          </div>
+          <div>
+            <dt>Generate a course</dt>
+            <dd>{me.costs.generateCourse} credits</dd>
+          </div>
+          <div>
+            <dt>Re-reading a simplification</dt>
+            <dd>free</dd>
+          </div>
         </dl>
       </section>
 
@@ -179,7 +225,9 @@ function AccountPageInner() {
                 <tr key={entry.id}>
                   <td>{REASON_LABEL[entry.reason] ?? entry.reason}</td>
                   <td className="acc-when">{new Date(entry.at).toLocaleString()}</td>
-                  <td className={`acc-delta ${entry.delta > 0 ? 'plus' : 'minus'}`}>{entry.delta > 0 ? `+${entry.delta}` : entry.delta}</td>
+                  <td className={`acc-delta ${entry.delta > 0 ? 'plus' : 'minus'}`}>
+                    {entry.delta > 0 ? `+${entry.delta}` : entry.delta}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -193,7 +241,9 @@ function AccountPageInner() {
 function formatPrice(cents: number | null, currency: string) {
   if (cents === null) return 'Pay what you want';
   try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.toUpperCase() }).format(
+      cents / 100
+    );
   } catch {
     return `${(cents / 100).toFixed(2)} ${currency.toUpperCase()}`;
   }

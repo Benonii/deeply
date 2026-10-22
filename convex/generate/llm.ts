@@ -7,7 +7,10 @@ export const MODEL = 'claude-opus-5-5';
 export class GenerationError extends Error {}
 
 function extractJson(text: string): unknown {
-  const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+  const cleaned = text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/, '');
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
   if (start < 0 || end <= start) throw new SyntaxError('No JSON object in response');
@@ -35,9 +38,11 @@ export async function generateJson<S extends z.ZodTypeAny>(options: {
       output_config: { effort: options.effort ?? 'high' },
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      messages,
+      messages
     };
-    const stream = client.beta.messages.stream(params as unknown as Anthropic.Beta.Messages.MessageCreateParamsStreaming);
+    const stream = client.beta.messages.stream(
+      params as unknown as Anthropic.Beta.Messages.MessageCreateParamsStreaming
+    );
     const message = await stream.finalMessage();
     usage.input += message.usage.input_tokens;
     usage.output += message.usage.output_tokens;
@@ -47,7 +52,8 @@ export async function generateJson<S extends z.ZodTypeAny>(options: {
     }
     const text = message.content.map((block) => (block.type === 'text' ? block.text : '')).join('');
     let errors: string[] = [];
-    if (message.stop_reason === 'max_tokens') errors = ['Output was cut off by the token limit; write it more compactly.'];
+    if (message.stop_reason === 'max_tokens')
+      errors = ['Output was cut off by the token limit; write it more compactly.'];
     else {
       try {
         const parsed = options.schema.safeParse(extractJson(text));

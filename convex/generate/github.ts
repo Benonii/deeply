@@ -1,4 +1,3 @@
-
 export const REPO_BYTES_CAP = 400_000;
 const FILE_BYTES_CAP = 60_000;
 const HOMEPAGE_BYTES_CAP = 200_000;
@@ -21,13 +20,18 @@ export type RepoContext = {
 export class RepoError extends Error {}
 
 export function parseRepoUrl(url: string): { owner: string; name: string } | null {
-  const match = url.trim().match(/^(?:https?:\/\/)?(?:www\.)?github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?(?:[#?].*)?$/);
+  const match = url
+    .trim()
+    .match(/^(?:https?:\/\/)?(?:www\.)?github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?(?:[#?].*)?$/);
   if (!match) return null;
   return { owner: match[1], name: match[2] };
 }
 
 function headers(): Record<string, string> {
-  const requestHeaders: Record<string, string> = { Accept: 'application/vnd.github+json', 'User-Agent': 'deeply-course-generator' };
+  const requestHeaders: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'deeply-course-generator'
+  };
   const token = process.env.GITHUB_TOKEN;
   if (token) requestHeaders.Authorization = `Bearer ${token}`;
   return requestHeaders;
@@ -35,16 +39,27 @@ function headers(): Record<string, string> {
 
 async function fetchGitHub<T>(path: string): Promise<T> {
   const response = await fetch(`https://api.github.com${path}`, { headers: headers() });
-  if (response.status === 404) throw new RepoError('Repository not found or private. Only public GitHub repositories are supported.');
-  if (response.status === 403 || response.status === 429) throw new RepoError('GitHub rate limit reached. Try again in a few minutes.');
+  if (response.status === 404)
+    throw new RepoError('Repository not found or private. Only public GitHub repositories are supported.');
+  if (response.status === 403 || response.status === 429)
+    throw new RepoError('GitHub rate limit reached. Try again in a few minutes.');
   if (!response.ok) throw new RepoError(`GitHub API error ${response.status} for ${path}`);
   return (await response.json()) as T;
 }
 
-async function rawFile(owner: string, name: string, sha: string, path: string, cap = FILE_BYTES_CAP): Promise<string | null> {
-  const response = await fetch(`https://raw.githubusercontent.com/${owner}/${name}/${sha}/${path.split('/').map(encodeURIComponent).join('/')}`, {
-    headers: { 'User-Agent': 'deeply-course-generator' },
-  });
+async function rawFile(
+  owner: string,
+  name: string,
+  sha: string,
+  path: string,
+  cap = FILE_BYTES_CAP
+): Promise<string | null> {
+  const response = await fetch(
+    `https://raw.githubusercontent.com/${owner}/${name}/${sha}/${path.split('/').map(encodeURIComponent).join('/')}`,
+    {
+      headers: { 'User-Agent': 'deeply-course-generator' }
+    }
+  );
   if (!response.ok) return null;
   const text = await response.text();
   if (text.length > cap || text.includes('\u0000')) return null;
@@ -52,7 +67,8 @@ async function rawFile(owner: string, name: string, sha: string, path: string, c
 }
 
 const SOURCE_EXT = /\.(ts|tsx|js|jsx|mjs|rs|go|py|rb|java|kt|swift|c|cc|cpp|h|hpp|cs|ex|exs|scala|zig|lua|php|sql)$/i;
-const SKIP = /(^|\/)(node_modules|vendor|dist|build|target|\.git|__tests__|tests?|spec|examples?|docs?|fixtures?|benchmarks?|third_party)(\/|$)|\.(min|d)\.\w+$|_test\.|\.test\.|\.spec\./i;
+const SKIP =
+  /(^|\/)(node_modules|vendor|dist|build|target|\.git|__tests__|tests?|spec|examples?|docs?|fixtures?|benchmarks?|third_party)(\/|$)|\.(min|d)\.\w+$|_test\.|\.test\.|\.spec\./i;
 
 function rankPaths(paths: string[], repoName: string): string[] {
   const score = (path: string) => {
@@ -60,14 +76,19 @@ function rankPaths(paths: string[], repoName: string): string[] {
     const depth = path.split('/').length;
     points -= Math.abs(depth - 3) * 2;
     if (/(^|\/)(src|lib|crates|packages|pkg|internal|core)\//.test(path)) points += 6;
-    if (/(index|main|lib|mod|core|engine|server|client|runtime|store|db|sync|scheduler|router)\.\w+$/i.test(path)) points += 5;
+    if (/(index|main|lib|mod|core|engine|server|client|runtime|store|db|sync|scheduler|router)\.\w+$/i.test(path))
+      points += 5;
     if (path.toLowerCase().includes(repoName.toLowerCase())) points += 1;
     return points;
   };
   return [...paths].sort((first, second) => score(second) - score(first));
 }
 
-export async function fetchRepoContext(owner: string, name: string, log?: (message: string) => Promise<unknown>): Promise<RepoContext> {
+export async function fetchRepoContext(
+  owner: string,
+  name: string,
+  log?: (message: string) => Promise<unknown>
+): Promise<RepoContext> {
   const repo = await fetchGitHub<{
     private: boolean;
     size: number;
@@ -80,23 +101,35 @@ export async function fetchRepoContext(owner: string, name: string, log?: (messa
   if (repo.private) throw new RepoError('Private repositories are not supported.');
   if (repo.size > 2_000_000) throw new RepoError('This repository is too large to analyse (over ~2 GB).');
 
-  const branch = await fetchGitHub<{ commit: { sha: string } }>(`/repos/${owner}/${name}/branches/${encodeURIComponent(repo.default_branch)}`);
+  const branch = await fetchGitHub<{ commit: { sha: string } }>(
+    `/repos/${owner}/${name}/branches/${encodeURIComponent(repo.default_branch)}`
+  );
   const sha = branch.commit.sha;
   await log?.(`Pinned ${owner}/${name}@${sha.slice(0, 10)} (${repo.default_branch})`);
 
   const tree = await fetchGitHub<{ tree: { path: string; type: string; size?: number }[]; truncated: boolean }>(
-    `/repos/${owner}/${name}/git/trees/${sha}?recursive=1`,
+    `/repos/${owner}/${name}/git/trees/${sha}?recursive=1`
   );
   const blobs = tree.tree.filter((entry) => entry.type === 'blob');
-  const languages = Object.keys(await fetchGitHub<Record<string, number>>(`/repos/${owner}/${name}/languages`).catch(() => ({}))).slice(0, 6);
+  const languages = Object.keys(
+    await fetchGitHub<Record<string, number>>(`/repos/${owner}/${name}/languages`).catch(() => ({}))
+  ).slice(0, 6);
 
   let readme = '';
   const readmePath = blobs.find((blob) => /^readme(\.md|\.rst|\.txt)?$/i.test(blob.path))?.path;
   if (readmePath) readme = ((await rawFile(owner, name, sha, readmePath, 40_000)) ?? '').slice(0, 30_000);
 
   const candidates = rankPaths(
-    blobs.filter((blob) => SOURCE_EXT.test(blob.path) && !SKIP.test(blob.path) && (blob.size ?? 0) > 400 && (blob.size ?? 0) < FILE_BYTES_CAP).map((blob) => blob.path),
-    name,
+    blobs
+      .filter(
+        (blob) =>
+          SOURCE_EXT.test(blob.path) &&
+          !SKIP.test(blob.path) &&
+          (blob.size ?? 0) > 400 &&
+          (blob.size ?? 0) < FILE_BYTES_CAP
+      )
+      .map((blob) => blob.path),
+    name
   );
   const files: RepoFile[] = [];
   let bytes = readme.length;
@@ -122,24 +155,36 @@ export async function fetchRepoContext(owner: string, name: string, log?: (messa
     readme,
     tree: blobs.map((blob) => blob.path).slice(0, 1500),
     files,
-    brandDigest,
+    brandDigest
   };
 }
 
 export async function fetchBrandDigest(url: string): Promise<string> {
   const absoluteURL = /^https?:\/\//.test(url) ? url : `https://${url}`;
-  const response = await fetch(absoluteURL, { headers: { 'User-Agent': 'Mozilla/5.0 (deeply-course-generator)' }, redirect: 'follow' });
+  const response = await fetch(absoluteURL, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (deeply-course-generator)' },
+    redirect: 'follow'
+  });
   if (!response.ok) return '';
   const html = (await response.text()).slice(0, HOMEPAGE_BYTES_CAP);
   const count = (pattern: RegExp) => {
     const counts = new Map<string, number>();
-    for (const match of html.matchAll(pattern)) counts.set(match[1].toLowerCase(), (counts.get(match[1].toLowerCase()) ?? 0) + 1);
+    for (const match of html.matchAll(pattern))
+      counts.set(match[1].toLowerCase(), (counts.get(match[1].toLowerCase()) ?? 0) + 1);
     return [...counts.entries()].sort((first, second) => second[1] - first[1]);
   };
-  const hexes = count(/(#[0-9a-fA-F]{6})\b/g).slice(0, 16).map(([color, occurrences]) => `${color}×${occurrences}`);
-  const vars = [...html.matchAll(/(--[\w-]*(?:color|brand|primary|accent|bg|background)[\w-]*)\s*:\s*([^;}{]{3,40})/gi)].slice(0, 20).map((match) => `${match[1]}: ${match[2].trim()}`);
-  const fonts = count(/font-family\s*:\s*([^;}"]{3,80})/gi).slice(0, 6).map(([font]) => font);
-  const gfonts = [...html.matchAll(/fonts\.googleapis\.com\/css2?\?family=([^"'&]+)/g)].map((match) => decodeURIComponent(match[1]).replace(/\+/g, ' ')).slice(0, 4);
+  const hexes = count(/(#[0-9a-fA-F]{6})\b/g)
+    .slice(0, 16)
+    .map(([color, occurrences]) => `${color}×${occurrences}`);
+  const vars = [...html.matchAll(/(--[\w-]*(?:color|brand|primary|accent|bg|background)[\w-]*)\s*:\s*([^;}{]{3,40})/gi)]
+    .slice(0, 20)
+    .map((match) => `${match[1]}: ${match[2].trim()}`);
+  const fonts = count(/font-family\s*:\s*([^;}"]{3,80})/gi)
+    .slice(0, 6)
+    .map(([font]) => font);
+  const gfonts = [...html.matchAll(/fonts\.googleapis\.com\/css2?\?family=([^"'&]+)/g)]
+    .map((match) => decodeURIComponent(match[1]).replace(/\+/g, ' '))
+    .slice(0, 4);
   const theme = html.match(/<meta[^>]+name=["']theme-color["'][^>]+content=["']([^"']+)/i)?.[1];
   const title = html.match(/<title>([^<]{0,120})/i)?.[1];
   const logo = html.match(/<link[^>]+rel=["'][^"']*icon[^"']*["'][^>]+href=["']([^"']+\.svg)/i)?.[1];
@@ -151,12 +196,11 @@ export async function fetchBrandDigest(url: string): Promise<string> {
     vars.length && `css colour variables:\n  ${vars.join('\n  ')}`,
     fonts.length && `font-family declarations: ${fonts.join(' | ')}`,
     gfonts.length && `google fonts loaded: ${gfonts.join(', ')}`,
-    logo && `svg icon: ${logo}`,
+    logo && `svg icon: ${logo}`
   ]
     .filter(Boolean)
     .join('\n');
 }
-
 
 export type RefRequest = {
   id: string;
@@ -171,7 +215,16 @@ export type RefRequest = {
   notes?: { line: number; text: string }[];
 };
 
-const LANG: Record<string, string> = { rs: 'rust', ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', go: 'go', py: 'python' };
+const LANG: Record<string, string> = {
+  rs: 'rust',
+  ts: 'ts',
+  tsx: 'ts',
+  js: 'ts',
+  jsx: 'ts',
+  mjs: 'ts',
+  go: 'go',
+  py: 'python'
+};
 
 export function resolveRef(request: RefRequest, files: RepoFile[], repo: { owner: string; name: string; sha: string }) {
   const file = files.find((file) => file.path === request.path);
@@ -185,7 +238,8 @@ export function resolveRef(request: RefRequest, files: RepoFile[], repo: { owner
     if ((lines[start - 1] ?? '').trim() !== want) {
       let best = -1;
       for (let index = 0; index < lines.length; index++) {
-        if (lines[index].trim() === want && (best < 0 || Math.abs(index + 1 - start) < Math.abs(best + 1 - start))) best = index;
+        if (lines[index].trim() === want && (best < 0 || Math.abs(index + 1 - start) < Math.abs(best + 1 - start)))
+          best = index;
       }
       if (best < 0) return null;
       const shift = best + 1 - start;
@@ -211,7 +265,7 @@ export function resolveRef(request: RefRequest, files: RepoFile[], repo: { owner
     summary: request.summary,
     explain: request.explain,
     notes: (request.notes ?? []).filter((note) => note.line >= start && note.line <= end),
-    code,
+    code
   };
 }
 

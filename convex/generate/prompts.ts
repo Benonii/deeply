@@ -1,4 +1,3 @@
-
 export const SYSTEM = `You write "Deeply" courses: interactive, technically deep explanations of how a system or concept actually works, for strong engineers who want to become experts in a few hours.
 
 Standards:
@@ -80,18 +79,23 @@ export const MODULE_RULES = `Module requirements:
 - At least 2 callouts (use "warn" for real gotchas and "deep" for internals), 1 "keyterms" block, and code examples where they help.
 - Every claim must be correct. Prefer specifics (data structures, invariants, complexity, message formats) over generalities.`;
 
-export function planPrompt(input: { topic: string; kind: 'concept' | 'repo'; repoSummary?: string; brandDigest?: string }) {
+export function planPrompt(input: {
+  topic: string;
+  kind: 'concept' | 'repo';
+  repoSummary?: string;
+  brandDigest?: string;
+}) {
   return `Plan a Deeply course.
 
 Topic: ${input.topic}
 Kind: ${input.kind}
 ${input.repoSummary ? `\nRepository research:\n${input.repoSummary}\n` : ''}${
-    input.brandDigest
-      ? `\nBrand hints scraped from the project's homepage (use these to match the real brand: pick its primary colours as accents, map its fonts to the closest Google Fonts):\n${input.brandDigest}\n`
-      : input.kind === 'concept'
-        ? `\nThis is a concept, not a product: design a distinctive visual identity that suits the subject.\n`
-        : ''
-  }
+  input.brandDigest
+    ? `\nBrand hints scraped from the project's homepage (use these to match the real brand: pick its primary colours as accents, map its fonts to the closest Google Fonts):\n${input.brandDigest}\n`
+    : input.kind === 'concept'
+      ? `\nThis is a concept, not a product: design a distinctive visual identity that suits the subject.\n`
+      : ''
+}
 Return JSON with exactly this shape:
 ${PLAN_SHAPE}`;
 }
@@ -120,10 +124,10 @@ ${input.outline.plan}
 
 ${MODULE_RULES}
 ${
-    input.files
-      ? `\nSource files from the repository, with line numbers. Quote real code only through codeRefs (pointers into these files) and attach their ids to the flow nodes/edges that the code implements. Aim for 3-6 codeRefs.\n\n${input.files}\n`
-      : '\n"codeRefs" must be [].\n'
-  }
+  input.files
+    ? `\nSource files from the repository, with line numbers. Quote real code only through codeRefs (pointers into these files) and attach their ids to the flow nodes/edges that the code implements. Aim for 3-6 codeRefs.\n\n${input.files}\n`
+    : '\n"codeRefs" must be [].\n'
+}
 Return JSON with exactly this shape:
 ${MODULE_SHAPE}`;
 }
@@ -135,7 +139,10 @@ export const CHALLENGE_SHAPE = `{ "challenges": [ {
   "boss"?: boolean                             // true for hard multi-concept scenario questions
 } ] }`;
 
-export function challengesPrompt(input: { courseTitle: string; modules: { n: number; title: string; summary: string; keyFacts: string }[] }) {
+export function challengesPrompt(input: {
+  courseTitle: string;
+  modules: { n: number; title: string; summary: string; keyFacts: string }[];
+}) {
   return `Write the challenge bank for "${input.courseTitle}".
 
 Modules and what they teach:
@@ -148,5 +155,8 @@ ${CHALLENGE_SHAPE}`;
 }
 
 export function repairPrompt(errors: string[]) {
-  return `Your JSON failed validation:\n${errors.slice(0, 25).map((error) => `- ${error}`).join('\n')}\n\nReturn the complete corrected JSON, same shape, nothing else.`;
+  return `Your JSON failed validation:\n${errors
+    .slice(0, 25)
+    .map((error) => `- ${error}`)
+    .join('\n')}\n\nReturn the complete corrected JSON, same shape, nothing else.`;
 }

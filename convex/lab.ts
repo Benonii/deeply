@@ -13,7 +13,7 @@ export const listMessages = query({
       .withIndex('by_room', (indexRange) => indexRange.eq('room', room))
       .order('desc')
       .take(30);
-  },
+  }
 });
 
 export const send = mutation({
@@ -23,7 +23,7 @@ export const send = mutation({
     if (!text || text.length > 280) throw new ConvexError('Messages must be 1–280 characters.');
     if (author.length > 32) throw new ConvexError('Author name too long.');
     await context.db.insert('messages', { room, author, body: text });
-  },
+  }
 });
 
 export const getCounter = query({
@@ -34,7 +34,7 @@ export const getCounter = query({
       .withIndex('by_name', (indexRange) => indexRange.eq('name', name))
       .unique();
     return counter?.value ?? 0;
-  },
+  }
 });
 
 export const increment = mutation({
@@ -47,7 +47,7 @@ export const increment = mutation({
       .unique();
     if (counter) await context.db.patch(counter._id, { value: counter.value + 1 });
     else await context.db.insert('counters', { name, value: 1 });
-  },
+  }
 });
 
 export const pruneMessages = internalMutation({
@@ -59,5 +59,5 @@ export const pruneMessages = internalMutation({
       .withIndex('by_creation_time', (indexRange) => indexRange.lt('_creationTime', cutoff))
       .take(500);
     for (const message of old) await context.db.delete(message._id);
-  },
+  }
 });
