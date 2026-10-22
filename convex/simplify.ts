@@ -1,8 +1,9 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { generateText } from 'ai';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { action, internalMutation, internalQuery } from './_generated/server';
 import { currentUser } from './auth';
+import { selectModel } from './lib/model';
 import { rateLimiter } from './rateLimits';
 
 export type SimplifyResult =
@@ -90,7 +91,7 @@ export const simplify = action({
     if (!charged.ok) return { status: 'credits' };
 
     try {
-      const out = await callClaude(source, level, context);
+      const out = await rewritePassage(source, level, context);
       await actionContext.runMutation(internal.simplify.store, { key, level, text: out, sourceChars: source.length });
       return { status: 'ok', text: out, cached: false, credits: charged.credits };
     } catch (error) {
@@ -105,30 +106,20 @@ export const simplify = action({
 
 class RefusalError extends Error {}
 
-async function callClaude(source: string, level: 1 | 2 | 3, context: string): Promise<string> {
-  const client = new Anthropic();
-  const response = await client.beta.messages.create({
-    model: 'claude-opus-5-5',
-    max_tokens: 4000,
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    output_config: { effort: 'low' },
+async function rewritePassage(source: string, level: 1 | 2 | 3, context: string): Promise<string> {
+  const { model, providerOptions } = selectModel('low');
+  const result = await generateText({
+    model,
+    maxOutputTokens: 4000,
+    providerOptions,
     system: SYSTEM,
-    messages: [
-      {
-        role: 'user',
-        content: `${LEVELS[level]}\n\nWhere this passage appears: ${context || 'a technical course'}\n\n<passage>\n${source}\n</passage>`
-      }
-    ]
-  } as Parameters<typeof client.beta.messages.create>[0] & { stream?: false });
+    prompt: `${LEVELS[level]}\n\nWhere this passage appears: ${context || 'a technical course'}\n\n<passage>\n${source}\n</passage>`
+  });
 
-  if (response.stop_reason === 'refusal') {
+  if (result.finishReason === 'content-filter') {
     throw new RefusalError("This passage couldn't be simplified. Your credit was refunded.");
   }
-  const text = response.content
-    .flatMap((block) => (block.type === 'text' ? [block.text] : []))
-    .join('')
-    .trim();
+  const text = result.text.trim();
   if (!text) throw new Error('Empty response');
   return text;
 }

@@ -1,8 +1,9 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { type ModelMessage, streamText } from 'ai';
 import type { z } from 'zod';
+import { findMissingAPIKey, selectModel } from '../lib/model';
 import { SYSTEM, repairPrompt } from './prompts';
 
-export const MODEL = 'claude-opus-5-5';
+import type { ModelEffort } from '../lib/types';
 
 export class GenerationError extends Error {}
 
@@ -22,38 +23,37 @@ export async function generateJson<S extends z.ZodTypeAny>(options: {
   schema: S;
   lint?: (value: z.infer<S>) => string[];
   maxTokens?: number;
-  effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  effort?: ModelEffort;
 }): Promise<{ value: z.infer<S>; usage: { input: number; output: number } }> {
-  if (!process.env.ANTHROPIC_API_KEY) throw new GenerationError('ANTHROPIC_API_KEY is not set on this deployment.');
-  const client = new Anthropic({ maxRetries: 3 });
-  const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: 'user', content: options.prompt }];
+  const missingKeyName = findMissingAPIKey();
+  if (missingKeyName) throw new GenerationError(`${missingKeyName} is not set on this deployment.`);
+  const { model, providerOptions } = selectModel(options.effort ?? 'high');
+  const messages: ModelMessage[] = [{ role: 'user', content: options.prompt }];
   const usage = { input: 0, output: 0 };
 
   for (let attempt = 0; attempt < 2; attempt++) {
-    const params = {
-      model: MODEL,
-      max_tokens: options.maxTokens ?? 64000,
+    const result = streamText({
+      model,
       system: SYSTEM,
-      thinking: { type: 'adaptive' },
-      output_config: { effort: options.effort ?? 'high' },
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      messages
-    };
-    const stream = client.beta.messages.stream(
-      params as unknown as Anthropic.Beta.Messages.MessageCreateParamsStreaming
-    );
-    const message = await stream.finalMessage();
-    usage.input += message.usage.input_tokens;
-    usage.output += message.usage.output_tokens;
+      messages,
+      maxOutputTokens: options.maxTokens ?? 64000,
+      maxRetries: 3,
+      providerOptions
+    });
+    const [text, finishReason, totalUsage, response] = await Promise.all([
+      result.text,
+      result.finishReason,
+      result.totalUsage,
+      result.response
+    ]);
+    usage.input += totalUsage.inputTokens ?? 0;
+    usage.output += totalUsage.outputTokens ?? 0;
 
-    if (message.stop_reason === 'refusal') {
+    if (finishReason === 'content-filter') {
       throw new GenerationError('The model declined to write this course. Try rephrasing the topic.');
     }
-    const text = message.content.map((block) => (block.type === 'text' ? block.text : '')).join('');
     let errors: string[] = [];
-    if (message.stop_reason === 'max_tokens')
-      errors = ['Output was cut off by the token limit; write it more compactly.'];
+    if (finishReason === 'length') errors = ['Output was cut off by the token limit; write it more compactly.'];
     else {
       try {
         const parsed = options.schema.safeParse(extractJson(text));
@@ -64,11 +64,11 @@ export async function generateJson<S extends z.ZodTypeAny>(options: {
           errors = parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`);
         }
       } catch (error) {
-        errors = [`Invalid JSON: ${(error as Error).message}`];
+        errors = [`Invalid JSON: ${error instanceof Error ? error.message : String(error)}`];
       }
     }
     if (attempt === 1) throw new GenerationError(`Output failed validation: ${errors.slice(0, 5).join('; ')}`);
-    messages.push({ role: 'assistant', content: message.content as Anthropic.Beta.BetaContentBlockParam[] });
+    messages.push(...response.messages);
     messages.push({ role: 'user', content: repairPrompt(errors) });
   }
   throw new GenerationError('unreachable');

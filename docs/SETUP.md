@@ -22,7 +22,10 @@ Each sign-in button only appears when its keys are set.
 |---|---|
 | `SITE_URL` | `<site>` exactly |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
-| `ANTHROPIC_API_KEY` | your Anthropic key |
+| `OPENAI_API_KEY` | your OpenAI key (default provider) |
+| `AI_PROVIDER` | optional; `anthropic` to use Claude instead of OpenAI |
+| `ANTHROPIC_API_KEY` | your Anthropic key, when `AI_PROVIDER=anthropic` |
+| `AI_MODEL` | optional; overrides the model id (defaults: `gpt-6-luna`, `claude-opus-5-5`) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | from step 2 |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | from step 2 |
 | `POLAR_ORGANIZATION_TOKEN` | from step 3 |
