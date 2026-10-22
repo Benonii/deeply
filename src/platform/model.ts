@@ -5,7 +5,6 @@ import type { Brand, Challenge, CoursePack, ModulePack } from '../../convex/lib/
 import type { BuiltinCourse, CoursePage } from '../engine/course';
 import { sanitizeBrand } from '../engine/theme';
 
-/** What the shell renders, whatever the course's source (React modules, a JSON pack, or a generated course). */
 export type ShellModule = {
   id: string;
   n: number;
@@ -19,8 +18,8 @@ export type ShellModule = {
 };
 
 export type ShellCourse = {
-  base: string; // hash prefix: "/c/convex" or "/g/<slug>"
-  id: string; // progress namespace
+  base: string;
+  id: string;
   title: string;
   tagline: string;
   summary: string;
@@ -36,7 +35,6 @@ function packModules(pack: CoursePack): ShellModule[] {
   return pack.modules.map((courseModule) => ({ ...courseModule, status: 'ready' as const, pack: courseModule }));
 }
 
-/** Make a pack's verified source excerpts openable from its diagrams. */
 function registerPackRefs(refs: Record<string, unknown> | undefined) {
   if (refs) registerRefs(refs as Record<string, CodeRef>);
 }
@@ -50,7 +48,6 @@ export function fromBuiltin(course: BuiltinCourse): ShellCourse {
   return { ...base, modules: packModules(course.pack), challenges: course.pack.challenges };
 }
 
-/** Shape returned by `courses.getBySlug` (generator workstream). */
 export type GeneratedCourseDoc = {
   course: { slug: string; status: string; topic: string; kind: 'concept' | 'repo'; meta?: any; error?: string };
   modules: { n: number; status: ShellModule['status']; outline: any; pack?: ModulePack; error?: string }[];

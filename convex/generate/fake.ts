@@ -1,8 +1,3 @@
-/**
- * GENERATOR_FAKE=1: deterministic fixtures so the whole pipeline can be
- * exercised without an Anthropic API key. Everything here must pass the
- * same validators as real output.
- */
 import type { ModuleOutline, ModuleOutput, PlanOutput } from './shapes';
 
 export const isFake = () => process.env.GENERATOR_FAKE === '1';

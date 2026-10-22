@@ -6,12 +6,11 @@ import { AccountHost } from '../account/host';
 import { anyApi } from 'convex/server';
 import { getProgress, setProgress, useProgress } from '../engine/progress';
 
-// Function references without codegen: anyApi.lab.send === api.lab.send
 export const api = anyApi;
 
 const URL_KEY = 'convex-academy-url';
 export function getConvexUrl(): string | undefined {
-  const env = process.env.FARM_CONVEX_URL; // inlined at build time by farm.config.ts
+  const env = process.env.FARM_CONVEX_URL;
   let stored: string | null = null;
   try { stored = localStorage.getItem(URL_KEY); } catch {}
   return stored || env || undefined;
@@ -24,10 +23,6 @@ export function setConvexUrl(url: string | null) {
   location.reload();
 }
 
-/* ------------------------------------------------------------------ */
-/* Wire tap: record every WebSocket frame so the Live Lab can show the */
-/* real sync protocol (ModifyQuerySet, Transition, MutationResponse…). */
-/* ------------------------------------------------------------------ */
 
 export type Frame = { id: number; dir: 'up' | 'down'; t: number; type: string; raw: string };
 const frames: Frame[] = [];
@@ -74,7 +69,6 @@ export function clearFrames() {
   frameListeners.forEach((listener) => listener());
 }
 
-/* ------------------------------------------------------------------ */
 
 export function deviceId() {
   try {
@@ -99,7 +93,6 @@ function ProgressSync() {
   const { all: progress } = useProgress();
   const hydrated = useRef(false);
 
-  // First load: merge server progress into local.
   useEffect(() => {
     if (remote === undefined || hydrated.current) return;
     hydrated.current = true;
@@ -112,7 +105,6 @@ function ProgressSync() {
     }
   }, [remote]);
 
-  // Afterwards: push changes up (debounced).
   useEffect(() => {
     if (!hydrated.current) return;
     const timer = setTimeout(() => { save({ deviceId: id, ...progress }).catch(() => {}); }, 600);

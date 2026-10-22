@@ -12,27 +12,21 @@ type Me = { userId: string; name: string; email: string; image: string | null; c
 type Pack = { key: 'small' | 'large'; name: string; credits: number; priceCents: number | null; currency: string };
 type LedgerRow = { id: string; at: number; delta: number; reason: string };
 
-/** Wraps the app with Convex + Better Auth providers (no-op when no Convex URL is configured). */
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return <ConvexClientProvider>{children}</ConvexClientProvider>;
 }
 
-/** Opens the sign-in dialog from anywhere (e.g. when Simplify needs auth). */
 export function openSignIn(reason?: string) {
   requestSignIn({ reason });
 }
 
-/** Current user's credits; undefined while loading, null when signed out or no backend. */
 export function useCredits(): number | null | undefined {
   const client = useConvexClient();
-  // `client` never changes for the life of the app, so the branch is stable.
   if (!client) return null;
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const me = useQuery(api.wallet.me) as Me | null | undefined;
   return me === undefined ? undefined : me ? me.credits : null;
 }
 
-/** Sidebar widget: "Sign in" or avatar · name · credits. */
 export function AccountButton() {
   const client = useConvexClient();
   if (!client) return null;
@@ -68,7 +62,6 @@ function Avatar({ me, size = 24 }: { me: Pick<Me, 'image' | 'name' | 'email'>; s
   );
 }
 
-/** #/account: credits balance, buy packs, usage history, sign out. */
 export function AccountPage() {
   const client = useConvexClient();
   if (!client) {

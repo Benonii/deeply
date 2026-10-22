@@ -1,7 +1,3 @@
-/**
- * GitHub research for repo courses, plus the verbatim code-ref resolver.
- * Pure fetch: runs in either Convex runtime.
- */
 
 export const REPO_BYTES_CAP = 400_000;
 const FILE_BYTES_CAP = 60_000;
@@ -17,9 +13,9 @@ export type RepoContext = {
   stars: number;
   languages: string[];
   readme: string;
-  tree: string[]; // all blob paths (truncated list)
-  files: RepoFile[]; // fetched source files, verbatim
-  brandDigest: string; // hints scraped from the homepage for brand extraction
+  tree: string[];
+  files: RepoFile[];
+  brandDigest: string;
 };
 
 export class RepoError extends Error {}
@@ -58,7 +54,6 @@ async function rawFile(owner: string, name: string, sha: string, path: string, c
 const SOURCE_EXT = /\.(ts|tsx|js|jsx|mjs|rs|go|py|rb|java|kt|swift|c|cc|cpp|h|hpp|cs|ex|exs|scala|zig|lua|php|sql)$/i;
 const SKIP = /(^|\/)(node_modules|vendor|dist|build|target|\.git|__tests__|tests?|spec|examples?|docs?|fixtures?|benchmarks?|third_party)(\/|$)|\.(min|d)\.\w+$|_test\.|\.test\.|\.spec\./i;
 
-/** Rank paths so the most "central" source files come first. */
 function rankPaths(paths: string[], repoName: string): string[] {
   const score = (path: string) => {
     let points = 0;
@@ -99,7 +94,6 @@ export async function fetchRepoContext(owner: string, name: string, log?: (messa
   const readmePath = blobs.find((blob) => /^readme(\.md|\.rst|\.txt)?$/i.test(blob.path))?.path;
   if (readmePath) readme = ((await rawFile(owner, name, sha, readmePath, 40_000)) ?? '').slice(0, 30_000);
 
-  // Pick source files until the byte budget is spent.
   const candidates = rankPaths(
     blobs.filter((blob) => SOURCE_EXT.test(blob.path) && !SKIP.test(blob.path) && (blob.size ?? 0) > 400 && (blob.size ?? 0) < FILE_BYTES_CAP).map((blob) => blob.path),
     name,
@@ -132,7 +126,6 @@ export async function fetchRepoContext(owner: string, name: string, log?: (messa
   };
 }
 
-/** Pull colour, font and logo hints out of a homepage so the model can match the real brand. */
 export async function fetchBrandDigest(url: string): Promise<string> {
   const absoluteURL = /^https?:\/\//.test(url) ? url : `https://${url}`;
   const response = await fetch(absoluteURL, { headers: { 'User-Agent': 'Mozilla/5.0 (deeply-course-generator)' }, redirect: 'follow' });
@@ -164,18 +157,14 @@ export async function fetchBrandDigest(url: string): Promise<string> {
     .join('\n');
 }
 
-/* ------------------------------------------------------------------ */
-/* Verbatim code refs                                                  */
-/* ------------------------------------------------------------------ */
 
-/** What the model proposes: a location, never the code itself. */
 export type RefRequest = {
   id: string;
   title: string;
   path: string;
   startLine: number;
   endLine: number;
-  firstLine?: string; // the exact text of startLine, used to re-anchor off-by-n errors
+  firstLine?: string;
   symbol: string;
   summary: string;
   explain: string;
@@ -184,10 +173,6 @@ export type RefRequest = {
 
 const LANG: Record<string, string> = { rs: 'rust', ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', go: 'go', py: 'python' };
 
-/**
- * Turns a model's proposed excerpt location into a CodeRef whose code is
- * copied from the real file. Returns null when the location can't be resolved.
- */
 export function resolveRef(request: RefRequest, files: RepoFile[], repo: { owner: string; name: string; sha: string }) {
   const file = files.find((file) => file.path === request.path);
   if (!file) return null;
@@ -195,7 +180,6 @@ export function resolveRef(request: RefRequest, files: RepoFile[], repo: { owner
   let start = Math.floor(request.startLine);
   let end = Math.floor(request.endLine);
   if (!(start >= 1 && end >= start)) return null;
-  // Re-anchor: models are often a few lines off. Find firstLine nearest to the claimed start.
   if (request.firstLine && request.firstLine.trim()) {
     const want = request.firstLine.trim();
     if ((lines[start - 1] ?? '').trim() !== want) {
@@ -209,7 +193,7 @@ export function resolveRef(request: RefRequest, files: RepoFile[], repo: { owner
       end += shift;
     }
   }
-  end = Math.min(end, lines.length, start + 79); // cap excerpts at 80 lines
+  end = Math.min(end, lines.length, start + 79);
   if (start > lines.length) return null;
   const code = lines.slice(start - 1, end).join('\n');
   if (!code.trim()) return null;
@@ -231,7 +215,6 @@ export function resolveRef(request: RefRequest, files: RepoFile[], repo: { owner
   };
 }
 
-/** Compact listing of files for prompts: path + numbered lines. */
 export function numbered(file: RepoFile, maxLines = 900): string {
   const lines = file.text.split('\n').slice(0, maxLines);
   const lineNumberWidth = String(lines.length).length;

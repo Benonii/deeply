@@ -6,14 +6,12 @@ import './account.css';
 
 const api = anyApi;
 
-/* openSignIn() can be called from anywhere; the host below listens. */
 type SignInRequest = { reason?: string };
 const listeners = new Set<(request: SignInRequest) => void>();
 export function requestSignIn(request: SignInRequest = {}) {
   listeners.forEach((listener) => listener(request));
 }
 
-/** Mounted once inside the Convex provider: sign-in dialog + first-sign-in wallet setup. */
 export function AccountHost() {
   const [request, setRequest] = useState<SignInRequest | null>(null);
   const { isAuthenticated } = useConvexAuth();
@@ -24,7 +22,6 @@ export function AccountHost() {
     listeners.add(listener);
     return () => { listeners.delete(listener); };
   }, []);
-  // Create the wallet (signup grant) as soon as the user is signed in.
   useEffect(() => {
     if (isAuthenticated) {
       ensure({}).catch(() => {});
@@ -53,7 +50,6 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
     setBusy(provider);
     setError(null);
     try {
-      // Come back to the exact page (hash route included) after the provider redirect.
       const response = await auth.signIn.social({ provider, callbackURL: window.location.href });
       if (response?.error) throw new Error(response.error.message || 'Sign-in failed');
     } catch (error) {

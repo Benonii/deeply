@@ -2,13 +2,9 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState 
 import { readableText, SimplifiedView, SimplifyMenu, useSimplify } from './simplify';
 import { Inline } from './md';
 
-/* ------------------------------------------------------------------ */
-/* Copy plumbing: every block can be copied as a ready-to-paste prompt */
-/* ------------------------------------------------------------------ */
 
 export const ModuleCtx = createContext<{ title: string; course?: string }>({ title: 'Deeply' });
 
-/** Simplify wiring for one block: text getter + breadcrumb from context. */
 function useBlockSimplify(label: string, getText: () => string) {
   const courseModule = useContext(ModuleCtx);
   return useSimplify(getText, () => [courseModule.course, courseModule.title, label].filter(Boolean).join(' › '));
@@ -18,7 +14,6 @@ export function buildPrompt(path: string[], body: string) {
   return `I'm studying Convex. Explain this part in more depth, check my understanding, and give me an example:\n\n[${path.join(' › ')}]\n\n${body.trim()}\n`;
 }
 
-/* Code drawer bus: diagrams call openCode(ids); <CodeDrawer/> listens. */
 type CodeReq = { ids: string[]; context: string };
 let codeOpener: ((request: CodeReq) => void) | null = null;
 export function registerCodeOpener(opener: ((request: CodeReq) => void) | null) { codeOpener = opener; }
@@ -74,7 +69,6 @@ export function CopyBtn({ get, label = 'Copy', title }: { get: () => string; lab
   );
 }
 
-/** Wraps any content; copy button copies its visible text with breadcrumb context. */
 export function Copyable({ label, children, className = '', extra }: { label: string; children: React.ReactNode; className?: string; extra?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const courseModule = useContext(ModuleCtx);
@@ -92,9 +86,6 @@ export function Copyable({ label, children, className = '', extra }: { label: st
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Layout blocks                                                       */
-/* ------------------------------------------------------------------ */
 
 export function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   const ref = useRef<HTMLElement>(null);
@@ -163,9 +154,6 @@ export function Compare({ head, rows, caption }: { head: string[]; rows: React.R
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Code with a tiny TS highlighter                                     */
-/* ------------------------------------------------------------------ */
 
 const KEYWORDS = /\b(import|from|export|const|let|var|async|await|return|function|if|else|for|of|in|new|throw|try|catch|default|type|interface|extends|as|while|break|continue|null|undefined|true|false|typeof)\b/;
 const RUST_KW = /\b(fn|pub|impl|struct|enum|match|let|mut|self|Self|use|mod|async|await|where|trait|crate|super|dyn|move|ref|loop|unsafe|const|static|type|return|if|else|for|in|while|break|continue|true|false|Some|None|Ok|Err)\b/;
@@ -213,9 +201,6 @@ export function Code({ code, title, lang = 'ts', note }: { code: string; title?:
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Animated flow diagrams                                              */
-/* ------------------------------------------------------------------ */
 
 export type FlowNode = { id: string; label: string; sub?: string; x: number; y: number; w?: number; h?: number; tone?: 'yellow' | 'red' | 'purple' | 'plain'; code?: string[] };
 export type FlowEdge = { id: string; from: string; to: string; label?: string; curve?: number; code?: string[] };
@@ -232,10 +217,6 @@ function edgePoint(node: FlowNode, targetX: number, targetY: number) {
   return { x: centerX + deltaX * scale, y: centerY + deltaY * scale };
 }
 
-/**
- * A stepper diagram: nodes + edges, with steps that light up parts of the
- * system and send a packet along the active edges.
- */
 export function Flow({ title, nodes, edges, steps, height = 420, caption }: { title: string; nodes: FlowNode[]; edges: FlowEdge[]; steps: FlowStep[]; height?: number; caption?: string }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -256,12 +237,11 @@ export function Flow({ title, nodes, edges, steps, height = 420, caption }: { ti
     const overlaps = (first: Box, second: Box) => first.x0 < second.x1 && second.x0 < first.x1 && first.y0 < second.y1 && second.y0 < first.y1;
     const nodeBoxes: Box[] = nodes.map((node) => { const { width, height } = center(node); return { x0: node.x - 3, y0: node.y - 3, x1: node.x + width + 3, y1: node.y + height + 3 }; });
     const placed: Box[] = [];
-    const LABEL_CH = 6.9; // JetBrains Mono at 11.5px
+    const LABEL_CH = 6.9;
     return edges.map((edge) => {
       const fromNode = byId[edge.from], toNode = byId[edge.to];
       const fromCenter = center(fromNode), toCenter = center(toNode);
       const startPoint = edgePoint(fromNode, toCenter.centerX, toCenter.centerY), endPoint = edgePoint(toNode, fromCenter.centerX, fromCenter.centerY);
-      // Edges that run both ways between the same pair bow apart automatically.
       const reverse = edges.some((otherEdge) => otherEdge.from === edge.to && otherEdge.to === edge.from);
       const curve = edge.curve ?? (reverse ? 0.14 : 0);
       const controlX = (startPoint.x + endPoint.x) / 2 - (endPoint.y - startPoint.y) * curve, controlY = (startPoint.y + endPoint.y) / 2 + (endPoint.x - startPoint.x) * curve;
@@ -274,8 +254,6 @@ export function Flow({ title, nodes, edges, steps, height = 420, caption }: { ti
       if (curve < 0 || (curve === 0 && normalY > 0)) { normalX = -normalX; normalY = -normalY; }
       const text = (edge.label ?? '') + (edge.code?.length ? (edge.label ? ' </>' : '</>') : '');
       const textWidth = text.length * LABEL_CH, textHeight = 15;
-      // Try positions along the curve and on both sides; keep the first that
-      // clears every node box and every label already placed.
       let best: { lx: number; ly: number; anchor: 'start' | 'middle' | 'end'; score: number } | null = null;
       for (const labelFraction of [0.5, 0.38, 0.62, 0.28, 0.72]) {
         for (const side of [1, -1]) {
@@ -385,12 +363,10 @@ export function Flow({ title, nodes, edges, steps, height = 420, caption }: { ti
   );
 }
 
-/** Squeeze text that would overflow its node box. */
 function fitText(text: string, characterWidth: number, maxWidth: number) {
   return text.length * characterWidth > maxWidth - 14 ? { textLength: maxWidth - 14, lengthAdjust: 'spacingAndGlyphs' as const } : {};
 }
 
-/** Static SVG diagram frame (draw your own SVG as children, viewBox 0 0 1000 H). */
 export function Diagram({ title, describe, height = 360, children, caption }: { title: string; describe: string; height?: number; children: React.ReactNode; caption?: string }) {
   const courseModule = useContext(ModuleCtx);
   const simp = useBlockSimplify(title, () => `Diagram: ${title}\n${describe}${caption ? '\n' + caption : ''}`);
@@ -415,9 +391,6 @@ export function Diagram({ title, describe, height = 360, children, caption }: { 
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Inline knowledge check                                              */
-/* ------------------------------------------------------------------ */
 
 export function Check({ question: q, options, answer, explain }: { question: string; options: string[]; answer: number; explain: string }) {
   const [pick, setPick] = useState<number | null>(null);
@@ -456,7 +429,6 @@ export function Check({ question: q, options, answer, explain }: { question: str
   );
 }
 
-/** Small inline code token */
 export const InlineCode = ({ children }: { children: React.ReactNode }) => <code className="ic">{children}</code>;
 
 export type Module = {

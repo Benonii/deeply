@@ -16,11 +16,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { PlatformHome } from './Home';
 import { fromBuiltin, fromGenerated, type GeneratedCourseDoc, type ShellCourse } from './model';
 
-/* ------------------------------------------------------------------ */
-/* Routing                                                             */
-/* ------------------------------------------------------------------ */
 
-/** Links from the single-course Convex app keep working. */
 function legacyRedirect(path: string): string | null {
   const match = path.match(/^\/(m\/[\w-]+|playground|lab|source)$/);
   if (!match) return null;
@@ -67,16 +63,12 @@ function useReveal(dependency: unknown) {
       entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add('in'); observer.unobserve(entry.target); } });
     }, { rootMargin: '0px 0px -8% 0px' });
     elements.forEach((element) => observer.observe(element));
-    // Content that loads later (generated modules) gets revealed too.
     const mutationObserver = new MutationObserver(() => document.querySelectorAll('.reveal:not(.in)').forEach((element) => observer.observe(element)));
     mutationObserver.observe(document.body, { childList: true, subtree: true });
     return () => { observer.disconnect(); mutationObserver.disconnect(); };
   }, [dependency]);
 }
 
-/* ------------------------------------------------------------------ */
-/* Shell                                                               */
-/* ------------------------------------------------------------------ */
 
 function Wordmark() {
   return (
@@ -94,7 +86,6 @@ function Themed({ brand, children }: { brand: Brand; children: React.ReactNode }
   useBrandFonts(brand);
   const style = useMemo(() => ({ ...brandVars(brand), colorScheme: isLight(brand.colors.bg) ? 'light' : 'dark' }) as React.CSSProperties, [brand]);
   useEffect(() => {
-    // Body paints behind the shell (overscroll, drawers), so it follows the course background.
     document.body.style.background = brand.colors.bg;
     document.documentElement.style.colorScheme = isLight(brand.colors.bg) ? 'light' : 'dark';
   }, [brand]);
@@ -168,7 +159,6 @@ function GeneratedCourse({ slug, route, sub }: { slug: string; route: string; su
   return <CourseRoutes course={course} route={route} sub={sub} />;
 }
 
-/* ------------------------------------------------------------------ */
 
 export function App() {
   const path = useRoute();
@@ -176,7 +166,6 @@ export function App() {
   const client = useConvexClient();
   useReveal(path);
 
-  // Simplify goes through the backend when one is connected.
   useEffect(() => {
     registerSimplifier(
       client ? (args) => client.action(anyApi.simplify.simplify, args) as Promise<SimplifyResult> : null,

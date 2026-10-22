@@ -1,7 +1,6 @@
 import { internalMutation, mutation, query } from './_generated/server';
 import { ConvexError, v } from 'convex/values';
 
-// Public demo endpoints: keep inputs small and bounded.
 const ROOMS = ['general', 'random'];
 const COUNTERS = ['hot'];
 const room = v.union(...ROOMS.map((roomName) => v.literal(roomName)));
@@ -9,8 +8,6 @@ const room = v.union(...ROOMS.map((roomName) => v.literal(roomName)));
 export const listMessages = query({
   args: { room },
   handler: async (context, { room }) => {
-    // Read set = the index range by_room == room. Only writes into this
-    // range invalidate this subscription.
     return await context.db
       .query('messages')
       .withIndex('by_room', (indexRange) => indexRange.eq('room', room))
@@ -44,8 +41,6 @@ export const increment = mutation({
   args: { name: v.string() },
   handler: async (context, { name }) => {
     if (!COUNTERS.includes(name)) throw new ConvexError('Unknown counter.');
-    // Read-modify-write on one document: concurrent calls conflict under OCC
-    // and Convex transparently retries them, so no increment is ever lost.
     const counter = await context.db
       .query('counters')
       .withIndex('by_name', (indexRange) => indexRange.eq('name', name))
@@ -55,7 +50,6 @@ export const increment = mutation({
   },
 });
 
-/** Cron: keep the demo chat small by deleting messages older than a day. */
 export const pruneMessages = internalMutation({
   args: {},
   handler: async (context) => {

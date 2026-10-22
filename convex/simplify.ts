@@ -55,11 +55,6 @@ export const store = internalMutation({
   },
 });
 
-/**
- * Rewrites a block of course text in plainer language. Cached results are free
- * and shared by everyone; a new rewrite costs one credit, charged before the
- * model call and refunded if it fails.
- */
 export const simplify = action({
   args: { text: v.string(), level, context: v.string() },
   handler: async (actionContext, { text, level, context }): Promise<SimplifyResult> => {
@@ -99,7 +94,7 @@ export const simplify = action({
 class RefusalError extends Error {}
 
 async function callClaude(source: string, level: 1 | 2 | 3, context: string): Promise<string> {
-  const client = new Anthropic(); // ANTHROPIC_API_KEY from the Convex environment
+  const client = new Anthropic();
   const response = await client.beta.messages.create({
     model: 'claude-opus-5-5',
     max_tokens: 4000,

@@ -1,23 +1,14 @@
 import { z } from 'zod';
 
-/**
- * The course pack format. Hand-written packs (src/courses/*) and AI-generated
- * courses (convex/generate) both produce this shape; the engine renders it.
- *
- * Inline text fields support a tiny markdown subset: **bold**, *italic*,
- * `code` and [links](https://…). No HTML.
- */
 
-export const Tone = z.enum(['yellow', 'red', 'purple', 'plain']); // mapped to brand accent, accent2, accent3, neutral
+export const Tone = z.enum(['yellow', 'red', 'purple', 'plain']);
 
 export const FlowNode = z.object({
   id: z.string(),
   label: z.string().describe('2-3 words'),
   sub: z.string().optional().describe('short monospace subtitle, <= 26 chars'),
-  // Grid placement (preferred for generated content): col 0-4, row 0-4.
   col: z.number().int().min(0).max(4).optional(),
   row: z.number().int().min(0).max(4).optional(),
-  // Absolute placement on a 1000-wide canvas (hand-authored packs).
   x: z.number().optional(),
   y: z.number().optional(),
   w: z.number().optional(),
@@ -113,7 +104,6 @@ export const Challenge = z.object({
 });
 export type Challenge = z.infer<typeof Challenge>;
 
-/** Visual identity. For a real product/repo, derive from its brand guidelines; for a concept, design one. */
 export const Brand = z.object({
   name: z.string().describe('display name, e.g. "Convex" or "CRDTs"'),
   colors: z.object({
@@ -174,7 +164,6 @@ export type CourseMeta = z.infer<typeof CourseMeta>;
 export const CoursePack = CourseMeta.extend({ modules: z.array(ModulePack).min(1) });
 export type CoursePack = z.infer<typeof CoursePack>;
 
-/** Structural checks zod can't express: ids referenced by flows and checks exist. */
 export function lintModule(pack: ModulePack, codeRefIds: Set<string> = new Set()): string[] {
   const errs: string[] = [];
   for (const section of pack.sections) for (const block of section.blocks) {

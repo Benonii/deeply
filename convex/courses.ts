@@ -7,7 +7,6 @@ import { COST } from './lib/pricing';
 import { parseRepoUrl } from './generate/github';
 import { WATCHDOG_MS } from './generate/state';
 
-/** Better Auth user id, or null when signed out. */
 async function userId(context: QueryCtx | MutationCtx): Promise<string | null> {
   const user = await currentUser(context);
   return user ? String(user._id) : null;
@@ -24,16 +23,12 @@ function slugify(text: string) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Queries                                                             */
-/* ------------------------------------------------------------------ */
 
 async function moduleCounts(context: QueryCtx, courseId: import('./_generated/dataModel').Id<'courses'>) {
   const courseModules = await context.db.query('courseModules').withIndex('by_course', (indexRange) => indexRange.eq('courseId', courseId)).collect();
   return { moduleCount: courseModules.length, readyModules: courseModules.filter((courseModule) => courseModule.status === 'ready').length };
 }
 
-/** Public catalog: ready or in-progress public courses, newest first. */
 export const listPublic = query({
   args: {},
   handler: async (context) => {
@@ -61,7 +56,6 @@ export const listPublic = query({
   },
 });
 
-/** A course and its modules. Unlisted courses are readable by anyone with the link. */
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (context, { slug }) => {
@@ -112,7 +106,6 @@ export const myCourses = query({
   },
 });
 
-/** Live generation log (most recent 50, oldest first). */
 export const events = query({
   args: { courseId: v.id('courses') },
   handler: async (context, { courseId }) => {
@@ -121,9 +114,6 @@ export const events = query({
   },
 });
 
-/* ------------------------------------------------------------------ */
-/* Mutations                                                           */
-/* ------------------------------------------------------------------ */
 
 type CreateResult =
   | { status: 'ok'; slug: string }
@@ -148,7 +138,6 @@ export const create = mutation({
   },
 });
 
-/** Same as `create` for a given user. Internal only: used by tests and admin tooling. */
 export const createForUser = internalMutation({
   args: { userId: v.string(), ...createArgs },
   handler: (context, { userId, ...args }) => startCourse(context, userId, args),
@@ -168,7 +157,6 @@ async function startCourse(
   }
   if (topic.length < 3 || topic.length > 200) return { status: 'invalid', message: 'The topic must be 3 to 200 characters.' };
 
-  // Per-user then global limits. Check both before consuming either.
   const perUser = await rateLimiter.check(context, 'generateCourse', { key: me });
   if (!perUser.ok) return { status: 'rate', retryAfterMs: perUser.retryAfter ?? 60_000 };
   const daily = await rateLimiter.check(context, 'generateCourseDaily', { key: me });
@@ -204,7 +192,6 @@ async function startCourse(
   return { status: 'ok', slug };
 }
 
-/** Accepts the wallet's charge result whether it returns a boolean or `{ ok }`. */
 function chargeOk(chargeResult: unknown): boolean {
   if (typeof chargeResult === 'boolean') return chargeResult;
   if (chargeResult && typeof chargeResult === 'object' && 'ok' in chargeResult) return Boolean((chargeResult as { ok: unknown }).ok);

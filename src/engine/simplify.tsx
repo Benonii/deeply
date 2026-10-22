@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Markdown } from './md';
 
-/**
- * "Simplify": rewrite any block in plainer words. The platform registers the
- * backend call (a Convex action); the engine only knows this contract.
- */
 export type SimplifyLevel = 1 | 2 | 3;
 export type SimplifyResult =
   | { status: 'ok'; text: string; cached: boolean; credits?: number }
@@ -39,12 +35,10 @@ function useAvailable() {
   return !!simplifier;
 }
 
-/** Visible text of an element without the engine's own controls. */
 export function readableText(element: HTMLElement | null | undefined) {
   if (!element) return '';
   const clone = element.cloneNode(true) as HTMLElement;
   clone.querySelectorAll('.copy-btn, .simp, .simplified, .copyable-bar, .code-actions').forEach((node) => node.remove());
-  // innerText needs layout; textContent is close enough on a detached clone.
   return (clone.innerText || clone.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
 }
 
@@ -75,7 +69,6 @@ export function useSimplify(getText: () => string, context: () => string) {
   return { state, run, clear: () => setState({ kind: 'idle' }) };
 }
 
-/** The "Simplify" button with its three levels. */
 export function SimplifyMenu({ onPick, busy }: { onPick: (level: SimplifyLevel) => void; busy?: boolean }) {
   const available = useAvailable();
   const [open, setOpen] = useState(false);
@@ -114,7 +107,6 @@ export function SimplifyMenu({ onPick, busy }: { onPick: (level: SimplifyLevel) 
   );
 }
 
-/** The rewritten text, shown under the original. */
 export function SimplifiedView({ state, onClose, onLevel }: { state: State; onClose: () => void; onLevel: (level: SimplifyLevel) => void }) {
   if (state.kind === 'idle') return null;
   const label = LEVELS.find((levelOption) => levelOption.level === state.level)!.label;

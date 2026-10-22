@@ -6,7 +6,6 @@ import { shaderColors } from '../engine/theme';
 const full = { width: '100%', height: '100%' };
 const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-/** The brand's shader, in one of three roles: page hero, module header band, or footer texture. */
 export function BrandShader({ brand, role, seed = 0 }: { brand: Brand; role: 'hero' | 'band' | 'foot'; seed?: number }) {
   const colors = shaderColors(brand);
   const speed = reduced ? 0 : role === 'hero' ? 0.25 : 0.35;

@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import type React from 'react';
 import type { Brand } from '../../convex/lib/courseSchema';
 
-/** Platform chrome: pitch black, neutral greys, one cool accent. */
 export const DEEPLY_BRAND: Brand = {
   name: 'Deeply',
   colors: {
@@ -29,7 +28,6 @@ const FALLBACK = {
   mono: 'ui-monospace, SFMono-Regular, Menlo, monospace',
 };
 
-/** Brand → the CSS custom properties the engine styles read. */
 export function brandVars(brand: Brand): React.CSSProperties {
   const colors = brand.colors;
   return {
@@ -53,14 +51,12 @@ export function brandVars(brand: Brand): React.CSSProperties {
 }
 
 const loaded = new Set<string>();
-/** Loads a brand's Google Fonts once. Each family gets its own link so one bad name can't block the others. */
 export function useBrandFonts(brand: Brand) {
   useEffect(() => {
     for (const family of [brand.fonts.display, brand.fonts.body, brand.fonts.mono]) {
       if (!family || loaded.has(family)) continue;
       loaded.add(family);
       const name = encodeURIComponent(family).replace(/%20/g, '+');
-      // Weighted request first; a plain request as a fallback for fonts without those weights.
       for (const href of [
         `https://fonts.googleapis.com/css2?family=${name}:wght@400;500;600;700;800&display=swap`,
         `https://fonts.googleapis.com/css2?family=${name}&display=swap`,
@@ -74,14 +70,12 @@ export function useBrandFonts(brand: Brand) {
   }, [brand.fonts.display, brand.fonts.body, brand.fonts.mono]);
 }
 
-/** Shader palette for a brand: explicit, or derived from its colors. */
 export function shaderColors(brand: Brand) {
   return brand.shader?.colors ?? [brand.colors.bg, brand.colors.accent3, brand.colors.accent2, brand.colors.accent, brand.colors.bg];
 }
 
 const COLOR = /^(#[0-9a-fA-F]{3,8}|(rgb|hsl|oklch|oklab)a?\([0-9.,%\s/-]+\))$/;
 const FONT = /^[A-Za-z0-9 ]{2,40}$/;
-/** Untrusted brands (generated courses): keep only well-formed colors and font names, drop the logo. */
 export function sanitizeBrand(brand: any, fallback: Brand = DEEPLY_BRAND): Brand {
   if (!brand || typeof brand !== 'object') return fallback;
   const colors = Object.fromEntries(
@@ -98,7 +92,6 @@ export function sanitizeBrand(brand: any, fallback: Brand = DEEPLY_BRAND): Brand
   };
 }
 
-/** Whether a background is light (so native controls and scrollbars should be light too). */
 export function isLight(hex: string) {
   const match = /^#([0-9a-f]{6})/i.exec(hex);
   if (!match) return false;

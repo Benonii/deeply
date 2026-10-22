@@ -50,8 +50,6 @@ export function CodeDrawer() {
 
 function RefView({ codeRef: r, context }: { codeRef: CodeRef; context: string }) {
   const lines = useMemo(() => r.code.replace(/\s+$/, '').split('\n'), [r.code]);
-  // Assign real file line numbers, resuming after each `// …` elision from
-  // the next annotated or final line when possible.
   const numbered = useMemo(() => {
     const exact = lineMap[r.id];
     if (exact && exact.length === lines.length) return lines.map((line, index) => ({ l: line, n: exact[index] }));

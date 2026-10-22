@@ -5,23 +5,21 @@ export const SHAS = {
 
 export type Repo = keyof typeof SHAS;
 
-/** Built-in Convex refs use a short repo key; generated courses use "owner/name" plus their own sha. */
 
-/** A real excerpt from Convex's source, attached to a diagram node or edge. */
 export type CodeRef = {
-  id: string; // stable key, e.g. 'sync.worker'
-  title: string; // human title, e.g. 'SyncWorker: one per WebSocket'
+  id: string;
+  title: string;
   repo: Repo | string;
   sha?: string;
-  path: string; // repo-relative path
-  startLine: number; // line of the first excerpt line in the real file
+  path: string;
+  startLine: number;
   endLine: number;
-  symbol: string; // main fn/struct/class shown
+  symbol: string;
   lang: string;
-  summary: string; // one sentence: what this code is responsible for
-  explain: string; // 1-3 paragraphs: how it works, what to notice
-  notes?: { line: number; text: string }[]; // annotations keyed by real file line number
-  code: string; // verbatim excerpt; elisions marked with a line containing only `// …`
+  summary: string;
+  explain: string;
+  notes?: { line: number; text: string }[];
+  code: string;
 };
 
 export function refUrl(codeRef: CodeRef) {

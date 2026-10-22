@@ -8,7 +8,6 @@ import type { ShellCourse, ShellModule } from './model';
 
 const padTwoDigits = (digits: number) => String(digits).padStart(2, '0');
 
-/** Extra pages of a course: its own pages plus a challenges page for packs. */
 export function coursePages(course: ShellCourse) {
   const pages = [...course.pages];
   if (course.challenges?.length) pages.push({ id: 'challenges', label: 'Challenges', Component: () => <PackChallenges challenges={course.challenges!} course={course.title} /> });

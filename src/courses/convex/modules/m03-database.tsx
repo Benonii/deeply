@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, InlineCode, Copyable } from '../../../engine/kit';
 
-/* ---------------- Interactive index-range visualiser ---------------- */
 
 type Row = { author: string; status: string; t: number };
 const ROWS: Row[] = [
@@ -112,7 +111,6 @@ function IndexVisualizer() {
   );
 }
 
-/* ---------------- Module ---------------- */
 
 const Component = () => (
   <>

@@ -1,6 +1,5 @@
 import type { BuiltinCourse } from '../course';
 
-/** Minimal pack used to test the renderer. Shown only when localStorage["deeply-fixtures"] === "1". */
 export const demoCourse: BuiltinCourse = {
   id: 'demo',
   title: 'Caches, Deeply',

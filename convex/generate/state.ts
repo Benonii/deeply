@@ -3,11 +3,6 @@ import { internalMutation, internalQuery, type MutationCtx } from '../_generated
 import { internal } from '../_generated/api';
 import type { Doc, Id } from '../_generated/dataModel';
 
-/**
- * Pipeline state for course generation. Actions (convex/generate/actions.ts)
- * do the slow work; these mutations record results and decide what runs next,
- * so each step is a separate, retryable scheduled function.
- */
 
 export const MAX_CONCURRENT_WRITERS = 3;
 export const MAX_ATTEMPTS = 2;
@@ -32,7 +27,6 @@ export const log = internalMutation({
   handler: (context, { courseId, message, level }) => logEvent(context, courseId, message, level ?? 'info'),
 });
 
-/** Planner is starting: bump attempts, mark planning. Returns false if this run is stale. */
 export const beginPlanning = internalMutation({
   args: { courseId: v.id('courses') },
   handler: async (context, { courseId }) => {
@@ -53,7 +47,7 @@ export const savePlan = internalMutation({
   },
   handler: async (mutationContext, { courseId, meta, outlines, context, repo }) => {
     const course = await mutationContext.db.get(courseId);
-    if (!course || course.status !== 'planning') return; // stale or deleted
+    if (!course || course.status !== 'planning') return;
     const existing = await mutationContext.db.query('courseModules').withIndex('by_course', (indexRange) => indexRange.eq('courseId', courseId)).first();
     if (!existing) {
       for (let index = 0; index < outlines.length; index++) {
@@ -66,7 +60,6 @@ export const savePlan = internalMutation({
   },
 });
 
-/** Start writers up to the concurrency cap; when every module is settled, start challenges. */
 async function claimWork(context: MutationCtx, courseId: Id<'courses'>) {
   const courseModules = await context.db.query('courseModules').withIndex('by_course', (indexRange) => indexRange.eq('courseId', courseId)).collect();
   let writing = courseModules.filter((courseModule) => courseModule.status === 'writing').length;
@@ -152,7 +145,6 @@ async function failCourse(context: MutationCtx, course: Doc<'courses'>, error: s
   }
 }
 
-/** Planner failed: retry once, otherwise fail the course and refund. */
 export const planFailed = internalMutation({
   args: { courseId: v.id('courses'), error: v.string(), retryable: v.boolean() },
   handler: async (context, { courseId, error, retryable }) => {
@@ -168,13 +160,8 @@ export const planFailed = internalMutation({
   },
 });
 
-export const WATCHDOG_MS = 12 * 60 * 1000; // longer than any single action can run
+export const WATCHDOG_MS = 12 * 60 * 1000;
 
-/**
- * Recovers from actions that crashed without reporting (runtime errors,
- * deploys mid-run): anything stuck past the action time limit is retried
- * once or failed, so a course never hangs with credits charged.
- */
 export const watchdog = internalMutation({
   args: { courseId: v.id('courses') },
   handler: async (context, { courseId }) => {

@@ -1,14 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CopyBtn, buildPrompt } from '../../../engine/kit';
 
-/*
- * Sync & subscription simulator.
- * A fake `messages` table with index by_channel ["channel", _creationTime].
- * Each client subscribes to queries whose read set is an index range.
- * A write commits at a timestamp; the subscription manager intersects the
- * write's old/new index keys with each read set; overlapping queries rerun
- * and a Transition is pushed to that client.
- */
 
 type Doc = { _id: string; _creationTime: number; channel: string; author: string; body: string };
 type ReadSet =
@@ -51,7 +43,6 @@ function runQuery(s: Sub, docs: Doc[]): string {
   return '[' + docs.filter((d) => d.channel === ch).map((d) => `"${d.body}"`).join(', ') + ']';
 }
 
-/** Does a write (old & new versions of one doc) intersect a read set? */
 function overlaps(r: ReadSet, before: Doc | null, after: Doc | null): boolean {
   const versions = [before, after].filter(Boolean) as Doc[];
   if (r.kind === 'all') return true;
@@ -93,7 +84,6 @@ export function SyncSim() {
     setStage(0);
   }
 
-  // drive the pipeline
   useEffect(() => {
     if (stage < 0 || !pending) return;
     const t = setTimeout(() => {

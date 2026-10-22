@@ -17,7 +17,6 @@ export type OrderChallenge = Base & { kind: 'order'; q: string; items: string[];
 export type Challenge = ChoiceChallenge | OrderChallenge;
 
 export const challenges: Challenge[] = [
-  /* ---------------- Mental model ---------------- */
   {
     id: 'mm-1', topic: 'mental-model', difficulty: 1, kind: 'mcq', title: 'What is Convex, really?',
     q: 'Which description is most accurate?',
@@ -75,7 +74,6 @@ export const challenges: Challenge[] = [
     explain: 'Queries read and are cached/reactive; mutations are serializable transactions; actions can talk to the outside world (fetch, SDKs, Node) but are not transactions — they read/write the DB only by calling queries/mutations.',
   },
 
-  /* ---------------- Functions ---------------- */
   {
     id: 'fn-1', topic: 'functions', difficulty: 1, kind: 'mcq', title: 'Who can call fetch()?',
     q: 'Which Convex function type may call `fetch()` to a third-party API?',
@@ -177,7 +175,6 @@ export const challenges: Challenge[] = [
     explain: 'Convex\'s runtime makes Math.random and Date.now safe by controlling them per execution, preserving determinism. True external nondeterminism (network, real clocks) is what is disallowed.',
   },
 
-  /* ---------------- Database ---------------- */
   {
     id: 'db-1', topic: 'database', difficulty: 1, kind: 'mcq', title: '.filter() cost',
     q: 'What does `.filter()` on a Convex query do for performance?',
@@ -274,7 +271,6 @@ export const challenges: Challenge[] = [
     explain: 'Transactions have read limits (documents scanned and bytes read). Unbounded collect() is a scaling bug: use an index range, .take(n), pagination, or a precomputed aggregate.',
   },
 
-  /* ---------------- Transactions ---------------- */
   {
     id: 'tx-1', topic: 'transactions', difficulty: 1, kind: 'mcq', title: 'Isolation level',
     q: 'What isolation do Convex mutations get?',
@@ -363,7 +359,6 @@ export const challenges: Challenge[] = [
     explain: 'Classic OCC: execute optimistically against a snapshot, validate at commit time, then persist and fan out. On conflict the mutation is re-run from step 1.',
   },
 
-  /* ---------------- Sync ---------------- */
   {
     id: 'sy-1', topic: 'sync', difficulty: 1, kind: 'mcq', title: 'Transport',
     q: 'How does the Convex React client talk to the backend?',
@@ -444,7 +439,6 @@ export const challenges: Challenge[] = [
     explain: 'Query results are cached keyed by function and arguments (and identity when auth is used). Deterministic queries make this safe. Calling ctx.auth makes the result identity-specific.',
   },
 
-  /* ---------------- Internals ---------------- */
   {
     id: 'in-1', topic: 'internals', difficulty: 1, kind: 'mcq', title: 'Implementation language',
     q: 'What is the Convex backend primarily written in?',
@@ -496,7 +490,6 @@ export const challenges: Challenge[] = [
     explain: 'A single serialization point assigns monotonically increasing timestamps. Validation is "did anything after my snapshot touch my read set?", and subscribers consume one ordered log.',
   },
 
-  /* ---------------- Platform ---------------- */
   {
     id: 'pf-1', topic: 'platform', difficulty: 2, kind: 'mcq', title: 'Scheduled function guarantees',
     q: 'Which execution guarantees does the scheduler provide?',
@@ -560,7 +553,6 @@ export const challenges: Challenge[] = [
     explain: 'httpAction handles raw Request → Response (verify signatures there), then calls ctx.runMutation to record the event.',
   },
 
-  /* ---------------- Patterns / security ---------------- */
   {
     id: 'pt-1', topic: 'patterns', difficulty: 2, kind: 'bug', title: 'The open delete',
     q: 'What is the security problem?',
@@ -617,7 +609,6 @@ export const challenges: Challenge[] = [
     explain: 'The client is untrusted. A common pattern is custom function wrappers (e.g. convex-helpers customQuery/customMutation) that load the user and enforce rules for every endpoint.',
   },
 
-  /* ---------------- Boss level ---------------- */
   {
     id: 'boss-1', topic: 'patterns', difficulty: 3, boss: true, kind: 'mcq', title: 'The jittery chat app',
     q: 'A chat app with 500 channels uses `.filter(channel == X)` for messages. Under load, CPU is high and every client re-renders whenever anyone posts in any channel. The root cause and fix?',

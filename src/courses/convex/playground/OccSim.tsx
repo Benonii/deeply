@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import { CopyBtn, buildPrompt } from '../../../engine/kit';
 
-/*
- * OCC simulator. Documents are MVCC-versioned: every commit appends a
- * version at a timestamp. A mutation reads at its begin timestamp (a
- * snapshot), buffers writes, and at commit the committer checks whether any
- * commit after the begin ts wrote something in the mutation's read set.
- */
 
 type DocId = 'counter' | 'stats';
 type Version = { ts: number; value: number };
 type Commit = { ts: number; by: string; writes: DocId[] };
 type Mut = {
   name: 'A' | 'B';
-  step: 0 | 1 | 2 | 3 | 4; // 0 idle, 1 begun, 2 read, 3 write buffered, 4 committed
+  step: 0 | 1 | 2 | 3 | 4;
   beginTs: number | null;
   read: number | null;
   attempts: number;
@@ -68,7 +62,6 @@ export function OccSim() {
   }
 
   function runToEnd(name: 'A' | 'B') {
-    // simple synchronous run of the remaining steps (models an automatic retry)
     let m = { ...muts[name] };
     const id = docOf(name);
     if (m.step === 4) return;

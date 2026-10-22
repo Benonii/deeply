@@ -14,10 +14,6 @@ function extractJson(text: string): unknown {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
-/**
- * Ask Claude for JSON, validate it with zod (+ an optional extra lint), and
- * give it one chance to repair. Streams so long outputs don't time out.
- */
 export async function generateJson<S extends z.ZodTypeAny>(options: {
   prompt: string;
   schema: S;
@@ -41,7 +37,6 @@ export async function generateJson<S extends z.ZodTypeAny>(options: {
       fallbacks: 'default',
       messages,
     };
-    // `fallbacks: "default"` is newer than the SDK's request types.
     const stream = client.beta.messages.stream(params as unknown as Anthropic.Beta.Messages.MessageCreateParamsStreaming);
     const message = await stream.finalMessage();
     usage.input += message.usage.input_tokens;
@@ -67,7 +62,6 @@ export async function generateJson<S extends z.ZodTypeAny>(options: {
       }
     }
     if (attempt === 1) throw new GenerationError(`Output failed validation: ${errors.slice(0, 5).join('; ')}`);
-    // Append the full assistant turn (thinking blocks included) and ask for a fix.
     messages.push({ role: 'assistant', content: message.content as Anthropic.Beta.BetaContentBlockParam[] });
     messages.push({ role: 'user', content: repairPrompt(errors) });
   }

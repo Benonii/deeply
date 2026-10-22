@@ -2,10 +2,6 @@ import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import { currentUser } from './auth';
 
-/**
- * Course progress. Anonymous visitors are tracked per browser (deviceId);
- * once signed in, the row is linked to the user and follows them across devices.
- */
 export const get = query({
   args: { deviceId: v.string() },
   handler: async (context, { deviceId }) => {
@@ -28,7 +24,6 @@ export const save = mutation({
     challenges: v.record(v.string(), v.boolean()),
   },
   handler: async (context, args) => {
-    // Bound the payload: keys are "<courseId>:<moduleId>" across many courses.
     if (args.deviceId.length > 64) throw new Error('Invalid device id');
     if (Object.keys(args.done).length > 1000 || Object.keys(args.challenges).length > 5000) throw new Error('Too many entries');
     const user = await currentUser(context);

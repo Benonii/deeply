@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { Brand, Challenge, ModulePack } from '../lib/courseSchema';
 
-/** What the planner returns. */
 export const ModuleOutline = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   title: z.string(),
@@ -33,14 +32,12 @@ export const RefRequest = z.object({
   notes: z.array(z.object({ line: z.number(), text: z.string() })).optional(),
 });
 
-/** What a module writer returns: the module plus pointers to code it wants to quote. */
 export const ModuleOutput = ModulePack.extend({ codeRefs: z.array(RefRequest).default([]) });
 export type ModuleOutput = z.infer<typeof ModuleOutput>;
 
 export const ChallengesOutput = z.object({ challenges: z.array(Challenge).min(4).max(40) });
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
-/** Extra checks on the planner output. */
 export function lintPlan(plan: PlanOutput): string[] {
   const errs: string[] = [];
   for (const [colorName, colorValue] of Object.entries(plan.brand.colors)) if (!HEX.test(colorValue)) errs.push(`brand.colors.${colorName} must be #rrggbb, got ${colorValue}`);

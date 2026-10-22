@@ -5,11 +5,8 @@ import { creditsForOrder, polar } from './billing';
 
 const http = httpRouter();
 
-// Better Auth endpoints under /api/auth/*. CORS is required because the SPA
-// runs on a different origin than <deployment>.convex.site.
 authComponent.registerRoutes(http, createAuth, { cors: true });
 
-// Polar webhooks at /polar/events (signature verified by the component).
 polar.registerRoutes(http, {
   events: {
     'order.paid': async (context, event) => {

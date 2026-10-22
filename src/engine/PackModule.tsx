@@ -3,7 +3,6 @@ import type { Block, ModulePack } from '../../convex/lib/courseSchema';
 import { Callout, Check, Code, Compare, Copyable, Flow, KeyTerms, Section, type FlowNode } from './kit';
 import { Inline } from './md';
 
-/** Renders a JSON module pack with the same components as hand-built modules. */
 export function PackModule({ pack }: { pack: ModulePack }) {
   return (
     <>
@@ -20,7 +19,6 @@ const NODE_W = 170;
 const NODE_H = 64;
 const ROW_GAP = 132;
 
-/** Grid placement (col/row) → absolute coordinates on the 1000-wide canvas. */
 export function layoutFlow(nodes: (Omit<FlowNode, 'x' | 'y'> & { x?: number; y?: number; col?: number; row?: number })[]) {
   const gridded = nodes.filter((node) => node.x === undefined || node.y === undefined);
   const cols = gridded.map((node) => node.col ?? 0);

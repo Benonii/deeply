@@ -1,13 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 
-/**
- * Progress lives in localStorage and, when a Convex deployment is configured,
- * is mirrored to Convex (see src/platform/convexClient.tsx).
- *
- * Keys are namespaced per course: `<courseId>:<moduleId>` and
- * `<courseId>:<challengeId>`. Course code calls useProgress() without a
- * namespace and gets the course the shell is currently showing.
- */
 export type Progress = {
   done: Record<string, boolean>;
   challenges: Record<string, boolean>;
@@ -16,7 +8,6 @@ export type Progress = {
 const KEY = 'convex-academy-progress-v1';
 const listeners = new Set<(progress: Progress) => void>();
 
-/** Course progress from before namespacing belonged to the Convex course. */
 function migrate(progress: Progress): Progress {
   const addNamespace = (record: Record<string, boolean>) =>
     Object.fromEntries(Object.entries(record).map(([key, value]) => [key.includes(':') ? key : `convex:${key}`, value]));
@@ -40,7 +31,6 @@ export function setProgress(next: Progress) {
 export function getProgress() { return state; }
 
 let currentNamespace = 'convex';
-/** Called by the course shell so course code can use un-namespaced ids. */
 export function setProgressNamespace(namespace: string) { currentNamespace = namespace; }
 
 function scoped(record: Record<string, boolean>, namespace: string) {

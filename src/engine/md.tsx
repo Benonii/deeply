@@ -1,9 +1,5 @@
 import React from 'react';
 
-/**
- * Markdown-lite for pack and simplified text: **bold**, *italic*, `code`,
- * [links](https://…). Builds React nodes directly; never uses innerHTML.
- */
 const INLINE = /(`[^`\n]+`)|(\*\*[^*\n]+\*\*)|(\*[^*\n]+\*)|(\[[^\]\n]+\]\((https?:\/\/[^)\s]+)\))/g;
 
 export function Inline({ text }: { text: string }) {
@@ -25,7 +21,6 @@ export function Inline({ text }: { text: string }) {
   return <>{out}</>;
 }
 
-/** Paragraphs, and "- " / "1. " lists, separated by blank lines. */
 export function Markdown({ text }: { text: string }) {
   const blocks = text.trim().split(/\n\s*\n/);
   return (

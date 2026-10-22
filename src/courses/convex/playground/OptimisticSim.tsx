@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CopyBtn, buildPrompt } from '../../../engine/kit';
 
-/*
- * Optimistic update simulator. The client view = last server snapshot with
- * every pending optimistic layer replayed on top. A layer is removed when the
- * server's Transition containing that mutation's commit ts arrives (success)
- * or when the mutation fails (rollback).
- */
 
 type Todo = { id: string; text: string; optimistic?: boolean };
 type Layer = { reqId: number; text: string; willFail: boolean; phase: 'sent' | 'committed' | 'failed' };
@@ -48,7 +42,6 @@ export function OptimisticSim() {
   }
 
   const snapshot: Todo[] = server.filter(() => true).slice(0, server.length);
-  // the client only sees server state up to clientTs; simulate by hiding docs whose layer is still "committed" but not yet transitioned
   const visibleServer = snapshot.filter((t) => !layers.some((l) => l.phase === 'committed' && `s${l.reqId}` === t.id));
   const view: Todo[] = [...visibleServer, ...layers.map((l) => ({ id: `o${l.reqId}`, text: l.text, optimistic: true }))];
 

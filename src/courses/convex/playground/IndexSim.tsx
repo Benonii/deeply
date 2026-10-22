@@ -1,11 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { CopyBtn, buildPrompt, Code } from '../../../engine/kit';
 
-/*
- * Index / query-cost simulator. Shows docs in index order, the contiguous
- * index range a query scans (= its read set), which scanned docs survive
- * .filter(), and which hypothetical writes would invalidate the subscription.
- */
 
 type Task = { _id: string; _creationTime: number; team: string; status: string; priority: number };
 const TEAMS = ['ai', 'core', 'infra', 'web'];
@@ -37,7 +32,7 @@ type Plan = {
   label: string;
   index: IndexName;
   code: (p: P) => string;
-  range: (p: P) => ((t: Task) => boolean) | string; // string = error
+  range: (p: P) => ((t: Task) => boolean) | string;
   rangeLabel: (p: P) => string;
   filter: (p: P) => (t: Task) => boolean;
 };

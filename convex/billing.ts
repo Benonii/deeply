@@ -6,12 +6,6 @@ import { action, internalAction, query } from './_generated/server';
 import { authComponent, currentUser } from './auth';
 import { rateLimiter } from './rateLimits';
 
-/**
- * Credit packs are one-time Polar products. Set their ids in Convex env:
- *   POLAR_PRODUCT_CREDITS_SMALL, POLAR_PRODUCT_CREDITS_LARGE
- * Credits per pack come from the product's `credits` metadata in Polar when
- * present, otherwise from DEFAULT_PACK_CREDITS.
- */
 export const DEFAULT_PACK_CREDITS = { small: 200, large: 1000 } as const;
 type PackKey = keyof typeof DEFAULT_PACK_CREDITS;
 
@@ -22,7 +16,6 @@ const productIds = {
 
 export const polar = new Polar<DataModel, typeof productIds>(components.polar, {
   getUserInfo: async (context) => {
-    // The component passes a query/action ctx; Better Auth accepts any Convex ctx.
     const user = await authComponent.getAuthUser(context as Parameters<typeof authComponent.getAuthUser>[0]);
     return { userId: user._id, email: user.email };
   },
@@ -35,7 +28,6 @@ function packForProduct(productId: string | null | undefined): PackKey | null {
   return null;
 }
 
-/** Packs for the pricing UI: name, price, credits. Empty when Polar isn't configured. */
 export const packs = query({
   args: {},
   handler: async (context) => {
@@ -62,7 +54,6 @@ export const packs = query({
   },
 });
 
-/** Creates a Polar checkout for a credit pack and returns its URL. */
 export const checkout = action({
   args: { pack: v.union(v.literal('small'), v.literal('large')), returnUrl: v.string() },
   handler: async (context, { pack, returnUrl }): Promise<{ url: string } | { error: string }> => {
@@ -73,7 +64,6 @@ export const checkout = action({
     const limit = await rateLimiter.limit(context, 'checkout', { key: user._id });
     if (!limit.ok) return { error: 'Too many checkout attempts. Try again in a few minutes.' };
     const site = process.env.SITE_URL ?? new URL(returnUrl).origin;
-    // Only redirect back to our own site.
     const success = returnUrl.startsWith(site) ? returnUrl : `${site}/#/account?purchase=success`;
     try {
       const session = await polar.createCheckoutSession(context, {
@@ -92,7 +82,6 @@ export const checkout = action({
   },
 });
 
-/** One-off: pull products created in Polar before the webhook existed. */
 export const syncProducts = internalAction({
   args: {},
   handler: async (context) => {
@@ -100,7 +89,6 @@ export const syncProducts = internalAction({
   },
 });
 
-/** Resolve who paid and how many credits an order is worth. Exported for the webhook. */
 export async function creditsForOrder(order: {
   productId: string | null;
   metadata?: { [metadataKey: string]: unknown };

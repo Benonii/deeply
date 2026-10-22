@@ -13,7 +13,6 @@ function shuffle<T>(arr: T[], seed: string) {
     const j = Math.floor(r() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
-  // never present already-solved order
   if (a.every((v, k) => v.i === k)) a.reverse();
   return a;
 }

@@ -1,7 +1,3 @@
-/**
- * Prompts for the course generator. The JSON shapes here mirror
- * convex/lib/courseSchema.ts; output is validated with zod afterwards.
- */
 
 export const SYSTEM = `You write "Deeply" courses: interactive, technically deep explanations of how a system or concept actually works, for strong engineers who want to become experts in a few hours.
 
@@ -107,7 +103,7 @@ export function modulePrompt(input: {
   outline: { id: string; title: string; kicker: string; summary: string; minutes: number; plan: string };
   n: number;
   allModules: { n: number; title: string; summary: string }[];
-  files?: string; // numbered source files for repo courses
+  files?: string;
 }) {
   return `Write module ${input.n} of the course "${input.courseTitle}" (topic: ${input.topic}).
 

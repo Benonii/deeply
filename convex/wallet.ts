@@ -10,7 +10,6 @@ async function getWallet(context: MutationCtx, userId: string) {
   return await context.db.query('wallets').withIndex('by_user', (indexRange) => indexRange.eq('userId', userId)).unique();
 }
 
-/** Creates the wallet (with the signup grant) the first time a user is seen. */
 async function ensureWallet(context: MutationCtx, userId: string) {
   const existing = await getWallet(context, userId);
   if (existing) return existing;
@@ -20,7 +19,6 @@ async function ensureWallet(context: MutationCtx, userId: string) {
   return (await context.db.get(id))!;
 }
 
-/** The signed-in user and their balance, or null when signed out. */
 export const me = query({
   args: {},
   handler: async (context) => {
@@ -32,14 +30,12 @@ export const me = query({
       name: user.name,
       email: user.email,
       image: user.image ?? null,
-      // Before the wallet exists we show the grant the user is about to receive.
       credits: wallet ? wallet.credits : FREE_CREDITS_ON_SIGNUP,
       costs: COST,
     };
   },
 });
 
-/** Called by the client right after sign-in so the signup grant appears in the ledger. */
 export const ensure = mutation({
   args: {},
   handler: async (context) => {
@@ -50,7 +46,6 @@ export const ensure = mutation({
   },
 });
 
-/** Recent ledger entries for the account page. */
 export const history = query({
   args: {},
   handler: async (context) => {
@@ -65,10 +60,6 @@ export const history = query({
   },
 });
 
-/**
- * Atomically spend credits. A mutation is a serializable transaction, so two
- * concurrent charges can never both spend the same last credit.
- */
 export const charge = internalMutation({
   args: { userId: v.string(), kind: usageKind, ref: v.string() },
   handler: async (context, { userId, kind, ref }) => {
@@ -81,7 +72,6 @@ export const charge = internalMutation({
   },
 });
 
-/** Give back a charge whose work failed. Idempotent per charge ref. */
 export const refund = internalMutation({
   args: { userId: v.string(), kind: usageKind, ref: v.string() },
   handler: async (context, { userId, kind, ref }) => {
@@ -97,7 +87,6 @@ export const refund = internalMutation({
   },
 });
 
-/** Add purchased credits. Idempotent per Polar order id. */
 export const credit = internalMutation({
   args: { userId: v.string(), credits: v.number(), ref: v.string() },
   handler: async (context, { userId, credits, ref }) => {

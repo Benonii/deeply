@@ -31,9 +31,6 @@ function repoSummary(repo: RepoContext): string {
     .join('\n\n');
 }
 
-/* ------------------------------------------------------------------ */
-/* 1. Research + plan                                                  */
-/* ------------------------------------------------------------------ */
 
 export const plan = internalAction({
   args: { courseId: v.id('courses') },
@@ -63,7 +60,6 @@ export const plan = internalAction({
             })
           ).value;
 
-      // Only keep files that exist in the research set.
       const known = new Set(repo?.files.map((file) => file.path) ?? []);
       const outlines = planOut.modules.map((plannedModule) => ({ ...plannedModule, files: plannedModule.files.filter((filePath) => known.has(filePath)) }));
       const meta = {
@@ -90,9 +86,6 @@ export const plan = internalAction({
   },
 });
 
-/* ------------------------------------------------------------------ */
-/* 2. Module writer                                                    */
-/* ------------------------------------------------------------------ */
 
 export const writeModule = internalAction({
   args: { courseId: v.id('courses'), n: v.number() },
@@ -124,13 +117,11 @@ export const writeModule = internalAction({
               files: fileText,
             }),
             schema: ModuleOutput,
-            // Lint against the refs the model *claims*; unresolvable ones are stripped below.
             lint: (pack) => lintModule(pack, new Set(pack.codeRefs.map((codeRef) => codeRef.id))),
           })
         ).value;
       }
 
-      // Copy code verbatim from the fetched files; drop anything that doesn't resolve.
       const refs: Record<string, CodeRefPack> = {};
       let dropped = 0;
       if (repo) {
@@ -151,7 +142,6 @@ export const writeModule = internalAction({
   },
 });
 
-/** Remove node/edge code ids that point at refs we could not verify. */
 function stripMissingRefs(pack: ModulePack, ok: Set<string>): ModulePack {
   const keep = (ids?: string[]) => {
     const keptIDs = (ids ?? []).filter((id) => ok.has(id));
@@ -170,9 +160,6 @@ function stripMissingRefs(pack: ModulePack, ok: Set<string>): ModulePack {
   };
 }
 
-/* ------------------------------------------------------------------ */
-/* 3. Challenges                                                       */
-/* ------------------------------------------------------------------ */
 
 export const writeChallenges = internalAction({
   args: { courseId: v.id('courses') },
@@ -202,7 +189,6 @@ export const writeChallenges = internalAction({
   },
 });
 
-/** A compact digest of a module for the challenge writer: headings, callouts and checks. */
 function keyFacts(pack: ModulePack): string {
   const lines: string[] = [];
   for (const section of pack.sections) {

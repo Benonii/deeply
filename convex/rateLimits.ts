@@ -1,10 +1,6 @@
 import { HOUR, MINUTE, RateLimiter } from '@convex-dev/rate-limiter';
 import { components } from './_generated/api';
 
-/**
- * All rate limits in one place. Per-user limits pass `{ key: userId }`;
- * global limits protect the Anthropic bill if many accounts are abused at once.
- */
 export const rateLimiter = new RateLimiter(components.rateLimiter, {
   simplify: { kind: 'token bucket', rate: 12, period: MINUTE, capacity: 6 },
   simplifyGlobal: { kind: 'token bucket', rate: 300, period: MINUTE, shards: 4 },

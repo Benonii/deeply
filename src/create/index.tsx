@@ -8,7 +8,6 @@ import './create.css';
 
 const api = anyApi;
 
-/** Reads `#/create/<slug>` so a progress view survives reloads and can be shared. */
 function useSlugFromHash() {
   const read = () => location.hash.match(/^#\/create\/([\w-]+)/)?.[1] ?? null;
   const [slug, setSlug] = useState(read);
@@ -20,7 +19,6 @@ function useSlugFromHash() {
   return slug;
 }
 
-/** #/create: generate a course from a concept or a GitHub repo, then watch it being written. */
 export function CreatePage() {
   const client = useConvexClient();
   if (!client) {

@@ -1,6 +1,5 @@
 import type { Block, Section } from '../../../convex/lib/courseSchema';
 
-/* Tiny builders that keep the hand-written course readable. */
 
 type FlowBlock = Extract<Block, { type: 'flow' }>;
 type CalloutKind = Extract<Block, { type: 'callout' }>['kind'];
