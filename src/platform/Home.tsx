@@ -1,0 +1,128 @@
+import React from 'react';
+import { useQuery } from 'convex/react';
+import { anyApi } from 'convex/server';
+import type { Brand } from '../../convex/lib/courseSchema';
+import { builtinCourses } from '../courses';
+import { useProgress } from '../engine/progress';
+import { DEEPLY_BRAND, sanitizeBrand, useBrandFonts } from '../engine/theme';
+import { BrandShader } from './BrandShader';
+import { useConvexClient } from './convexClient';
+import { ErrorBoundary } from './ErrorBoundary';
+import { fromBuiltin } from './model';
+
+type CardData = { href: string; title: string; tagline: string; brand: Brand; kind: 'concept' | 'repo'; modules: number; minutes?: number; done?: number; logo?: string; community?: boolean };
+
+function Swatches({ b }: { b: Brand }) {
+  return (
+    <span className="cc-swatches" aria-hidden>
+      {[b.colors.accent, b.colors.accent2, b.colors.accent3].map((c, i) => <span key={i} style={{ background: c }} />)}
+    </span>
+  );
+}
+
+function CourseCard({ c }: { c: CardData }) {
+  useBrandFonts(c.brand);
+  const [head, ...rest] = c.title.split(', ');
+  return (
+    <a className="cc reveal" href={c.href} style={{ ['--cc-accent' as any]: c.brand.colors.accent }}>
+      <div className="cc-top">
+        {c.logo ? <span className="cc-logo" dangerouslySetInnerHTML={{ __html: c.logo }} /> : <Swatches b={c.brand} />}
+        <span className="cc-kind">{c.community ? 'Community · ' : ''}{c.kind === 'repo' ? 'Codebase' : 'Concept'}</span>
+      </div>
+      <div className="cc-title" style={{ fontFamily: `'${c.brand.fonts.display}', var(--font-display)` }}>
+        {head}{rest.length > 0 && <>, <span style={{ color: c.brand.colors.accent }}>{rest.join(', ')}</span></>}
+      </div>
+      <p className="cc-tag">{c.tagline}</p>
+      <div className="cc-foot">
+        <span>{c.modules} modules{c.minutes ? ` · ~${Math.round((c.minutes / 60) * 10) / 10} h` : ''}</span>
+        {c.done !== undefined && c.done > 0 && <span>{c.done}/{c.modules} done</span>}
+        <span className="cc-go">→</span>
+      </div>
+    </a>
+  );
+}
+
+function CommunityCourses() {
+  const list = useQuery(anyApi.courses.listPublic, {}) as any[] | undefined;
+  if (list === undefined) return <p className="muted small">Loading community courses…</p>;
+  if (!list.length) return <p className="muted">No community courses yet. <a href="#/create">Create the first one.</a></p>;
+  return (
+    <div className="cc-grid">
+      {list.map((x) => (
+        <CourseCard
+          key={x.slug}
+          c={{
+            href: `#/g/${x.slug}`,
+            title: x.title ?? x.meta?.title ?? x.topic,
+            tagline: x.tagline ?? x.meta?.tagline ?? '',
+            brand: sanitizeBrand(x.brand ?? x.meta?.brand),
+            kind: x.kind ?? 'concept',
+            modules: x.moduleCount ?? x.modules ?? 0,
+            community: true,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function PlatformHome() {
+  const { all } = useProgress();
+  const client = useConvexClient();
+  const cards: CardData[] = builtinCourses.map((b) => {
+    const c = fromBuiltin(b);
+    return {
+      href: `#${c.base}`,
+      title: c.title,
+      tagline: c.tagline,
+      brand: c.brand,
+      kind: c.kind,
+      modules: c.modules.length,
+      minutes: c.modules.reduce((s, m) => s + m.minutes, 0),
+      done: c.modules.filter((m) => all.done[`${c.id}:${m.id}`]).length,
+      logo: b.brand.logoSvg,
+    };
+  });
+  return (
+    <div className="home platform-home">
+      <section className="hero hero-platform">
+        <div className="hero-shader" aria-hidden><BrandShader brand={DEEPLY_BRAND} role="hero" /></div>
+        <div className="hero-inner">
+          <div className="eyebrow">Open-source deep dives</div>
+          <h1>Learn anything, <span className="hl">deeply.</span></h1>
+          <p className="lede">
+            Courses that open up how things really work: animated diagrams of every moving part, the real source code
+            behind them, challenges that test you, and a Simplify button for whenever the explanation gets too dense.
+          </p>
+          <div className="hero-cta">
+            <a className="btn primary" href="#/create">Create a course →</a>
+            <a className="btn ghost" href="#catalog" onClick={(e) => { e.preventDefault(); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }); }}>Browse courses</a>
+          </div>
+        </div>
+      </section>
+
+      <section className="platform-section" id="catalog">
+        <div className="ps-head"><h2>Courses</h2><p className="muted">Written and checked by hand.</p></div>
+        <div className="cc-grid">{cards.map((c) => <CourseCard key={c.href} c={c} />)}</div>
+      </section>
+
+      {client && (
+        <section className="platform-section">
+          <div className="ps-head"><h2>From the community</h2><p className="muted">Generated on Deeply from a topic or a GitHub repo.</p></div>
+          <ErrorBoundary fallback={<p className="muted">Community courses aren't available right now.</p>}>
+            <CommunityCourses />
+          </ErrorBoundary>
+        </section>
+      )}
+
+      <section className="platform-section how">
+        <div className="ps-head"><h2>How a course gets made</h2></div>
+        <ol className="how-steps">
+          <li><b>Name a topic or a repo.</b><span>A concept like CRDTs, or a GitHub repository. Brand colors and type come from the project's own guidelines when it has them.</span></li>
+          <li><b>It's researched and written module by module.</b><span>Each module gets diagrams you can step through, deep dives, and quick checks. For repos, code excerpts are checked against the real files.</span></li>
+          <li><b>You learn it, at your level.</b><span>Simplify any block when it gets too dense, copy any block as a prompt, and prove it in the challenges.</span></li>
+        </ol>
+      </section>
+    </div>
+  );
+}

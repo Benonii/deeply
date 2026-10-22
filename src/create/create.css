@@ -1,0 +1,82 @@
+/* Create a course: form, live progress, my courses. Uses engine tokens only. */
+.cr { padding: 0 clamp(20px, 5vw, 72px) 96px; max-width: 980px; display: grid; gap: 32px; }
+.cr-head { padding-top: 64px; }
+.cr-head h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 800; letter-spacing: -0.03em; text-wrap: balance; }
+.cr-note { color: var(--fg2); }
+.cr a { color: var(--accent); }
+
+/* form */
+.cr-form { display: grid; gap: 18px; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg2); }
+.cr-seg { display: inline-flex; justify-self: start; border: 1px solid var(--line2); border-radius: 999px; padding: 3px; gap: 2px; }
+.cr-seg button { border: none; background: none; color: var(--muted); padding: 7px 16px; border-radius: 999px; font-size: 14px; font-weight: 500; transition: background .15s, color .15s; }
+.cr-seg button.on { background: var(--accent); color: var(--on-accent); }
+.cr-field { display: grid; gap: 6px; }
+.cr-field > span { font-size: 13px; color: var(--fg2); font-weight: 500; }
+.cr-field input { background: var(--bg); border: 1px solid var(--line2); border-radius: 10px; padding: 12px 14px; font-size: 16px; color: var(--fg); min-width: 0; transition: border-color .15s; }
+.cr-field input:focus { outline: none; border-color: var(--accent); }
+.cr-examples { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.cr-chip { border: 1px solid var(--line2); background: var(--panel); color: var(--fg2); border-radius: 999px; padding: 4px 11px; font-size: 12.5px; font-family: var(--font-mono); }
+.cr-chip:hover { border-color: var(--accent); color: var(--fg); }
+.cr-vis { border: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--fg2); }
+.cr-vis legend { font-size: 13px; font-weight: 500; margin-bottom: 6px; padding: 0; color: var(--fg2); width: 100%; }
+.cr-vis label { display: flex; gap: 8px; align-items: center; }
+.cr-vis input { accent-color: var(--accent); }
+.cr-submit { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+.cr-submit .btn:disabled { opacity: .6; cursor: progress; }
+.cr-submit .muted { max-width: 52ch; }
+.cr-problem { margin: 0; padding: 12px 14px; border-radius: 10px; border: 1px solid color-mix(in oklab, var(--accent2) 45%, var(--line)); color: var(--fg); font-size: 14.5px; }
+
+/* progress */
+.cr-progress { display: grid; gap: 22px; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg2); }
+.cr-progress-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.cr-progress-top > div:first-child { min-width: 0; }
+.cr-progress h2 { font-size: clamp(26px, 3.4vw, 38px); font-weight: 700; letter-spacing: -0.02em; margin: 6px 0 4px; text-wrap: balance; }
+.cr-progress p { margin: 0; }
+.cr-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.cr-actions .btn.primary { color: var(--on-accent); }
+.cr-status { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.cr-status.s-ready { color: var(--ok); }
+.cr-status.s-failed { color: var(--accent2); }
+.cr-spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid color-mix(in oklab, var(--accent) 30%, transparent); border-top-color: var(--accent); animation: cr-spin .8s linear infinite; }
+@keyframes cr-spin { to { transform: rotate(360deg); } }
+
+.cr-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.cr-steps li { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; color: var(--muted); margin: 0; }
+.cr-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line2); flex: none; }
+.cr-steps .st-done { color: var(--fg2); } .cr-steps .st-done .cr-dot { background: var(--ok); }
+.cr-steps .st-active { color: var(--fg); border-color: var(--line2); } .cr-steps .st-active .cr-dot { background: var(--accent); animation: cr-pulse 1.4s ease infinite; }
+.cr-steps .st-failed { color: var(--accent2); } .cr-steps .st-failed .cr-dot { background: var(--accent2); }
+@keyframes cr-pulse { 50% { opacity: .35; } }
+
+.cr-mods { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cr-mods li { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; padding: 12px 8px; border-bottom: 1px solid var(--line); margin: 0; }
+.cr-mods li:last-child { border-bottom: none; }
+.cr-mod-n { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--line2); }
+.cr-mods .m-ready .cr-mod-n { color: var(--ok); }
+.cr-mods .m-writing .cr-mod-n { color: var(--accent); }
+.cr-mods .m-failed .cr-mod-n { color: var(--accent2); }
+.cr-mod-body { display: grid; gap: 2px; min-width: 0; }
+.cr-mod-title { font-weight: 600; color: var(--fg); }
+.cr-mod-state { font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
+.cr-mods .m-writing .cr-mod-state { color: var(--accent); }
+
+.cr-log summary { cursor: pointer; font-size: 13px; color: var(--fg2); font-weight: 500; }
+.cr-log ul { list-style: none; margin: 10px 0 0; padding: 0; font-family: var(--font-mono); font-size: 12.5px; max-height: 260px; overflow-y: auto; display: grid; gap: 4px; }
+.cr-log li { margin: 0; color: var(--fg2); display: grid; grid-template-columns: 76px 1fr; gap: 10px; overflow-wrap: anywhere; }
+.cr-log time { color: var(--muted); }
+.cr-log .lv-warn { color: var(--accent); } .cr-log .lv-error { color: var(--accent2); }
+
+/* my courses */
+.cr-mine h3 { font-size: 20px; margin-bottom: 10px; }
+.cr-mine ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.cr-mine li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; margin: 0; }
+.cr-mine li.on { border-color: var(--line2); background: var(--panel); }
+.cr-mine li > a:first-child { display: grid; gap: 2px; text-decoration: none; color: var(--fg); min-width: 0; }
+.cr-mine-title { font-weight: 600; }
+
+@media (max-width: 600px) {
+  .cr-form, .cr-progress { padding: 18px; }
+  .cr-mods li { grid-template-columns: 30px 1fr; }
+  .cr-mod-state { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) { .cr-spin, .cr-steps .st-active .cr-dot { animation: none; } }

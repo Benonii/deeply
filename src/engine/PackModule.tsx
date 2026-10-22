@@ -1,0 +1,71 @@
+import React from 'react';
+import type { Block, ModulePack } from '../../convex/lib/courseSchema';
+import { Callout, Check, Code, Compare, Copyable, Flow, KeyTerms, Section, type FlowNode } from './kit';
+import { Inline } from './md';
+
+/** Renders a JSON module pack with the same components as hand-built modules. */
+export function PackModule({ pack }: { pack: ModulePack }) {
+  return (
+    <>
+      {pack.sections.map((s) => (
+        <Section key={s.id} id={s.id} title={s.title}>
+          {s.blocks.map((b, i) => <PackBlock key={i} b={b} />)}
+        </Section>
+      ))}
+    </>
+  );
+}
+
+const NODE_W = 170;
+const NODE_H = 64;
+const ROW_GAP = 132;
+
+/** Grid placement (col/row) → absolute coordinates on the 1000-wide canvas. */
+export function layoutFlow(nodes: (Omit<FlowNode, 'x' | 'y'> & { x?: number; y?: number; col?: number; row?: number })[]) {
+  const gridded = nodes.filter((n) => n.x === undefined || n.y === undefined);
+  const cols = gridded.map((n) => n.col ?? 0);
+  const minCol = Math.min(...cols, 0), maxCol = Math.max(...cols, 0);
+  const span = maxCol - minCol;
+  const placed: FlowNode[] = nodes.map((n) => {
+    if (n.x !== undefined && n.y !== undefined) return n as FlowNode;
+    const w = n.w ?? NODE_W;
+    const col = n.col ?? 0, row = n.row ?? 0;
+    const x = span === 0 ? (1000 - w) / 2 : 24 + ((col - minCol) / span) * (1000 - 48 - w);
+    return { ...n, w, h: n.h ?? NODE_H, x: Math.round(x), y: 28 + row * ROW_GAP } as FlowNode;
+  });
+  const bottom = Math.max(...placed.map((n) => n.y + (n.h ?? NODE_H)));
+  return { nodes: placed, height: Math.max(240, bottom + 36) };
+}
+
+export function PackBlock({ b }: { b: Block }) {
+  switch (b.type) {
+    case 'p':
+      return <p><Inline text={b.text} /></p>;
+    case 'h3':
+      return <h3><Inline text={b.text} /></h3>;
+    case 'list': {
+      const items = b.items.map((t, i) => <li key={i}><Inline text={t} /></li>);
+      return b.ordered ? <ol>{items}</ol> : <ul>{items}</ul>;
+    }
+    case 'callout':
+      return <Callout kind={b.kind} title={b.title}><p><Inline text={b.text} /></p></Callout>;
+    case 'keyterms':
+      return <KeyTerms terms={b.terms.map((t) => ({ term: t.term, def: <Inline text={t.def} /> }))} />;
+    case 'compare':
+      return <Compare caption={b.caption} head={b.head} rows={b.rows.map((r) => r.map((c, j) => <Inline key={j} text={c} />))} />;
+    case 'code':
+      return <Code title={b.title} lang={b.lang} code={b.code} note={b.note ? <Inline text={b.note} /> : undefined} />;
+    case 'flow': {
+      const { nodes, height } = layoutFlow(b.nodes);
+      return <Flow title={b.title} nodes={nodes} edges={b.edges} steps={b.steps} height={b.height ?? height} caption={b.caption} />;
+    }
+    case 'check':
+      return <Check q={b.q} options={b.options} answer={b.answer} explain={b.explain} />;
+    default:
+      return (
+        <Copyable label="Unsupported block">
+          <p className="muted">This block type isn't supported by this version of the app.</p>
+        </Copyable>
+      );
+  }
+}
