@@ -24,8 +24,8 @@ export type CodeRef = {
   code: string; // verbatim excerpt; elisions marked with a line containing only `// …`
 };
 
-export function refUrl(r: CodeRef) {
-  const lines = `#L${r.startLine}-L${r.endLine}`;
-  if (r.repo in SHAS) return `https://github.com/get-convex/${r.repo}/blob/${r.sha ?? SHAS[r.repo as Repo]}/${r.path}${lines}`;
-  return `https://github.com/${r.repo}/blob/${r.sha ?? 'HEAD'}/${r.path}${lines}`;
+export function refUrl(codeRef: CodeRef) {
+  const lines = `#L${codeRef.startLine}-L${codeRef.endLine}`;
+  if (codeRef.repo in SHAS) return `https://github.com/get-convex/${codeRef.repo}/blob/${codeRef.sha ?? SHAS[codeRef.repo as Repo]}/${codeRef.path}${lines}`;
+  return `https://github.com/${codeRef.repo}/blob/${codeRef.sha ?? 'HEAD'}/${codeRef.path}${lines}`;
 }

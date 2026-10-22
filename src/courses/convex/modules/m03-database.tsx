@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, C, Copyable } from '../../../engine/kit';
+import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, InlineCode, Copyable } from '../../../engine/kit';
 
 /* ---------------- Interactive index-range visualiser ---------------- */
 
@@ -76,7 +76,7 @@ function IndexVisualizer() {
       </div>
       <pre className="ixviz-code"><code>{m.code}</code></pre>
       <div className="ixviz-meta">
-        Index <C>{m.index}</C>{m.index === 'by_author_status' ? <> on <C>["author","status",_creationTime]</C></> : <> on <C>[_creationTime]</C></>} ·
+        Index <InlineCode>{m.index}</InlineCode>{m.index === 'by_author_status' ? <> on <InlineCode>["author","status",_creationTime]</InlineCode></> : <> on <InlineCode>[_creationTime]</InlineCode></>} ·
         scanned <strong style={{ color: 'var(--yellow)' }}>{scanned}</strong> · returned <strong style={{ color: 'var(--red)' }}>{returned}</strong> · wasted reads <strong>{scanned - returned}</strong>
       </div>
       <div className="ixviz-rows" role="list">
@@ -104,9 +104,9 @@ function IndexVisualizer() {
         })}
       </div>
       <p className="ixviz-foot">
-        Key observation: the index range is contiguous in sort order. <C>.filter()</C> never shrinks the
-        range. It only drops rows after they have been read. Moving a condition from <C>.filter</C> into
-        <C> withIndex</C> shrinks both the read set (fewer invalidations) and the cost.
+        Key observation: the index range is contiguous in sort order. <InlineCode>.filter()</InlineCode> never shrinks the
+        range. It only drops rows after they have been read. Moving a condition from <InlineCode>.filter</InlineCode> into
+        <InlineCode> withIndex</InlineCode> shrinks both the read set (fewer invalidations) and the cost.
       </p>
     </Copyable>
   );
@@ -125,18 +125,18 @@ const Component = () => (
       </p>
       <KeyTerms
         terms={[
-          { term: '_id', def: <>Every document's primary key, type <C>{'Id<"table">'}</C>. A string that encodes the table and an internal ID, plus a checksum. It is globally unique and stable for the document's life.</> },
+          { term: '_id', def: <>Every document's primary key, type <InlineCode>{'Id<"table">'}</InlineCode>. A string that encodes the table and an internal ID, plus a checksum. It is globally unique and stable for the document's life.</> },
           { term: '_creationTime', def: 'Milliseconds since epoch (a float) assigned at insert. Immutable. Implicitly the last column of every index, which gives every index a deterministic total order.' },
           { term: 'Table', def: 'Created lazily on first insert, or declared in schema.ts. Has a table number internally; IDs are only valid for their own table.' },
           { term: 'Index', def: 'An ordered list of field values (a B-tree-like sorted key space) maintained transactionally with each write.' },
-          { term: 'System tables', def: <>Tables prefixed with <C>_</C> (e.g. <C>_storage</C>, <C>_scheduled_functions</C>) managed by Convex and readable via <C>ctx.db.system</C>.</> },
+          { term: 'System tables', def: <>Tables prefixed with <InlineCode>_</InlineCode> (e.g. <InlineCode>_storage</InlineCode>, <InlineCode>_scheduled_functions</InlineCode>) managed by Convex and readable via <InlineCode>ctx.db.system</InlineCode>.</> },
         ]}
       />
       <Callout kind="deep" title="How IDs work">
         An ID isn't a random UUID you can point anywhere. It encodes which table it belongs to (by internal table
-        number) plus the per-document internal ID, with a checksum. That's why <C>ctx.db.get(id)</C> needs no
-        table name, and why <C>v.id("users")</C> can reject an ID from <C>"posts"</C> at the validator level. Use
-        <C> ctx.db.normalizeId("users", str)</C> to safely turn an untrusted string into an ID (or null).
+        number) plus the per-document internal ID, with a checksum. That's why <InlineCode>ctx.db.get(id)</InlineCode> needs no
+        table name, and why <InlineCode>v.id("users")</InlineCode> can reject an ID from <InlineCode>"posts"</InlineCode> at the validator level. Use
+        <InlineCode> ctx.db.normalizeId("users", str)</InlineCode> to safely turn an untrusted string into an ID (or null).
       </Callout>
     </Section>
 
@@ -176,33 +176,33 @@ export default defineSchema({
         caption="The validator vocabulary"
         head={['Validator', 'TS type', 'Notes']}
         rows={[
-          [<C>v.string() / v.number() / v.boolean()</C>, 'string / number / boolean', 'number is float64'],
-          [<C>v.int64()</C>, 'bigint', 'true 64-bit ints'],
-          [<C>v.null()</C>, 'null', 'distinct from undefined'],
-          [<C>v.id("t")</C>, 'Id<"t">', 'checks table membership'],
-          [<C>v.array(x) / v.object({'{…}'}) / v.record(k, x)</C>, 'T[] / {...} / Record', 'arrays and objects have size limits'],
-          [<C>v.union(...) / v.literal(x)</C>, 'A | B / literal', 'discriminated unions work great'],
-          [<C>v.optional(x)</C>, 'x | undefined (field may be absent)', 'only meaningful as an object field'],
-          [<C>v.bytes()</C>, 'ArrayBuffer', 'small binary; use file storage for big'],
-          [<C>v.any()</C>, 'any', 'escape hatch'],
+          [<InlineCode>v.string() / v.number() / v.boolean()</InlineCode>, 'string / number / boolean', 'number is float64'],
+          [<InlineCode>v.int64()</InlineCode>, 'bigint', 'true 64-bit ints'],
+          [<InlineCode>v.null()</InlineCode>, 'null', 'distinct from undefined'],
+          [<InlineCode>v.id("t")</InlineCode>, 'Id<"t">', 'checks table membership'],
+          [<InlineCode>v.array(x) / v.object({'{…}'}) / v.record(k, x)</InlineCode>, 'T[] / {...} / Record', 'arrays and objects have size limits'],
+          [<InlineCode>v.union(...) / v.literal(x)</InlineCode>, 'A | B / literal', 'discriminated unions work great'],
+          [<InlineCode>v.optional(x)</InlineCode>, 'x | undefined (field may be absent)', 'only meaningful as an object field'],
+          [<InlineCode>v.bytes()</InlineCode>, 'ArrayBuffer', 'small binary; use file storage for big'],
+          [<InlineCode>v.any()</InlineCode>, 'any', 'escape hatch'],
         ]}
       />
       <Callout kind="insight" title="Schema is optional, then enforced">
         Without a schema, Convex infers one from your data (visible in the dashboard). Once you define one,
-        <C> defineSchema</C> has <C>schemaValidation: true</C> by default: every write is validated, <em>and</em>
+        <InlineCode> defineSchema</InlineCode> has <InlineCode>schemaValidation: true</InlineCode> by default: every write is validated, <em>and</em>
         every push is checked against the existing data. A push that would make existing documents invalid is
         rejected, so the schema is a true invariant.
       </Callout>
       <Callout kind="warn" title="Adding a required field to a populated table">
-        Push 1: add it as <C>v.optional(...)</C>. Run a migration to backfill it in batches. Push 2: make it
+        Push 1: add it as <InlineCode>v.optional(...)</InlineCode>. Run a migration to backfill it in batches. Push 2: make it
         required. The second push validates every document and succeeds only once the backfill is complete.
       </Callout>
     </Section>
 
     <Section id="indexes" title="Indexes: the only way to make a query fast">
       <p>
-        Convex has <strong>no query planner</strong>. A query either names an index with <C>withIndex</C> or
-        scans the default <C>by_creation_time</C> order. This is a deliberate choice: performance is visible in
+        Convex has <strong>no query planner</strong>. A query either names an index with <InlineCode>withIndex</InlineCode> or
+        scans the default <InlineCode>by_creation_time</InlineCode> order. This is a deliberate choice: performance is visible in
         the code and never changes because a planner changed its mind under load.
       </p>
       <Diagram
@@ -234,14 +234,14 @@ export default defineSchema({
         </g>
       </Diagram>
       <Callout kind="rule" title="The withIndex grammar">
-        Inside <C>withIndex(name, q =&gt; …)</C> you may write: zero or more <C>.eq</C> on the index fields
-        <em> in order</em>, then optionally one lower bound (<C>.gt</C>/<C>.gte</C>) and/or one upper bound
-        (<C>.lt</C>/<C>.lte</C>) on the <em>next</em> field. That always describes one contiguous range. You
+        Inside <InlineCode>withIndex(name, q =&gt; …)</InlineCode> you may write: zero or more <InlineCode>.eq</InlineCode> on the index fields
+        <em> in order</em>, then optionally one lower bound (<InlineCode>.gt</InlineCode>/<InlineCode>.gte</InlineCode>) and/or one upper bound
+        (<InlineCode>.lt</InlineCode>/<InlineCode>.lte</InlineCode>) on the <em>next</em> field. That always describes one contiguous range. You
         cannot skip a field or put equality after a range.
       </Callout>
       <IndexVisualizer />
       <Check
-        q="Index by_author_status = ['author','status']. Which withIndex expression is INVALID?"
+        question="Index by_author_status = ['author','status']. Which withIndex expression is INVALID?"
         options={[
           'q.eq("author", a)',
           'q.eq("author", a).eq("status", "live")',
@@ -252,10 +252,10 @@ export default defineSchema({
         explain="You must constrain index fields as a prefix, in order. Skipping 'author' to constrain 'status' doesn't describe a contiguous range. Define an index starting with 'status' if you need that access path."
       />
       <Callout kind="deep" title="Why the read set is a range, not a list of documents">
-        A query that read <C>by_channel = X</C> must be invalidated when a <em>new</em> message is inserted into
+        A query that read <InlineCode>by_channel = X</InlineCode> must be invalidated when a <em>new</em> message is inserted into
         channel X, and that document didn't exist when the query ran. So Convex records the index <em>key range</em>
         scanned, not the doc IDs it returned. Any later write whose index key falls in the range is a conflict
-        (for mutations) or an invalidation (for subscriptions). A wide scan with <C>.filter</C> records a wide
+        (for mutations) or an invalidation (for subscriptions). A wide scan with <InlineCode>.filter</InlineCode> records a wide
         range, so unrelated writes invalidate it too.
       </Callout>
     </Section>
@@ -297,15 +297,15 @@ await ctx.db.delete(id);
         caption="Terminal operations"
         head={['Method', 'Returns', 'Reads', 'Use when']}
         rows={[
-          [<C>.collect()</C>, 'all in range', 'whole range', 'range is known to be small'],
-          [<C>.take(n)</C>, 'first n', '≈ n (+ filtered-out)', 'bounded lists'],
-          [<C>.first()</C>, 'one or null', 'until first match', 'latest / any'],
-          [<C>.unique()</C>, 'one or null; throws on >1', 'up to 2', 'lookups by unique key'],
-          [<C>.paginate(opts)</C>, '{ page, isDone, continueCursor }', 'one page', 'infinite lists'],
+          [<InlineCode>.collect()</InlineCode>, 'all in range', 'whole range', 'range is known to be small'],
+          [<InlineCode>.take(n)</InlineCode>, 'first n', '≈ n (+ filtered-out)', 'bounded lists'],
+          [<InlineCode>.first()</InlineCode>, 'one or null', 'until first match', 'latest / any'],
+          [<InlineCode>.unique()</InlineCode>, 'one or null; throws on >1', 'up to 2', 'lookups by unique key'],
+          [<InlineCode>.paginate(opts)</InlineCode>, '{ page, isDone, continueCursor }', 'one page', 'infinite lists'],
         ]}
       />
       <Check
-        q="Which query has the SMALLEST read set?"
+        question="Which query has the SMALLEST read set?"
         options={[
           'query("posts").filter(q => q.eq(q.field("author"), id)).first()',
           'query("posts").withIndex("by_author_status", q => q.eq("author", id)).first()',
@@ -319,7 +319,7 @@ await ctx.db.delete(id);
 
     <Section id="pagination" title="Pagination: cursors and reactive page boundaries">
       <p>
-        <C>.paginate({'{ numItems, cursor }'})</C> returns a page plus an opaque <C>continueCursor</C>
+        <InlineCode>.paginate({'{ numItems, cursor }'})</InlineCode> returns a page plus an opaque <InlineCode>continueCursor</InlineCode>
         encoding a position in the index. The interesting part is how this stays <em>reactive</em> without
         pages shifting as data is inserted.
       </p>
@@ -373,8 +373,8 @@ const { results, status, loadMore } = usePaginatedQuery(
 
     <Section id="relations" title="Modeling relations">
       <p>
-        There is no <C>JOIN</C>. You join in code, which is fast because function and data are co-located and
-        every <C>ctx.db.get</C> is a cheap indexed point read inside the same snapshot.
+        There is no <InlineCode>JOIN</InlineCode>. You join in code, which is fast because function and data are co-located and
+        every <InlineCode>ctx.db.get</InlineCode> is a cheap indexed point read inside the same snapshot.
       </p>
       <Code
         title="One-to-many and many-to-many joins in code"
@@ -410,8 +410,8 @@ const likers = await Promise.all(likes.map((l) => ctx.db.get(l.user)));
         ]}
       />
       <Callout kind="warn" title="Arrays inside documents are not indexed">
-        You can't <C>withIndex</C> on "array contains X". If you need to look up by tag, use a
-        <C> postTags</C> join table indexed by tag (or a search index's filter fields).
+        You can't <InlineCode>withIndex</InlineCode> on "array contains X". If you need to look up by tag, use a
+        <InlineCode> postTags</InlineCode> join table indexed by tag (or a search index's filter fields).
       </Callout>
     </Section>
 
@@ -440,7 +440,7 @@ const likers = await Promise.all(likes.map((l) => ctx.db.get(l.user)));
         ]}
       />
       <Check
-        q="A query reads by_status eq('open'). A mutation changes a task from 'open' to 'closed'. Is the query invalidated?"
+        question="A query reads by_status eq('open'). A mutation changes a task from 'open' to 'closed'. Is the query invalidated?"
         options={['No — the task is no longer open', 'Yes — the delete of the old index key ("open", …) falls inside the read range', 'Only if the query used .collect()', 'Only after a timeout']}
         answer={1}
         explain="Index maintenance removes the old key and inserts the new one. The removal of ('open', creationTime, id) intersects the query's range, so the query re-runs and the task correctly disappears from the list."
@@ -457,12 +457,12 @@ const likers = await Promise.all(likes.map((l) => ctx.db.get(l.user)));
       </p>
       <Callout kind="rule" title="Index hygiene">
         Every index costs write amplification: each insert or patch of an indexed field updates every index on
-        the table. Prefer one compound index such as <C>["author","status"]</C> that serves both
-        <C> eq(author)</C> and <C>eq(author).eq(status)</C> over two separate ones. A prefix of a compound index
+        the table. Prefer one compound index such as <InlineCode>["author","status"]</InlineCode> that serves both
+        <InlineCode> eq(author)</InlineCode> and <InlineCode>eq(author).eq(status)</InlineCode> over two separate ones. A prefix of a compound index
         is itself usable.
       </Callout>
       <Check
-        q="You have index by_author_status ['author','status']. Do you also need by_author ['author']?"
+        question="You have index by_author_status ['author','status']. Do you also need by_author ['author']?"
         options={['Yes, a compound index can only be used with all fields', 'No — eq("author", x) uses a prefix of by_author_status', 'Only for descending order', 'Only if author is optional']}
         answer={1}
         explain="Any prefix of a compound index is a valid range. by_author would just be redundant write amplification (though it orders by _creationTime directly after author, which can matter for 'newest by author regardless of status')."

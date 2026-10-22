@@ -1,11 +1,11 @@
-import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Check, C } from '../../../engine/kit';
+import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Check, InlineCode } from '../../../engine/kit';
 
 const Component = () => (
   <>
     <Section id="four-kinds" title="The four kinds of functions">
       <p>
         Every piece of backend logic in Convex is one of four function types. The type is a <em>contract</em>
-        with the runtime. It decides which capabilities <C>ctx</C> gives you, whether the function is
+        with the runtime. It decides which capabilities <InlineCode>ctx</InlineCode> gives you, whether the function is
         transactional, whether it can be cached or subscribed to, and whether it may touch the network.
       </p>
       <Compare
@@ -33,7 +33,7 @@ const Component = () => (
           { term: 'QueryCtx', def: <>{'{ db: DatabaseReader, auth, storage (reader: getUrl), runQuery? }'} — no writes, no scheduler.</> },
           { term: 'MutationCtx', def: <>{'{ db: DatabaseWriter, auth, storage (getUrl, delete, generateUploadUrl), scheduler, runQuery, runMutation }'}</> },
           { term: 'ActionCtx', def: <>{'{ runQuery, runMutation, runAction, scheduler, auth, storage (store, get, getUrl, delete), vectorSearch }'} — no ctx.db.</> },
-          { term: 'Function reference', def: <>A typed pointer like <C>api.messages.send</C> or <C>internal.billing.charge</C>. At runtime it is just the path string "messages:send".</> },
+          { term: 'Function reference', def: <>A typed pointer like <InlineCode>api.messages.send</InlineCode> or <InlineCode>internal.billing.charge</InlineCode>. At runtime it is just the path string "messages:send".</> },
         ]}
       />
     </Section>
@@ -78,16 +78,16 @@ export const purgeDone = internalMutation({
 `}
       />
       <Callout kind="warn" title="Public functions are a public API">
-        Anything exported as <C>query</C>, <C>mutation</C>, or <C>action</C> can be called by anyone who knows
+        Anything exported as <InlineCode>query</InlineCode>, <InlineCode>mutation</InlineCode>, or <InlineCode>action</InlineCode> can be called by anyone who knows
         your deployment URL, with any arguments that pass the validator. Always validate args (TS types alone
-        are erased at runtime) and check <C>ctx.auth</C> inside the handler. Mark helpers <C>internal*</C> so
+        are erased at runtime) and check <InlineCode>ctx.auth</InlineCode> inside the handler. Mark helpers <InlineCode>internal*</InlineCode> so
         they aren't exposed at all.
       </Callout>
       <Callout kind="deep" title="Validators do double duty">
-        <C>v.object(...)</C> validators exist at runtime (they are serialized into the function's metadata on
-        push, which is how the dashboard can show argument forms) and at compile time (via <C>Infer</C>). Convex
-        values are a JSON superset: they add <C>Id</C>, <C>bigint</C> (v.int64), <C>ArrayBuffer</C> (v.bytes),
-        and distinguish <C>undefined</C> (field missing) from <C>null</C>.
+        <InlineCode>v.object(...)</InlineCode> validators exist at runtime (they are serialized into the function's metadata on
+        push, which is how the dashboard can show argument forms) and at compile time (via <InlineCode>Infer</InlineCode>). Convex
+        values are a JSON superset: they add <InlineCode>Id</InlineCode>, <InlineCode>bigint</InlineCode> (v.int64), <InlineCode>ArrayBuffer</InlineCode> (v.bytes),
+        and distinguish <InlineCode>undefined</InlineCode> (field missing) from <InlineCode>null</InlineCode>.
       </Callout>
     </Section>
 
@@ -98,10 +98,10 @@ export const purgeDone = internalMutation({
         runtime rather than trusting you:
       </p>
       <ul>
-        <li><C>Math.random()</C> is seeded per function execution, so retries produce the same sequence.</li>
-        <li><C>Date.now()</C> / <C>new Date()</C> is frozen at the start of the function execution. It doesn't advance while your code runs.</li>
-        <li><C>fetch</C>, timers like <C>setTimeout</C>/<C>setInterval</C> (for side effects), and network or filesystem access are unavailable in queries and mutations.</li>
-        <li>Only <C>ctx.db</C> reads count as dependencies. There are no hidden inputs.</li>
+        <li><InlineCode>Math.random()</InlineCode> is seeded per function execution, so retries produce the same sequence.</li>
+        <li><InlineCode>Date.now()</InlineCode> / <InlineCode>new Date()</InlineCode> is frozen at the start of the function execution. It doesn't advance while your code runs.</li>
+        <li><InlineCode>fetch</InlineCode>, timers like <InlineCode>setTimeout</InlineCode>/<InlineCode>setInterval</InlineCode> (for side effects), and network or filesystem access are unavailable in queries and mutations.</li>
+        <li>Only <InlineCode>ctx.db</InlineCode> reads count as dependencies. There are no hidden inputs.</li>
       </ul>
       <Flow
         title="Why determinism unlocks caching, retries and subscriptions"
@@ -126,13 +126,13 @@ export const purgeDone = internalMutation({
         ]}
       />
       <Callout kind="warn" title="The classic bug: Date.now() in a query">
-        <C>{'.filter(q => q.gt(q.field("expiresAt"), Date.now()))'}</C> looks fine but goes stale. The query
+        <InlineCode>{'.filter(q => q.gt(q.field("expiresAt"), Date.now()))'}</InlineCode> looks fine but goes stale. The query
         only re-runs when data in its read set changes, not when time passes. Fixes: pass a coarse
-        <C> now</C> argument from the client (rounded to the minute so caching still works), or keep an
-        <C> isExpired</C> flag that a scheduled function flips at the right time.
+        <InlineCode> now</InlineCode> argument from the client (rounded to the minute so caching still works), or keep an
+        <InlineCode> isExpired</InlineCode> flag that a scheduled function flips at the right time.
       </Callout>
       <Check
-        q="A query uses Math.random() to pick a 'featured' item. What do subscribers see?"
+        question="A query uses Math.random() to pick a 'featured' item. What do subscribers see?"
         options={[
           'A different random item every second',
           'A stable item that only changes when the query is invalidated by a write (randomness is seeded per execution)',
@@ -148,11 +148,11 @@ export const purgeDone = internalMutation({
       <p>
         By default every function runs in the <strong>Convex runtime</strong>: V8 isolates embedded in the Rust
         backend (similar in spirit to Cloudflare Workers). Isolates start in milliseconds, share no state between
-        requests that you can rely on, and offer web-standard APIs (<C>fetch</C> in actions, <C>TextEncoder</C>,
-        <C> crypto.subtle</C>, <C>URL</C>, streams) but not Node built-ins.
+        requests that you can rely on, and offer web-standard APIs (<InlineCode>fetch</InlineCode> in actions, <InlineCode>TextEncoder</InlineCode>,
+        <InlineCode> crypto.subtle</InlineCode>, <InlineCode>URL</InlineCode>, streams) but not Node built-ins.
       </p>
       <p>
-        Put <C>"use node";</C> at the top of a file and its <em>actions</em> run in a real Node.js environment
+        Put <InlineCode>"use node";</InlineCode> at the top of a file and its <em>actions</em> run in a real Node.js environment
         instead (on separate infrastructure, typically AWS Lambda in Convex Cloud). That gives you npm packages
         that need Node APIs (fs, native crypto, some SDKs). The costs are slower cold starts, and the file may
         contain only actions, because queries and mutations must be in the V8 runtime.
@@ -178,7 +178,7 @@ export const summarize = action({
   },
 });
 `}
-        note={<>Each <C>runQuery</C>/<C>runMutation</C> is a separate transaction. Between #1 and #2 the doc can change. If that matters, re-check it inside <C>saveSummary</C>.</>}
+        note={<>Each <InlineCode>runQuery</InlineCode>/<InlineCode>runMutation</InlineCode> is a separate transaction. Between #1 and #2 the doc can change. If that matters, re-check it inside <InlineCode>saveSummary</InlineCode>.</>}
       />
       <Callout kind="deep" title="Isolate reuse and globals">
         Isolates may be reused between invocations for speed, so module-level state <em>can</em> survive
@@ -189,12 +189,12 @@ export const summarize = action({
 
     <Section id="actions" title="Actions: escaping the transaction">
       <p>
-        Actions exist because the outside world isn't transactional. An action can await <C>fetch</C> for
+        Actions exist because the outside world isn't transactional. An action can await <InlineCode>fetch</InlineCode> for
         seconds or minutes, call any number of queries and mutations, and schedule more work. The guarantees
         it gives up:
       </p>
       <ul>
-        <li><strong>No atomicity across steps.</strong> If it crashes after <C>runMutation</C> A but before B, A stays committed.</li>
+        <li><strong>No atomicity across steps.</strong> If it crashes after <InlineCode>runMutation</InlineCode> A but before B, A stays committed.</li>
         <li><strong>At-most-once.</strong> Convex does <em>not</em> automatically retry actions, because it can't know whether your Stripe call went through. You build retries (with idempotency keys) yourself or use the Action Retrier / Workpool components.</li>
         <li><strong>Not reactive or cached.</strong> Clients call actions imperatively and get a single result.</li>
       </ul>
@@ -231,7 +231,7 @@ export const summarize = action({
         gives you a durable record, retry hooks, and a reactive status for free.
       </Callout>
       <Check
-        q="An action calls runMutation(A), then fetch() to Stripe, then runMutation(B). The process crashes during fetch. What is the DB state?"
+        question="An action calls runMutation(A), then fetch() to Stripe, then runMutation(B). The process crashes during fetch. What is the DB state?"
         options={['Neither A nor B is applied — actions are atomic', 'A is applied, B is not; nothing retries automatically', 'Convex retries the whole action so A is applied twice', 'A is rolled back automatically']}
         answer={1}
         explain="Each runMutation is its own committed transaction and actions are at-most-once. Design for this: make steps idempotent, record progress in the DB, and use idempotency keys with external APIs."
@@ -240,10 +240,10 @@ export const summarize = action({
 
     <Section id="composition" title="Calling functions from functions">
       <p>
-        <C>ctx.runQuery</C> / <C>ctx.runMutation</C> exist in mutations too, but inside a mutation they run in
+        <InlineCode>ctx.runQuery</InlineCode> / <InlineCode>ctx.runMutation</InlineCode> exist in mutations too, but inside a mutation they run in
         the <strong>same transaction</strong> as sub-calls with some overhead (argument/return validation,
         separate isolate context). The idiomatic way to share logic between queries and mutations is plain
-        TypeScript helper functions that take <C>ctx</C>:
+        TypeScript helper functions that take <InlineCode>ctx</InlineCode>:
       </p>
       <Code
         title="convex/lib/auth.ts — helpers, not runQuery"
@@ -273,7 +273,7 @@ export async function requireUser(ctx: QueryCtx) {
         ]}
       />
       <Check
-        q="Why can't a mutation call ctx.runAction directly?"
+        question="Why can't a mutation call ctx.runAction directly?"
         options={['Actions are too slow', 'A mutation may be retried; running a side-effecting action inside it would duplicate side effects and break atomicity. Scheduling defers it until after commit', 'It\'s only a type restriction', 'Actions can only be called from the client']}
         answer={1}
         explain="The scheduler write commits with the mutation, so the action runs exactly when (and only if) the mutation commits, and once per successful commit."
@@ -283,8 +283,8 @@ export async function requireUser(ctx: QueryCtx) {
     <Section id="errors" title="Errors, ConvexError and what the client sees">
       <p>
         If a handler throws, a mutation's buffered writes are discarded: nothing commits. In production, plain
-        <C> Error</C> messages are redacted for the client ("Server Error") so you don't leak internals.
-        To send structured, expected errors to the client, throw <C>ConvexError</C> with a data payload:
+        <InlineCode> Error</InlineCode> messages are redacted for the client ("Server Error") so you don't leak internals.
+        To send structured, expected errors to the client, throw <InlineCode>ConvexError</InlineCode> with a data payload:
       </p>
       <Code
         title="Application errors"
@@ -305,7 +305,7 @@ try {
 `}
       />
       <Callout kind="insight" title="Query errors are reactive too">
-        If a subscribed query throws, <C>useQuery</C> throws during render (catch it with an error boundary).
+        If a subscribed query throws, <InlineCode>useQuery</InlineCode> throws during render (catch it with an error boundary).
         When the data changes so the query no longer throws, the subscription recovers on its own, because the
         failed result's read set was tracked like any other.
       </Callout>
@@ -335,7 +335,7 @@ http.route({
 
 export default http;
 `}
-        note={<>Served at <C>https://&lt;deployment&gt;.convex.site/stripe/webhook</C> (note <C>.site</C>, not <C>.cloud</C>). Request/Response are standard Fetch API objects.</>}
+        note={<>Served at <InlineCode>https://&lt;deployment&gt;.convex.site/stripe/webhook</InlineCode> (note <InlineCode>.site</InlineCode>, not <InlineCode>.cloud</InlineCode>). Request/Response are standard Fetch API objects.</>}
       />
     </Section>
 
@@ -355,7 +355,7 @@ export default http;
         ]}
       />
       <Check
-        q="You need to backfill a field on 2 million documents. What's the right shape?"
+        question="You need to backfill a field on 2 million documents. What's the right shape?"
         options={['One mutation that .collect()s and patches everything', 'An action that loops runMutation over pages (or the Migrations component), each mutation handling a bounded batch', 'A query that patches documents', 'A single httpAction']}
         answer={1}
         explain="Per-transaction read/write limits make a single giant mutation impossible. Batch with cursors, either self-scheduling mutations or the @convex-dev/migrations component, so each transaction stays small and conflicts stay rare."

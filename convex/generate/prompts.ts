@@ -112,7 +112,7 @@ export function modulePrompt(input: {
   return `Write module ${input.n} of the course "${input.courseTitle}" (topic: ${input.topic}).
 
 Course outline (for context; write only module ${input.n}):
-${input.allModules.map((m) => `${m.n}. ${m.title}: ${m.summary}`).join('\n')}
+${input.allModules.map((courseModule) => `${courseModule.n}. ${courseModule.title}: ${courseModule.summary}`).join('\n')}
 
 This module:
 id: ${input.outline.id}
@@ -143,7 +143,7 @@ export function challengesPrompt(input: { courseTitle: string; modules: { n: num
   return `Write the challenge bank for "${input.courseTitle}".
 
 Modules and what they teach:
-${input.modules.map((m) => `${m.n}. ${m.title}: ${m.summary}\n${m.keyFacts}`).join('\n\n')}
+${input.modules.map((courseModule) => `${courseModule.n}. ${courseModule.title}: ${courseModule.summary}\n${courseModule.keyFacts}`).join('\n\n')}
 
 Write 24 challenges: a mix of mcq, predict and bug types across all modules and difficulties, plus exactly 4 with "boss": true that combine several modules in a realistic scenario. Wrong options must be plausible misconceptions. Explanations say why the answer is right and why the tempting wrong option is wrong.
 
@@ -152,5 +152,5 @@ ${CHALLENGE_SHAPE}`;
 }
 
 export function repairPrompt(errors: string[]) {
-  return `Your JSON failed validation:\n${errors.slice(0, 25).map((e) => `- ${e}`).join('\n')}\n\nReturn the complete corrected JSON, same shape, nothing else.`;
+  return `Your JSON failed validation:\n${errors.slice(0, 25).map((error) => `- ${error}`).join('\n')}\n\nReturn the complete corrected JSON, same shape, nothing else.`;
 }

@@ -34,24 +34,24 @@ function normalize(text: string) {
   return text.replace(/\s+/g, ' ').trim();
 }
 
-async function sha256(s: string) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+async function sha256(text: string) {
+  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 export const getCached = internalQuery({
   args: { key: v.string() },
-  handler: async (ctx, { key }) => {
-    const row = await ctx.db.query('simplifications').withIndex('by_key', (q) => q.eq('key', key)).first();
+  handler: async (context, { key }) => {
+    const row = await context.db.query('simplifications').withIndex('by_key', (indexRange) => indexRange.eq('key', key)).first();
     return row?.text ?? null;
   },
 });
 
 export const store = internalMutation({
   args: { key: v.string(), level, text: v.string(), sourceChars: v.number() },
-  handler: async (ctx, args) => {
-    const existing = await ctx.db.query('simplifications').withIndex('by_key', (q) => q.eq('key', args.key)).first();
-    if (!existing) await ctx.db.insert('simplifications', args);
+  handler: async (context, args) => {
+    const existing = await context.db.query('simplifications').withIndex('by_key', (indexRange) => indexRange.eq('key', args.key)).first();
+    if (!existing) await context.db.insert('simplifications', args);
   },
 });
 
@@ -62,35 +62,35 @@ export const store = internalMutation({
  */
 export const simplify = action({
   args: { text: v.string(), level, context: v.string() },
-  handler: async (ctx, { text, level, context }): Promise<SimplifyResult> => {
+  handler: async (actionContext, { text, level, context }): Promise<SimplifyResult> => {
     const source = normalize(text);
     if (source.length < 1 || source.length > 6000) return { status: 'error', message: 'This block is too long to simplify.' };
     if (context.length > 300) return { status: 'error', message: 'Context is too long.' };
 
     const key = await sha256(`${level}\n${source}`);
-    const cached = await ctx.runQuery(internal.simplify.getCached, { key });
+    const cached = await actionContext.runQuery(internal.simplify.getCached, { key });
     if (cached !== null) return { status: 'ok', text: cached, cached: true };
 
-    const user = await currentUser(ctx);
+    const user = await currentUser(actionContext);
     if (!user) return { status: 'auth' };
 
-    const mine = await rateLimiter.limit(ctx, 'simplify', { key: user._id });
+    const mine = await rateLimiter.limit(actionContext, 'simplify', { key: user._id });
     if (!mine.ok) return { status: 'rate', retryAfterMs: mine.retryAfter };
-    const global = await rateLimiter.limit(ctx, 'simplifyGlobal');
+    const global = await rateLimiter.limit(actionContext, 'simplifyGlobal');
     if (!global.ok) return { status: 'rate', retryAfterMs: global.retryAfter };
 
     const ref = `simplify:${key.slice(0, 16)}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
-    const charged = await ctx.runMutation(internal.wallet.charge, { userId: user._id, kind: 'simplify', ref });
+    const charged = await actionContext.runMutation(internal.wallet.charge, { userId: user._id, kind: 'simplify', ref });
     if (!charged.ok) return { status: 'credits' };
 
     try {
       const out = await callClaude(source, level, context);
-      await ctx.runMutation(internal.simplify.store, { key, level, text: out, sourceChars: source.length });
+      await actionContext.runMutation(internal.simplify.store, { key, level, text: out, sourceChars: source.length });
       return { status: 'ok', text: out, cached: false, credits: charged.credits };
-    } catch (err) {
-      await ctx.runMutation(internal.wallet.refund, { userId: user._id, kind: 'simplify', ref });
-      console.error('simplify failed', err);
-      const message = err instanceof RefusalError ? err.message : 'Simplify is unavailable right now. Your credit was refunded.';
+    } catch (error) {
+      await actionContext.runMutation(internal.wallet.refund, { userId: user._id, kind: 'simplify', ref });
+      console.error('simplify failed', error);
+      const message = error instanceof RefusalError ? error.message : 'Simplify is unavailable right now. Your credit was refunded.';
       return { status: 'error', message };
     }
   },
@@ -98,7 +98,7 @@ export const simplify = action({
 
 class RefusalError extends Error {}
 
-async function callClaude(source: string, lvl: 1 | 2 | 3, context: string): Promise<string> {
+async function callClaude(source: string, level: 1 | 2 | 3, context: string): Promise<string> {
   const client = new Anthropic(); // ANTHROPIC_API_KEY from the Convex environment
   const response = await client.beta.messages.create({
     model: 'claude-opus-5-5',
@@ -110,7 +110,7 @@ async function callClaude(source: string, lvl: 1 | 2 | 3, context: string): Prom
     messages: [
       {
         role: 'user',
-        content: `${LEVELS[lvl]}\n\nWhere this passage appears: ${context || 'a technical course'}\n\n<passage>\n${source}\n</passage>`,
+        content: `${LEVELS[level]}\n\nWhere this passage appears: ${context || 'a technical course'}\n\n<passage>\n${source}\n</passage>`,
       },
     ],
   } as Parameters<typeof client.beta.messages.create>[0] & { stream?: false });
@@ -119,7 +119,7 @@ async function callClaude(source: string, lvl: 1 | 2 | 3, context: string): Prom
     throw new RefusalError("This passage couldn't be simplified. Your credit was refunded.");
   }
   const text = response.content
-    .flatMap((b) => (b.type === 'text' ? [b.text] : []))
+    .flatMap((block) => (block.type === 'text' ? [block.text] : []))
     .join('')
     .trim();
   if (!text) throw new Error('Empty response');

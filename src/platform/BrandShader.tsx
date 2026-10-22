@@ -15,8 +15,8 @@ export function BrandShader({ brand, role, seed = 0 }: { brand: Brand; role: 'he
     return <Dithering colorBack={brand.colors.bg} colorFront={role === 'foot' ? brand.colors.accent : colors[colors.length > 2 ? 1 : colors.length - 1]} shape="warp" type="4x4" size={2} speed={speed} style={full} />;
   }
   if (role === 'band' || kind === 'grain') {
-    const rot = [0, 1, 2].map((k) => colors[(k + seed) % colors.length]).filter((c) => c.toLowerCase() !== brand.colors.bg.toLowerCase());
-    return <GrainGradient colorBack={brand.colors.bg} colors={rot.length >= 2 ? rot : [brand.colors.accent, brand.colors.accent3]} softness={0.7} intensity={0.35} noise={0.3} shape="wave" speed={speed} style={full} />;
+    const rotatedColors = [0, 1, 2].map((offset) => colors[(offset + seed) % colors.length]).filter((color) => color.toLowerCase() !== brand.colors.bg.toLowerCase());
+    return <GrainGradient colorBack={brand.colors.bg} colors={rotatedColors.length >= 2 ? rotatedColors : [brand.colors.accent, brand.colors.accent3]} softness={0.7} intensity={0.35} noise={0.3} shape="wave" speed={speed} style={full} />;
   }
   return <MeshGradient colors={colors} distortion={0.85} swirl={0.6} grainOverlay={0.25} speed={speed} style={full} />;
 }

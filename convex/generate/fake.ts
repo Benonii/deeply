@@ -9,10 +9,10 @@ export const isFake = () => process.env.GENERATOR_FAKE === '1';
 
 export function fakePlan(topic: string, kind: 'concept' | 'repo', files: string[]): PlanOutput {
   const subject = topic.replace(/^https?:\/\/github\.com\//, '').slice(0, 40);
-  const mod = (n: number, id: string, title: string): ModuleOutline => ({
+  const courseModule = (moduleNumber: number, id: string, title: string): ModuleOutline => ({
     id,
     title,
-    kicker: `Fixture module ${n}`,
+    kicker: `Fixture module ${moduleNumber}`,
     summary: `A placeholder module about ${title.toLowerCase()} used to test the generator.`,
     minutes: 20,
     plan: '- intro\n- one flow diagram\n- one check',
@@ -30,11 +30,11 @@ export function fakePlan(topic: string, kind: 'concept' | 'repo', files: string[
       shader: { kind: 'mesh', colors: ['#000000', '#4fd1c5', '#b794f4'] },
       source: 'designed',
     },
-    modules: [mod(1, 'mental-model', 'The mental model'), mod(2, 'internals', 'Internals'), mod(3, 'patterns', 'Patterns')],
+    modules: [courseModule(1, 'mental-model', 'The mental model'), courseModule(2, 'internals', 'Internals'), courseModule(3, 'patterns', 'Patterns')],
   };
 }
 
-export function fakeModule(outline: ModuleOutline, n: number, firstFile?: { path: string; text: string }): ModuleOutput {
+export function fakeModule(outline: ModuleOutline, moduleNumber: number, firstFile?: { path: string; text: string }): ModuleOutput {
   const refs: ModuleOutput['codeRefs'] = firstFile
     ? [{
         id: `${outline.id}.entry`,
@@ -50,7 +50,7 @@ export function fakeModule(outline: ModuleOutline, n: number, firstFile?: { path
     : [];
   return {
     id: outline.id,
-    n,
+    n: moduleNumber,
     title: outline.title,
     kicker: outline.kicker,
     minutes: outline.minutes,
@@ -102,16 +102,16 @@ export function fakeModule(outline: ModuleOutline, n: number, firstFile?: { path
 
 export function fakeChallenges(modules: { title: string }[]) {
   return {
-    challenges: Array.from({ length: 6 }, (_, i) => ({
-      id: `fx-${i + 1}`,
-      topic: modules[i % modules.length]?.title ?? 'General',
-      difficulty: ((i % 3) + 1) as 1 | 2 | 3,
+    challenges: Array.from({ length: 6 }, (_, index) => ({
+      id: `fx-${index + 1}`,
+      topic: modules[index % modules.length]?.title ?? 'General',
+      difficulty: ((index % 3) + 1) as 1 | 2 | 3,
       type: 'mcq' as const,
-      q: `Fixture question ${i + 1}?`,
+      q: `Fixture question ${index + 1}?`,
       options: ['Right', 'Wrong', 'Also wrong'],
       answer: 0,
       explain: 'Fixture explanation.',
-      boss: i >= 4,
+      boss: index >= 4,
     })),
   };
 }

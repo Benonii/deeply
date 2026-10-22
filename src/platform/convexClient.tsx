@@ -34,22 +34,22 @@ const frames: Frame[] = [];
 const frameListeners = new Set<() => void>();
 let frameId = 0;
 
-function record(dir: 'up' | 'down', data: unknown) {
+function record(direction: 'up' | 'down', data: unknown) {
   if (typeof data !== 'string') return;
   let type = 'binary';
   try { type = JSON.parse(data).type ?? 'unknown'; } catch {}
-  frames.push({ id: frameId++, dir, t: Date.now(), type, raw: data });
+  frames.push({ id: frameId++, dir: direction, t: Date.now(), type, raw: data });
   if (frames.length > 300) frames.shift();
-  frameListeners.forEach((l) => l());
+  frameListeners.forEach((listener) => listener());
 }
 
 function installWireTap() {
-  const W = window.WebSocket as any;
-  if (W.__tapped) return;
-  class Tapped extends W {
+  const OriginalWebSocket = window.WebSocket as any;
+  if (OriginalWebSocket.__tapped) return;
+  class Tapped extends OriginalWebSocket {
     constructor(...args: any[]) {
       super(...args);
-      this.addEventListener('message', (e: MessageEvent) => record('down', e.data));
+      this.addEventListener('message', (event: MessageEvent) => record('down', event.data));
     }
     send(data: any) {
       record('up', data);
@@ -63,15 +63,15 @@ function installWireTap() {
 export function useFrames() {
   const [, force] = useState(0);
   useEffect(() => {
-    const l = () => force((n) => n + 1);
-    frameListeners.add(l);
-    return () => { frameListeners.delete(l); };
+    const rerender = () => force((count) => count + 1);
+    frameListeners.add(rerender);
+    return () => { frameListeners.delete(rerender); };
   }, []);
   return frames;
 }
 export function clearFrames() {
   frames.length = 0;
-  frameListeners.forEach((l) => l());
+  frameListeners.forEach((listener) => listener());
 }
 
 /* ------------------------------------------------------------------ */
@@ -115,8 +115,8 @@ function ProgressSync() {
   // Afterwards: push changes up (debounced).
   useEffect(() => {
     if (!hydrated.current) return;
-    const t = setTimeout(() => { save({ deviceId: id, ...progress }).catch(() => {}); }, 600);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => { save({ deviceId: id, ...progress }).catch(() => {}); }, 600);
+    return () => clearTimeout(timer);
   }, [progress, id, save]);
   return null;
 }

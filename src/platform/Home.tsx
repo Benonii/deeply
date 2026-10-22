@@ -12,21 +12,21 @@ import { fromBuiltin } from './model';
 
 type CardData = { href: string; title: string; tagline: string; brand: Brand; kind: 'concept' | 'repo'; modules: number; minutes?: number; done?: number; logo?: string; community?: boolean };
 
-function Swatches({ b }: { b: Brand }) {
+function Swatches({ brand: b }: { brand: Brand }) {
   return (
     <span className="cc-swatches" aria-hidden>
-      {[b.colors.accent, b.colors.accent2, b.colors.accent3].map((c, i) => <span key={i} style={{ background: c }} />)}
+      {[b.colors.accent, b.colors.accent2, b.colors.accent3].map((color, index) => <span key={index} style={{ background: color }} />)}
     </span>
   );
 }
 
-function CourseCard({ c }: { c: CardData }) {
+function CourseCard({ card: c }: { card: CardData }) {
   useBrandFonts(c.brand);
   const [head, ...rest] = c.title.split(', ');
   return (
     <a className="cc reveal" href={c.href} style={{ ['--cc-accent' as any]: c.brand.colors.accent }}>
       <div className="cc-top">
-        {c.logo ? <span className="cc-logo" dangerouslySetInnerHTML={{ __html: c.logo }} /> : <Swatches b={c.brand} />}
+        {c.logo ? <span className="cc-logo" dangerouslySetInnerHTML={{ __html: c.logo }} /> : <Swatches brand={c.brand} />}
         <span className="cc-kind">{c.community ? 'Community · ' : ''}{c.kind === 'repo' ? 'Codebase' : 'Concept'}</span>
       </div>
       <div className="cc-title" style={{ fontFamily: `'${c.brand.fonts.display}', var(--font-display)` }}>
@@ -48,16 +48,16 @@ function CommunityCourses() {
   if (!list.length) return <p className="muted">No community courses yet. <a href="#/create">Create the first one.</a></p>;
   return (
     <div className="cc-grid">
-      {list.map((x) => (
+      {list.map((publicCourse) => (
         <CourseCard
-          key={x.slug}
-          c={{
-            href: `#/g/${x.slug}`,
-            title: x.title ?? x.meta?.title ?? x.topic,
-            tagline: x.tagline ?? x.meta?.tagline ?? '',
-            brand: sanitizeBrand(x.brand ?? x.meta?.brand),
-            kind: x.kind ?? 'concept',
-            modules: x.moduleCount ?? x.modules ?? 0,
+          key={publicCourse.slug}
+          card={{
+            href: `#/g/${publicCourse.slug}`,
+            title: publicCourse.title ?? publicCourse.meta?.title ?? publicCourse.topic,
+            tagline: publicCourse.tagline ?? publicCourse.meta?.tagline ?? '',
+            brand: sanitizeBrand(publicCourse.brand ?? publicCourse.meta?.brand),
+            kind: publicCourse.kind ?? 'concept',
+            modules: publicCourse.moduleCount ?? publicCourse.modules ?? 0,
             community: true,
           }}
         />
@@ -69,18 +69,18 @@ function CommunityCourses() {
 export function PlatformHome() {
   const { all } = useProgress();
   const client = useConvexClient();
-  const cards: CardData[] = builtinCourses.map((b) => {
-    const c = fromBuiltin(b);
+  const cards: CardData[] = builtinCourses.map((builtinCourse) => {
+    const course = fromBuiltin(builtinCourse);
     return {
-      href: `#${c.base}`,
-      title: c.title,
-      tagline: c.tagline,
-      brand: c.brand,
-      kind: c.kind,
-      modules: c.modules.length,
-      minutes: c.modules.reduce((s, m) => s + m.minutes, 0),
-      done: c.modules.filter((m) => all.done[`${c.id}:${m.id}`]).length,
-      logo: b.brand.logoSvg,
+      href: `#${course.base}`,
+      title: course.title,
+      tagline: course.tagline,
+      brand: course.brand,
+      kind: course.kind,
+      modules: course.modules.length,
+      minutes: course.modules.reduce((sum, courseModule) => sum + courseModule.minutes, 0),
+      done: course.modules.filter((courseModule) => all.done[`${course.id}:${courseModule.id}`]).length,
+      logo: builtinCourse.brand.logoSvg,
     };
   });
   return (
@@ -96,14 +96,14 @@ export function PlatformHome() {
           </p>
           <div className="hero-cta">
             <a className="btn primary" href="#/create">Create a course →</a>
-            <a className="btn ghost" href="#catalog" onClick={(e) => { e.preventDefault(); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }); }}>Browse courses</a>
+            <a className="btn ghost" href="#catalog" onClick={(event) => { event.preventDefault(); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }); }}>Browse courses</a>
           </div>
         </div>
       </section>
 
       <section className="platform-section" id="catalog">
         <div className="ps-head"><h2>Courses</h2><p className="muted">Written and checked by hand.</p></div>
-        <div className="cc-grid">{cards.map((c) => <CourseCard key={c.href} c={c} />)}</div>
+        <div className="cc-grid">{cards.map((card) => <CourseCard key={card.href} card={card} />)}</div>
       </section>
 
       {client && (

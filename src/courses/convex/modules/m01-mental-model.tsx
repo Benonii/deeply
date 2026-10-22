@@ -1,4 +1,4 @@
-import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, C } from '../../../engine/kit';
+import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, InlineCode } from '../../../engine/kit';
 
 const Component = () => (
   <>
@@ -11,13 +11,13 @@ const Component = () => (
       </p>
       <p>
         The key design choice: <strong>the database knows exactly what every query read</strong>. A query
-        function is deterministic and only touches data through <C>ctx.db</C>, so the system can record its
+        function is deterministic and only touches data through <InlineCode>ctx.db</InlineCode>, so the system can record its
         <em> read set</em> (the index ranges it scanned). When a mutation commits, Convex checks its writes against
         the read sets of every live subscription and re-runs only the queries whose results could have changed.
         Reactivity, caching, consistency and retries all follow from that.
       </p>
       <Callout kind="analogy" title="A spreadsheet for your backend">
-        Think of every <C>useQuery</C> as a spreadsheet cell holding a formula. The formula (your query
+        Think of every <InlineCode>useQuery</InlineCode> as a spreadsheet cell holding a formula. The formula (your query
         function) reads other cells (documents in index ranges). When any of those cells change, the
         spreadsheet recomputes the formula and shows the new value. You never write invalidation code. The
         dependency tracking is automatic and exact, because the "spreadsheet" (the database) runs the formula itself.
@@ -37,7 +37,7 @@ const Component = () => (
     <Section id="architecture" title="The big-picture architecture">
       <p>
         Follow one request from a React component to disk and back. The backend is written in Rust (open source
-        as <C>get-convex/convex-backend</C>). It hosts V8 isolates for your JS functions, a transaction log and
+        as <InlineCode>get-convex/convex-backend</InlineCode>). It hosts V8 isolates for your JS functions, a transaction log and
         index layer on top of a persistence store, and per-connection sync workers that speak the WebSocket
         protocol.
       </p>
@@ -78,7 +78,7 @@ const Component = () => (
       />
       <Callout kind="deep" title="Why co-locating functions with the DB matters">
         In a classic stack each query is a network round trip from an app server to the DB, so you batch,
-        cache, and accept N+1 pain. In Convex the function runs inside the backend and each <C>ctx.db.get</C>
+        cache, and accept N+1 pain. In Convex the function runs inside the backend and each <InlineCode>ctx.db.get</InlineCode>
         is an in-process call against an index layer (with caching of recent data). A loop of 50 gets is fine.
         "Join in code" is the intended pattern, not an anti-pattern.
       </Callout>
@@ -122,7 +122,7 @@ export const send = mutation({
   },
 });
 `}
-        note={<>Any client subscribed to <C>list</C> for that channel sees the new message about one round trip after <C>send</C> commits. You write no invalidation, pub/sub, or cache-busting code.</>}
+        note={<>Any client subscribed to <InlineCode>list</InlineCode> for that channel sees the new message about one round trip after <InlineCode>send</InlineCode> commits. You write no invalidation, pub/sub, or cache-busting code.</>}
       />
       <Code
         title="src/Chat.tsx — the client side"
@@ -185,7 +185,7 @@ export function Chat({ channel }: { channel: Id<"channels"> }) {
         ]}
       />
       <Check
-        q="Why can Convex automatically retry a mutation that hit a write conflict, while most backends cannot?"
+        question="Why can Convex automatically retry a mutation that hit a write conflict, while most backends cannot?"
         options={[
           'Because Convex locks every table during a mutation',
           'Because mutations are deterministic and have no external side effects, so re-executing is equivalent to running once',
@@ -230,7 +230,7 @@ export function Chat({ channel }: { channel: Id<"channels"> }) {
       />
       <Callout kind="warn" title="A resolved mutation promise means the UI already reflects it">
         Because the client waits for a Transition at or after the mutation's commit timestamp before resolving,
-        code after <C>await send(...)</C> can rely on every subscribed query already including the write. In
+        code after <InlineCode>await send(...)</InlineCode> can rely on every subscribed query already including the write. In
         most stacks you have to refetch to get this.
       </Callout>
     </Section>
@@ -276,7 +276,7 @@ npx convex dashboard        # open the dashboard
 `}
       />
       <Check
-        q="Your teammate adds a required field to a table that already has documents, with schema validation on. What happens on push?"
+        question="Your teammate adds a required field to a table that already has documents, with schema validation on. What happens on push?"
         options={[
           'Push succeeds; old docs get the field set to null',
           'Push is rejected because existing documents don\'t match the new schema',
@@ -317,13 +317,13 @@ npx convex dashboard        # open the dashboard
         </g>
       </Diagram>
       <Check
-        q="Where does the fully-typed `api` object your React code imports come from?"
+        question="Where does the fully-typed `api` object your React code imports come from?"
         options={['A runtime fetch of the deployment\'s schema', 'Codegen by the Convex CLI from your convex/ function exports', 'You write it by hand', 'The ConvexProvider injects it']}
         answer={1}
         explain="The CLI generates convex/_generated/api.d.ts from your exported functions. At runtime `api` is a Proxy (anyApi) that builds string function names like 'messages:list'. All the type safety exists at compile time."
       />
       <Check
-        q="What is the single most important property that lets Convex know which subscriptions a write affects?"
+        question="What is the single most important property that lets Convex know which subscriptions a write affects?"
         options={['Clients declare which tables they listen to', 'Queries are deterministic and all reads go through ctx.db, so read sets are recorded exactly', 'Convex re-runs every query after every write', 'The WAL is parsed for table names']}
         answer={1}
         explain="Re-running everything wouldn't scale, and table-level listening is too coarse. Recording the exact index ranges each query read makes invalidation precise."

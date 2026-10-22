@@ -1,4 +1,4 @@
-import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, C } from '../../../engine/kit';
+import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, InlineCode } from '../../../engine/kit';
 
 const Component = () => (
   <>
@@ -14,7 +14,7 @@ const Component = () => (
         memory:
       </p>
       <ol>
-        <li><strong>The client</strong> (<C>ConvexReactClient</C> → <C>BaseConvexClient</C> → a WebSocket manager) holding a local <em>query set</em>.</li>
+        <li><strong>The client</strong> (<InlineCode>ConvexReactClient</InlineCode> → <InlineCode>BaseConvexClient</InlineCode> → a WebSocket manager) holding a local <em>query set</em>.</li>
         <li><strong>The sync protocol</strong> — a small set of JSON messages over one WebSocket.</li>
         <li><strong>The sync worker</strong> on the server — one per connection, holding that client’s subscriptions.</li>
         <li><strong>The subscription manager</strong> — matches every commit’s write set against all live read sets.</li>
@@ -58,9 +58,9 @@ const Component = () => (
         ))}
       </Diagram>
       <ul>
-        <li><strong>Deduplication.</strong> Ten components calling <C>useQuery(api.msgs.list, {'{'} channel {'}'})</C> with equal args share <em>one</em> query id and one server subscription. Args are compared by their serialized JSON form (Convex values).</li>
-        <li><strong>Reference counting.</strong> When the last component using a query unmounts, the client removes it from the query set (sends a <C>Remove</C>).</li>
-        <li><strong>Batching.</strong> Changes to the query set made in the same tick are coalesced into one <C>ModifyQuerySet</C> message.</li>
+        <li><strong>Deduplication.</strong> Ten components calling <InlineCode>useQuery(api.msgs.list, {'{'} channel {'}'})</InlineCode> with equal args share <em>one</em> query id and one server subscription. Args are compared by their serialized JSON form (Convex values).</li>
+        <li><strong>Reference counting.</strong> When the last component using a query unmounts, the client removes it from the query set (sends a <InlineCode>Remove</InlineCode>).</li>
+        <li><strong>Batching.</strong> Changes to the query set made in the same tick are coalesced into one <InlineCode>ModifyQuerySet</InlineCode> message.</li>
         <li><strong>Atomic React updates.</strong> When a transition arrives, every affected query is updated in a single batch, so the UI never renders half of one database state and half of another.</li>
       </ul>
       <Code
@@ -89,7 +89,7 @@ function Channel({ id }: { id: Id<"channels"> }) {
     <Section id="protocol" title="The wire protocol">
       <p>
         The protocol is small enough to memorize. Field names below are close to the real JSON (the client is open source in
-        the <C>convex</C> npm package under <C>browser/sync</C>), but treat exact shapes as approximate.
+        the <InlineCode>convex</InlineCode> npm package under <InlineCode>browser/sync</InlineCode>), but treat exact shapes as approximate.
       </p>
       <Diagram
         title="Messages over the sync WebSocket"
@@ -127,13 +127,13 @@ function Channel({ id }: { id: Id<"channels"> }) {
         <text x="60" y="432" fill="var(--muted)" fontSize="13" fontFamily="JetBrains Mono">Every Transition moves the client from one StateVersion to the next — never skipping, never mixing.</text>
       </Diagram>
       <p>
-        The <C>StateVersion</C> is the heart of it. It says: “these query results correspond to <em>query set version N</em>,
-        evaluated as <em>identity version M</em>, at <em>database timestamp T</em>.” The client applies a <C>Transition</C>
-        only if its <C>startVersion</C> equals the client’s current version, which guarantees the client never jumps to a
+        The <InlineCode>StateVersion</InlineCode> is the heart of it. It says: “these query results correspond to <em>query set version N</em>,
+        evaluated as <em>identity version M</em>, at <em>database timestamp T</em>.” The client applies a <InlineCode>Transition</InlineCode>
+        only if its <InlineCode>startVersion</InlineCode> equals the client’s current version, which guarantees the client never jumps to a
         state that skips a query-set or auth change it made.
       </p>
       <Check
-        q="Why does a Transition carry both startVersion and endVersion?"
+        question="Why does a Transition carry both startVersion and endVersion?"
         options={['For compression', 'So the client can verify the diff applies to exactly the state it has, keeping its view consistent', 'To let the client reorder transitions', 'For logging only']}
         answer={1}
         explain="Transitions are diffs. A diff is only meaningful relative to a base state. Matching startVersion to the client's current StateVersion ensures the client moves atomically from one consistent snapshot (query set + identity + ts) to the next."
@@ -219,7 +219,7 @@ function Channel({ id }: { id: Id<"channels"> }) {
         actually changed. (The precise data structure is an implementation detail; think “interval index over read ranges.”)
       </Callout>
       <Check
-        q="Client A subscribes to a query that does ctx.db.query('tasks').filter(q => q.eq(q.field('owner'), me)).collect(). Another user inserts a task they own. What happens?"
+        question="Client A subscribes to a query that does ctx.db.query('tasks').filter(q => q.eq(q.field('owner'), me)).collect(). Another user inserts a task they own. What happens?"
         options={['Nothing — the filter excludes it', 'A\'s query is invalidated and re-run, because its read set is the whole tasks table', 'The client filters it locally', 'The insert is rejected']}
         answer={1}
         explain="filter() runs after the scan; the read set covers the entire table. Any write to tasks invalidates the subscription. The result is unchanged, but you pay for the re-run. Use withIndex('by_owner', q => q.eq('owner', me)) so unrelated writes don't touch your range."
@@ -234,7 +234,7 @@ function Channel({ id }: { id: Id<"channels"> }) {
       <ul>
         <li>A “unread count” badge and the message list can never disagree, even though they are separate queries.</li>
         <li>You never see a parent document updated while its children query still shows the old state.</li>
-        <li>The client’s view moves forward monotonically in time: ts never goes backward, even across reconnects (the client sends <C>maxObservedTimestamp</C> on <C>Connect</C>).</li>
+        <li>The client’s view moves forward monotonically in time: ts never goes backward, even across reconnects (the client sends <InlineCode>maxObservedTimestamp</InlineCode> on <InlineCode>Connect</InlineCode>).</li>
       </ul>
       <Callout kind="analogy">
         Think of each Transition as a frame in a film. Every query on screen is drawn from the same frame. Other systems give
@@ -257,8 +257,8 @@ function Channel({ id }: { id: Id<"channels"> }) {
       <p>Three guarantees for mutations sent from one client:</p>
       <ol>
         <li><strong>Ordered:</strong> mutations from a single client are executed in the order they were sent (the client queues them on the socket; the server processes them serially per session).</li>
-        <li><strong>Exactly-once-ish on reconnect:</strong> each carries a <C>requestId</C>; if the socket drops, unacknowledged mutations are resent and the server deduplicates by session + request id, so a retry after a disconnect doesn’t double-apply (approximately; details in the client source).</li>
-        <li><strong>Read-your-writes:</strong> the <C>await mutation()</C> promise resolves only after the client has applied a Transition whose <C>ts</C> ≥ the mutation’s commit <C>ts</C>. When your <C>await</C> returns, every <C>useQuery</C> already reflects the write.</li>
+        <li><strong>Exactly-once-ish on reconnect:</strong> each carries a <InlineCode>requestId</InlineCode>; if the socket drops, unacknowledged mutations are resent and the server deduplicates by session + request id, so a retry after a disconnect doesn’t double-apply (approximately; details in the client source).</li>
+        <li><strong>Read-your-writes:</strong> the <InlineCode>await mutation()</InlineCode> promise resolves only after the client has applied a Transition whose <InlineCode>ts</InlineCode> ≥ the mutation’s commit <InlineCode>ts</InlineCode>. When your <InlineCode>await</InlineCode> returns, every <InlineCode>useQuery</InlineCode> already reflects the write.</li>
       </ol>
       <Code
         title="Read-your-writes in practice"
@@ -274,7 +274,7 @@ async function onAdd(text: string) {
 }`}
       />
       <Check
-        q="A mutation commits at ts=900 and the MutationResponse arrives, but the client's latest transition is at ts=880. What does the client do?"
+        question="A mutation commits at ts=900 and the MutationResponse arrives, but the client's latest transition is at ts=880. What does the client do?"
         options={['Resolve the promise immediately', 'Hold the promise until a transition with ts ≥ 900 is applied, then resolve', 'Refetch all queries via HTTP', 'Drop the response']}
         answer={1}
         explain="Resolving early would let code after `await` observe query results that don't include its own write. The client waits until its synced view has caught up to the mutation's commit ts."
@@ -283,7 +283,7 @@ async function onAdd(text: string) {
 
     <Section id="optimistic" title="Optimistic updates">
       <p>
-        Round-trip latency is still latency. <C>useMutation(fn).withOptimisticUpdate(cb)</C> lets you patch local query results
+        Round-trip latency is still latency. <InlineCode>useMutation(fn).withOptimisticUpdate(cb)</InlineCode> lets you patch local query results
         instantly. The client keeps these patches as a <em>layer</em> on top of the server results:
       </p>
       <Code
@@ -329,11 +329,11 @@ const send = useMutation(api.messages.send).withOptimisticUpdate(
         ]}
       />
       <Callout kind="warn" title="Optimistic update rules">
-        The callback must be pure and fast, must not mutate objects returned by <C>getQuery</C> in place (create new arrays/objects),
-        and should handle <C>undefined</C> (query not loaded). It may run multiple times as layers are replayed.
+        The callback must be pure and fast, must not mutate objects returned by <InlineCode>getQuery</InlineCode> in place (create new arrays/objects),
+        and should handle <InlineCode>undefined</InlineCode> (query not loaded). It may run multiple times as layers are replayed.
       </Callout>
       <Check
-        q="Two optimistic mutations are pending. The first one's server result arrives. What happens to the second one's optimistic layer?"
+        question="Two optimistic mutations are pending. The first one's server result arrives. What happens to the second one's optimistic layer?"
         options={['It is discarded', 'It is re-run on top of the new server state', 'It is merged with a three-way diff', 'It is committed locally']}
         answer={1}
         explain="Optimistic updates are functions, not snapshots. Pending layers are replayed in order on top of the latest authoritative results until their own mutations are reflected."
@@ -343,16 +343,16 @@ const send = useMutation(api.messages.send).withOptimisticUpdate(
     <Section id="auth-reconnect" title="Reconnects and auth">
       <p>
         <strong>Reconnect:</strong> the WebSocket manager reconnects with exponential backoff. On reconnect it sends
-        <C>Connect</C> (with session id and <C>maxObservedTimestamp</C>), re-sends the full current query set as one
-        <C>ModifyQuerySet</C>, re-sends <C>Authenticate</C>, and replays un-acknowledged mutations in order. The server
+        <InlineCode>Connect</InlineCode> (with session id and <InlineCode>maxObservedTimestamp</InlineCode>), re-sends the full current query set as one
+        <InlineCode>ModifyQuerySet</InlineCode>, re-sends <InlineCode>Authenticate</InlineCode>, and replays un-acknowledged mutations in order. The server
         recomputes results at a ts no earlier than what the client already saw, so the UI never goes back in time.
-        <C>useConvexConnectionState</C> / <C>client.connectionState()</C> expose this to your UI.
+        <InlineCode>useConvexConnectionState</InlineCode> / <InlineCode>client.connectionState()</InlineCode> expose this to your UI.
       </p>
       <p>
         <strong>Auth:</strong> the client fetches a JWT from your provider (Clerk, Auth0, Convex Auth…) and sends
-        <C>Authenticate</C>. That bumps the <C>identity</C> component of the StateVersion, and the server re-evaluates every
-        query under the new identity (results depend on <C>ctx.auth</C>). Before the token expires, the client fetches a fresh
-        one and re-authenticates without dropping subscriptions; if the server rejects it you get <C>AuthError</C>.
+        <InlineCode>Authenticate</InlineCode>. That bumps the <InlineCode>identity</InlineCode> component of the StateVersion, and the server re-evaluates every
+        query under the new identity (results depend on <InlineCode>ctx.auth</InlineCode>). Before the token expires, the client fetches a fresh
+        one and re-authenticates without dropping subscriptions; if the server rejects it you get <InlineCode>AuthError</InlineCode>.
       </p>
       <Code
         title="Auth-dependent query"
@@ -376,15 +376,15 @@ export const myTasks = query({
       <Compare
         head={['API', 'What it does', 'Under the hood']}
         rows={[
-          [<C>useQuery(fn, args)</C>, 'Reactive result; undefined while loading; throws on error (use an error boundary)', 'Add to query set; listener on queryId'],
-          [<C>useQuery(fn, "skip")</C>, 'Don\'t subscribe (e.g. args not ready yet)', 'No query set entry'],
-          [<C>useMutation(fn)</C>, 'Returns a stable function → Promise', 'Mutation message, requestId, RYW wait'],
-          [<C>useAction(fn)</C>, 'Call an action (no RYW, not reactive)', 'Action message'],
-          [<C>usePaginatedQuery(fn, args, {'{'}initialNumItems{'}'})</C>, 'results, status, loadMore(n)', 'One subscription per page; each page is reactive; page boundaries pinned by cursors'],
-          [<C>useQueries</C>, 'Dynamic number of subscriptions', 'Multiple queryIds'],
-          [<C>ConvexHttpClient</C>, 'Plain HTTP query/mutation/action (scripts, servers)', 'POST /api/query etc; not reactive'],
-          [<><C>preloadQuery</C> / <C>usePreloadedQuery</C></>, 'SSR in Next.js: fetch on server, hydrate & subscribe on client', 'HTTP fetch at a ts, then WebSocket subscription'],
-          [<><C>fetchQuery</C> / <C>fetchMutation</C></>, 'One-shot calls from server components / route handlers', 'HTTP'],
+          [<InlineCode>useQuery(fn, args)</InlineCode>, 'Reactive result; undefined while loading; throws on error (use an error boundary)', 'Add to query set; listener on queryId'],
+          [<InlineCode>useQuery(fn, "skip")</InlineCode>, 'Don\'t subscribe (e.g. args not ready yet)', 'No query set entry'],
+          [<InlineCode>useMutation(fn)</InlineCode>, 'Returns a stable function → Promise', 'Mutation message, requestId, RYW wait'],
+          [<InlineCode>useAction(fn)</InlineCode>, 'Call an action (no RYW, not reactive)', 'Action message'],
+          [<InlineCode>usePaginatedQuery(fn, args, {'{'}initialNumItems{'}'})</InlineCode>, 'results, status, loadMore(n)', 'One subscription per page; each page is reactive; page boundaries pinned by cursors'],
+          [<InlineCode>useQueries</InlineCode>, 'Dynamic number of subscriptions', 'Multiple queryIds'],
+          [<InlineCode>ConvexHttpClient</InlineCode>, 'Plain HTTP query/mutation/action (scripts, servers)', 'POST /api/query etc; not reactive'],
+          [<><InlineCode>preloadQuery</InlineCode> / <InlineCode>usePreloadedQuery</InlineCode></>, 'SSR in Next.js: fetch on server, hydrate & subscribe on client', 'HTTP fetch at a ts, then WebSocket subscription'],
+          [<><InlineCode>fetchQuery</InlineCode> / <InlineCode>fetchMutation</InlineCode></>, 'One-shot calls from server components / route handlers', 'HTTP'],
         ]}
       />
       <Code
@@ -407,7 +407,7 @@ const { results, status, loadMore } = usePaginatedQuery(
         note={<>Each loaded page is its own subscription over a fixed index interval (start cursor → end cursor). New items inserted inside a loaded page appear in that page, so pages can grow; boundaries don’t shift.</>}
       />
       <Check
-        q="When should you use ConvexHttpClient instead of ConvexReactClient?"
+        question="When should you use ConvexHttpClient instead of ConvexReactClient?"
         options={['Always in production', 'For scripts, cron jobs on other servers, or server-side code where you need a one-off call and no live updates', 'When you need optimistic updates', 'When you need consistency across queries']}
         answer={1}
         explain="The HTTP client is stateless request/response: no WebSocket, no subscriptions, no transitions. Use it outside interactive UIs."
@@ -417,7 +417,7 @@ const { results, status, loadMore } = usePaginatedQuery(
     <Section id="why-no-cache" title="Why you never write cache invalidation again">
       <p>Put together, the guarantees remove whole categories of client code:</p>
       <ul>
-        <li>No <C>invalidateQueries</C>: the server knows which results changed because it knows their read sets.</li>
+        <li>No <InlineCode>invalidateQueries</InlineCode>: the server knows which results changed because it knows their read sets.</li>
         <li>No stale-while-revalidate tuning: there is no TTL — a result is valid until a write overlaps it.</li>
         <li>No manual websocket channels / pub-sub topics for realtime features: every query is already live.</li>
         <li>No “refetch after mutate”: read-your-writes is built in.</li>
@@ -425,11 +425,11 @@ const { results, status, loadMore } = usePaginatedQuery(
       </ul>
       <Callout kind="rule" title="The cost model">
         Reactivity is not free: every subscription whose read set is hit costs a re-execution. Keep read sets narrow (indexes,
-        <C>take</C>, pagination), avoid reading volatile docs (like a global “lastSeen” field) in widely-used queries, and
+        <InlineCode>take</InlineCode>, pagination), avoid reading volatile docs (like a global “lastSeen” field) in widely-used queries, and
         split rapidly-changing data (presence, typing indicators) into their own tables.
       </Callout>
       <Check
-        q="A query reads the current user doc, which also stores lastActiveAt updated every 10s by a heartbeat. 50 queries on the page read that user doc. What's the issue?"
+        question="A query reads the current user doc, which also stores lastActiveAt updated every 10s by a heartbeat. 50 queries on the page read that user doc. What's the issue?"
         options={['None, Convex caches it', 'Every heartbeat invalidates all 50 queries for that user, re-running them every 10s', 'The heartbeat will conflict and fail', 'Queries can\'t read user docs']}
         answer={1}
         explain="Any write to the user doc overlaps every read set that includes it. Move volatile fields (presence/heartbeat) to a separate table so unrelated queries aren't invalidated."

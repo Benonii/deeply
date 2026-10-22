@@ -83,18 +83,18 @@ function Form() {
   const cost = COST.generateCourse;
   const short = typeof credits === 'number' && credits < cost;
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setProblem(null);
     if (credits === null) return openSignIn('Sign in to create a course.');
     setBusy(true);
     try {
-      const r = (await create({ topic: kind === 'repo' ? topic || repoUrl : topic, kind, repoUrl: kind === 'repo' ? repoUrl : undefined, visibility })) as CreateResult;
-      if (r.status === 'ok') location.hash = `#/create/${r.slug}`;
-      else if (r.status === 'auth') openSignIn('Sign in to create a course.');
-      else if (r.status === 'credits') setProblem(<>You need {r.needed} credits to create a course. <a href="#/account">Get more credits</a></>);
-      else if (r.status === 'rate') setProblem(`You've hit the course creation limit. Try again in ${formatWait(r.retryAfterMs)}.`);
-      else setProblem(r.message);
+      const result = (await create({ topic: kind === 'repo' ? topic || repoUrl : topic, kind, repoUrl: kind === 'repo' ? repoUrl : undefined, visibility })) as CreateResult;
+      if (result.status === 'ok') location.hash = `#/create/${result.slug}`;
+      else if (result.status === 'auth') openSignIn('Sign in to create a course.');
+      else if (result.status === 'credits') setProblem(<>You need {result.needed} credits to create a course. <a href="#/account">Get more credits</a></>);
+      else if (result.status === 'rate') setProblem(`You've hit the course creation limit. Try again in ${formatWait(result.retryAfterMs)}.`);
+      else setProblem(result.message);
     } catch {
       setProblem('Something went wrong starting the course. Try again.');
     } finally {
@@ -105,9 +105,9 @@ function Form() {
   return (
     <form className="cr-form" onSubmit={submit}>
       <div className="cr-seg" role="radiogroup" aria-label="What to learn">
-        {(['concept', 'repo'] as const).map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={kind === k} className={kind === k ? 'on' : ''} onClick={() => setKind(k)}>
-            {k === 'concept' ? 'A concept' : 'A GitHub repo'}
+        {(['concept', 'repo'] as const).map((kindOption) => (
+          <button key={kindOption} type="button" role="radio" aria-checked={kind === kindOption} className={kind === kindOption ? 'on' : ''} onClick={() => setKind(kindOption)}>
+            {kindOption === 'concept' ? 'A concept' : 'A GitHub repo'}
           </button>
         ))}
       </div>
@@ -115,26 +115,26 @@ function Form() {
       {kind === 'concept' ? (
         <label className="cr-field">
           <span>Concept</span>
-          <input id="cr-topic" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. How LLM inference works" maxLength={200} required minLength={3} />
+          <input id="cr-topic" value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="e.g. How LLM inference works" maxLength={200} required minLength={3} />
         </label>
       ) : (
         <>
           <label className="cr-field">
             <span>Repository URL</span>
-            <input id="cr-repo" value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} placeholder="https://github.com/owner/name" required inputMode="url" />
+            <input id="cr-repo" value={repoUrl} onChange={(event) => setRepoUrl(event.target.value)} placeholder="https://github.com/owner/name" required inputMode="url" />
           </label>
           <label className="cr-field">
             <span>Focus (optional)</span>
-            <input id="cr-focus" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. the storage engine and replication" maxLength={200} />
+            <input id="cr-focus" value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="e.g. the storage engine and replication" maxLength={200} />
           </label>
         </>
       )}
 
       <div className="cr-examples">
         <span className="muted small">Try:</span>
-        {EXAMPLES[kind].map((ex) => (
-          <button key={ex} type="button" className="cr-chip" onClick={() => (kind === 'concept' ? setTopic(ex) : setRepoUrl(ex))}>
-            {ex.replace('https://github.com/', '')}
+        {EXAMPLES[kind].map((example) => (
+          <button key={example} type="button" className="cr-chip" onClick={() => (kind === 'concept' ? setTopic(example) : setRepoUrl(example))}>
+            {example.replace('https://github.com/', '')}
           </button>
         ))}
       </div>
@@ -159,9 +159,9 @@ function Form() {
   );
 }
 
-function formatWait(ms: number) {
-  const m = Math.ceil(ms / 60000);
-  return m >= 60 ? `${Math.ceil(m / 60)} hour${m >= 120 ? 's' : ''}` : `${m} minute${m === 1 ? '' : 's'}`;
+function formatWait(milliseconds: number) {
+  const minutes = Math.ceil(milliseconds / 60000);
+  return minutes >= 60 ? `${Math.ceil(minutes / 60)} hour${minutes >= 120 ? 's' : ''}` : `${minutes} minute${minutes === 1 ? '' : 's'}`;
 }
 
 type Status = 'queued' | 'planning' | 'writing' | 'ready' | 'failed';
@@ -180,12 +180,12 @@ function Progress({ slug }: { slug: string }) {
   if (data === null) return <p className="cr-note">No course at this address. <a href="#/create">Create one</a></p>;
   const { course, modules } = data;
   const status = course.status as Status;
-  const ready = modules.filter((m: { status: string }) => m.status === 'ready').length;
+  const ready = modules.filter((courseModule: { status: string }) => courseModule.status === 'ready').length;
   const title = course.meta?.title ?? course.topic;
   const steps: { label: string; state: 'done' | 'active' | 'todo' | 'failed' }[] = [
     { label: course.kind === 'repo' ? 'Research the repository' : 'Research the topic', state: status === 'queued' || status === 'planning' ? 'active' : status === 'failed' && !modules.length ? 'failed' : 'done' },
     { label: 'Plan modules and design the brand', state: modules.length ? 'done' : status === 'failed' ? 'failed' : status === 'planning' ? 'active' : 'todo' },
-    { label: `Write modules (${ready}/${modules.length || '…'})`, state: !modules.length ? 'todo' : modules.every((m: { status: string }) => m.status === 'ready' || m.status === 'failed') ? 'done' : 'active' },
+    { label: `Write modules (${ready}/${modules.length || '…'})`, state: !modules.length ? 'todo' : modules.every((courseModule: { status: string }) => courseModule.status === 'ready' || courseModule.status === 'failed') ? 'done' : 'active' },
     { label: 'Write challenges', state: course.challengesStatus === 'ready' ? 'done' : course.challengesStatus === 'writing' ? 'active' : course.challengesStatus === 'failed' ? 'failed' : 'todo' },
   ];
 
@@ -205,19 +205,19 @@ function Progress({ slug }: { slug: string }) {
       {course.error && <p className="cr-problem">{course.error}</p>}
 
       <ol className="cr-steps">
-        {steps.map((s) => <li key={s.label} className={`st-${s.state}`}><span className="cr-dot" aria-hidden />{s.label}</li>)}
+        {steps.map((step) => <li key={step.label} className={`st-${step.state}`}><span className="cr-dot" aria-hidden />{step.label}</li>)}
       </ol>
 
       {modules.length > 0 && (
         <ul className="cr-mods">
-          {modules.map((m: { n: number; status: string; outline: { id?: string; title: string; summary: string }; error: string | null }) => (
-            <li key={m.n} className={`m-${m.status}`}>
-              <span className="cr-mod-n">{String(m.n).padStart(2, '0')}</span>
+          {modules.map((courseModule: { n: number; status: string; outline: { id?: string; title: string; summary: string }; error: string | null }) => (
+            <li key={courseModule.n} className={`m-${courseModule.status}`}>
+              <span className="cr-mod-n">{String(courseModule.n).padStart(2, '0')}</span>
               <span className="cr-mod-body">
-                <span className="cr-mod-title">{m.outline.title}</span>
-                <span className="muted small">{m.status === 'failed' ? m.error ?? 'Failed' : m.outline.summary}</span>
+                <span className="cr-mod-title">{courseModule.outline.title}</span>
+                <span className="muted small">{courseModule.status === 'failed' ? courseModule.error ?? 'Failed' : courseModule.outline.summary}</span>
               </span>
-              <span className="cr-mod-state">{m.status === 'ready' ? <a href={`#/g/${slug}/m/${moduleId(m)}`}>Read</a> : m.status === 'writing' ? 'Writing…' : m.status === 'failed' ? 'Failed' : 'Waiting'}</span>
+              <span className="cr-mod-state">{courseModule.status === 'ready' ? <a href={`#/g/${slug}/m/${moduleId(courseModule)}`}>Read</a> : courseModule.status === 'writing' ? 'Writing…' : courseModule.status === 'failed' ? 'Failed' : 'Waiting'}</span>
             </li>
           ))}
         </ul>
@@ -226,8 +226,8 @@ function Progress({ slug }: { slug: string }) {
       <details className="cr-log" open={status !== 'ready'}>
         <summary>Generation log</summary>
         <ul>
-          {(events ?? []).map((e: { id: string; at: number; message: string; level: string }) => (
-            <li key={e.id} className={`lv-${e.level}`}><time>{new Date(e.at).toLocaleTimeString()}</time>{e.message}</li>
+          {(events ?? []).map((event: { id: string; at: number; message: string; level: string }) => (
+            <li key={event.id} className={`lv-${event.level}`}><time>{new Date(event.at).toLocaleTimeString()}</time>{event.message}</li>
           ))}
         </ul>
       </details>
@@ -235,8 +235,8 @@ function Progress({ slug }: { slug: string }) {
   );
 }
 
-function moduleId(m: { outline: { id?: string }; n: number }) {
-  return m.outline.id ?? String(m.n);
+function moduleId(courseModule: { outline: { id?: string }; n: number }) {
+  return courseModule.outline.id ?? String(courseModule.n);
 }
 
 function MyCourses({ current }: { current: string | null }) {
@@ -246,15 +246,15 @@ function MyCourses({ current }: { current: string | null }) {
     <section className="cr-mine">
       <h3>Your courses</h3>
       <ul>
-        {mine.map((c: { slug: string; title: string; status: Status; readyModules: number; moduleCount: number; visibility: string }) => (
-          <li key={c.slug} className={c.slug === current ? 'on' : ''}>
-            <a href={c.status === 'ready' ? `#/g/${c.slug}` : `#/create/${c.slug}`}>
-              <span className="cr-mine-title">{c.title}</span>
+        {mine.map((course: { slug: string; title: string; status: Status; readyModules: number; moduleCount: number; visibility: string }) => (
+          <li key={course.slug} className={course.slug === current ? 'on' : ''}>
+            <a href={course.status === 'ready' ? `#/g/${course.slug}` : `#/create/${course.slug}`}>
+              <span className="cr-mine-title">{course.title}</span>
               <span className="muted small">
-                {STATUS_LABEL[c.status]} · {c.readyModules}/{c.moduleCount} modules · {c.visibility}
+                {STATUS_LABEL[course.status]} · {course.readyModules}/{course.moduleCount} modules · {course.visibility}
               </span>
             </a>
-            {c.status !== 'ready' && c.status !== 'failed' && <a className="small" href={`#/create/${c.slug}`}>Progress</a>}
+            {course.status !== 'ready' && course.status !== 'failed' && <a className="small" href={`#/create/${course.slug}`}>Progress</a>}
           </li>
         ))}
       </ul>

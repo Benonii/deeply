@@ -41,13 +41,13 @@ export const ChallengesOutput = z.object({ challenges: z.array(Challenge).min(4)
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 /** Extra checks on the planner output. */
-export function lintPlan(p: PlanOutput): string[] {
+export function lintPlan(plan: PlanOutput): string[] {
   const errs: string[] = [];
-  for (const [k, c] of Object.entries(p.brand.colors)) if (!HEX.test(c)) errs.push(`brand.colors.${k} must be #rrggbb, got ${c}`);
+  for (const [colorName, colorValue] of Object.entries(plan.brand.colors)) if (!HEX.test(colorValue)) errs.push(`brand.colors.${colorName} must be #rrggbb, got ${colorValue}`);
   const ids = new Set<string>();
-  for (const m of p.modules) {
-    if (ids.has(m.id)) errs.push(`duplicate module id ${m.id}`);
-    ids.add(m.id);
+  for (const courseModule of plan.modules) {
+    if (ids.has(courseModule.id)) errs.push(`duplicate module id ${courseModule.id}`);
+    ids.add(courseModule.id);
   }
   return errs;
 }

@@ -1,4 +1,4 @@
-import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, C } from '../../../engine/kit';
+import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, InlineCode } from '../../../engine/kit';
 
 const Component = () => (
   <>
@@ -11,7 +11,7 @@ const Component = () => (
       </p>
       <p>
         So each feature inherits the same guarantees. A scheduled job is a row in a system table, so it's transactional. A
-        file is a row in <C>_storage</C> that points at blob storage, so its metadata is reactive. A search index is an index,
+        file is a row in <InlineCode>_storage</InlineCode> that points at blob storage, so its metadata is reactive. A search index is an index,
         so search results update by themselves. Once you see that, you can work out how most features behave without
         reading their docs.
       </p>
@@ -56,16 +56,16 @@ const Component = () => (
 
     <Section id="pf-scheduler" title="Scheduler: durable jobs that commit with your mutation">
       <p>
-        <C>ctx.scheduler.runAfter(delayMs, fnRef, args)</C> and <C>ctx.scheduler.runAt(timestamp, fnRef, args)</C> enqueue a
+        <InlineCode>ctx.scheduler.runAfter(delayMs, fnRef, args)</InlineCode> and <InlineCode>ctx.scheduler.runAt(timestamp, fnRef, args)</InlineCode> enqueue a
         function to run later. In a mutation, the scheduling call <strong>writes a document into the system table</strong>{' '}
-        <C>_scheduled_functions</C> as part of the mutation's own transaction. That's where the scheduler gets its guarantees:
+        <InlineCode>_scheduled_functions</InlineCode> as part of the mutation's own transaction. That's where the scheduler gets its guarantees:
       </p>
       <ul>
         <li><strong>Atomic with your writes.</strong> If the mutation throws, or is retried after an OCC conflict, the job never existed. You can't get "order saved but email job lost" or "email sent for an order that rolled back".</li>
         <li><strong>Scheduled mutations run exactly once.</strong> They're transactions, so the scheduler can commit the mutation and mark the job done atomically, and retry on transient failures without double effects.</li>
-        <li><strong>Scheduled actions run at most once.</strong> Actions have side effects Convex can't roll back (a <C>fetch</C> to Stripe), so they aren't retried automatically. If one fails partway through, you decide what to do (or use the action-retrier / workpool components).</li>
-        <li><strong>Observable and reactive.</strong> <C>_scheduled_functions</C> is queryable with <C>ctx.db.system.get(id)</C> / <C>ctx.db.system.query("_scheduled_functions")</C>. The job's state (pending, inProgress, success, failed, canceled) is just data, so a UI can subscribe to it.</li>
-        <li><strong>Cancelable.</strong> <C>runAfter</C> returns an <C>Id&lt;"_scheduled_functions"&gt;</C>, and <C>ctx.scheduler.cancel(id)</C> cancels it. A job that hasn't started won't run. A running action isn't interrupted, but no further scheduled work starts.</li>
+        <li><strong>Scheduled actions run at most once.</strong> Actions have side effects Convex can't roll back (a <InlineCode>fetch</InlineCode> to Stripe), so they aren't retried automatically. If one fails partway through, you decide what to do (or use the action-retrier / workpool components).</li>
+        <li><strong>Observable and reactive.</strong> <InlineCode>_scheduled_functions</InlineCode> is queryable with <InlineCode>ctx.db.system.get(id)</InlineCode> / <InlineCode>ctx.db.system.query("_scheduled_functions")</InlineCode>. The job's state (pending, inProgress, success, failed, canceled) is just data, so a UI can subscribe to it.</li>
+        <li><strong>Cancelable.</strong> <InlineCode>runAfter</InlineCode> returns an <InlineCode>Id&lt;"_scheduled_functions"&gt;</InlineCode>, and <InlineCode>ctx.scheduler.cancel(id)</InlineCode> cancels it. A job that hasn't started won't run. A running action isn't interrupted, but no further scheduled work starts.</li>
       </ul>
       <Code
         title="convex/orders.ts — schedule work transactionally"
@@ -117,7 +117,7 @@ export const expire = internalMutation({
 });
 `}
         note={<>
-          <C>runAfter(0, ...)</C> is the standard way to kick off an action from a mutation. A mutation can't call an action
+          <InlineCode>runAfter(0, ...)</InlineCode> is the standard way to kick off an action from a mutation. A mutation can't call an action
           directly, because actions have side effects and the mutation may be retried.
         </>}
       />
@@ -155,12 +155,12 @@ export const expire = internalMutation({
         ]}
       />
       <Callout kind="warn" title="Scheduling from an action is NOT atomic">
-        In an action, <C>ctx.scheduler.runAfter</C> commits the job immediately, because there's no surrounding
+        In an action, <InlineCode>ctx.scheduler.runAfter</InlineCode> commits the job immediately, because there's no surrounding
         transaction. If the action then throws, the job still runs. Schedule from mutations whenever the job should depend
         on other writes.
       </Callout>
       <Callout kind="deep" title="Why mutations can't call actions directly">
-        Mutations are deterministic and retried on OCC conflict. If a mutation could <C>fetch</C>, every retry would repeat
+        Mutations are deterministic and retried on OCC conflict. If a mutation could <InlineCode>fetch</InlineCode>, every retry would repeat
         the side effect. The scheduler fixes this by turning "call that action" into data (a row), which commits once. The
         effectful work then happens outside the transaction, after commit.
       </Callout>
@@ -168,7 +168,7 @@ export const expire = internalMutation({
 
     <Section id="pf-crons" title="Cron jobs: declarative schedules">
       <p>
-        Recurring jobs are declared in <C>convex/crons.ts</C> with <C>cronJobs()</C>. On <C>npx convex deploy</C> / <C>dev</C>,
+        Recurring jobs are declared in <InlineCode>convex/crons.ts</InlineCode> with <InlineCode>cronJobs()</InlineCode>. On <InlineCode>npx convex deploy</InlineCode> / <InlineCode>dev</InlineCode>,
         the backend reconciles the declared crons with what's registered. Each run is then executed through the same
         scheduling machinery, so cron-run mutations get exactly-once and cron-run actions get at-most-once.
       </p>
@@ -198,15 +198,15 @@ export default crons;
     <Section id="pf-files" title="File storage: blobs outside, metadata inside">
       <p>
         File bytes live in blob storage (object storage such as S3 behind Convex cloud; local disk or S3-compatible storage
-        for self-hosted). Each file also has a metadata document in the system table <C>_storage</C>: <C>_id</C>
-        (a <C>Id&lt;"_storage"&gt;</C>), <C>sha256</C>, <C>size</C>, <C>contentType</C>, <C>_creationTime</C>. You store the
-        storage ID in your own documents and resolve it to a URL with <C>ctx.storage.getUrl(id)</C>.
+        for self-hosted). Each file also has a metadata document in the system table <InlineCode>_storage</InlineCode>: <InlineCode>_id</InlineCode>
+        (a <InlineCode>Id&lt;"_storage"&gt;</InlineCode>), <InlineCode>sha256</InlineCode>, <InlineCode>size</InlineCode>, <InlineCode>contentType</InlineCode>, <InlineCode>_creationTime</InlineCode>. You store the
+        storage ID in your own documents and resolve it to a URL with <InlineCode>ctx.storage.getUrl(id)</InlineCode>.
       </p>
       <p>There are three ways files get in:</p>
       <ol>
-        <li><strong>Upload URLs</strong> (best for browser uploads of any size): a mutation calls <C>ctx.storage.generateUploadUrl()</C>, the client POSTs the bytes straight to that short-lived URL, gets back <C>{'{ storageId }'}</C>, then calls a second mutation to save it.</li>
-        <li><strong>HTTP action upload</strong>: the client POSTs to your <C>httpAction</C>, which calls <C>ctx.storage.store(blob)</C>. One round trip and custom logic, but the request size is limited (about 20 MB; check docs).</li>
-        <li><strong>From an action</strong>: <C>ctx.storage.store(blob)</C> after generating or fetching content (an AI image, a downloaded PDF).</li>
+        <li><strong>Upload URLs</strong> (best for browser uploads of any size): a mutation calls <InlineCode>ctx.storage.generateUploadUrl()</InlineCode>, the client POSTs the bytes straight to that short-lived URL, gets back <InlineCode>{'{ storageId }'}</InlineCode>, then calls a second mutation to save it.</li>
+        <li><strong>HTTP action upload</strong>: the client POSTs to your <InlineCode>httpAction</InlineCode>, which calls <InlineCode>ctx.storage.store(blob)</InlineCode>. One round trip and custom logic, but the request size is limited (about 20 MB; check docs).</li>
+        <li><strong>From an action</strong>: <InlineCode>ctx.storage.store(blob)</InlineCode> after generating or fetching content (an AI image, a downloaded PDF).</li>
       </ol>
       <Flow
         title="Upload-URL flow (3 steps, bytes never touch your functions)"
@@ -288,7 +288,7 @@ async function onUpload(file: File) {
     <Section id="pf-auth" title="Auth: identity is a verified JWT on the connection">
       <p>
         Convex doesn't make you run an auth server. It verifies <strong>OpenID Connect JWTs</strong> from providers you
-        configure in <C>convex/auth.config.ts</C>: Clerk, Auth0, WorkOS, any OIDC issuer, custom JWT, or the first-party{' '}
+        configure in <InlineCode>convex/auth.config.ts</InlineCode>: Clerk, Auth0, WorkOS, any OIDC issuer, custom JWT, or the first-party{' '}
         <strong>Convex Auth</strong> library (which runs the auth flows inside your own deployment and issues tokens
         itself).
       </p>
@@ -306,14 +306,14 @@ export default {
 `}
       />
       <ol>
-        <li>The client gets a JWT from the provider and passes a token fetcher to <C>ConvexProviderWithClerk</C> / <C>ConvexProviderWithAuth</C> (or <C>client.setAuth(fetchToken)</C>).</li>
-        <li>The client sends an <C>Authenticate</C> message over the WebSocket. The backend checks the signature against the issuer's JWKS, plus <C>iss</C>, <C>aud</C> and expiry.</li>
-        <li>Every function on that connection sees <C>ctx.auth.getUserIdentity()</C>, which returns a <C>UserIdentity</C> (<C>tokenIdentifier</C>, <C>subject</C>, <C>issuer</C>, plus claims like <C>email</C>, <C>name</C>) or <C>null</C>.</li>
+        <li>The client gets a JWT from the provider and passes a token fetcher to <InlineCode>ConvexProviderWithClerk</InlineCode> / <InlineCode>ConvexProviderWithAuth</InlineCode> (or <InlineCode>client.setAuth(fetchToken)</InlineCode>).</li>
+        <li>The client sends an <InlineCode>Authenticate</InlineCode> message over the WebSocket. The backend checks the signature against the issuer's JWKS, plus <InlineCode>iss</InlineCode>, <InlineCode>aud</InlineCode> and expiry.</li>
+        <li>Every function on that connection sees <InlineCode>ctx.auth.getUserIdentity()</InlineCode>, which returns a <InlineCode>UserIdentity</InlineCode> (<InlineCode>tokenIdentifier</InlineCode>, <InlineCode>subject</InlineCode>, <InlineCode>issuer</InlineCode>, plus claims like <InlineCode>email</InlineCode>, <InlineCode>name</InlineCode>) or <InlineCode>null</InlineCode>.</li>
         <li>Before the token expires, the client fetches a fresh one and re-authenticates <strong>on the same socket</strong>. The identity version changes, so queries re-run under the new identity.</li>
       </ol>
       <Callout kind="deep" title="Identity is part of the cache key">
-        Query results are cached per (function, args, identity). Two users calling <C>api.messages.mine</C> with identical
-        args never share a cached result, because <C>getUserIdentity()</C> is an input to the query just like its args. This
+        Query results are cached per (function, args, identity). Two users calling <InlineCode>api.messages.mine</InlineCode> with identical
+        args never share a cached result, because <InlineCode>getUserIdentity()</InlineCode> is an input to the query just like its args. This
         is why auth is "reactive": when your token changes, or you log out, the client's query set is re-evaluated under the
         new identity.
       </Callout>
@@ -332,21 +332,21 @@ export const me = query({
   },
 });
 `}
-        note={<>Key users on <C>tokenIdentifier</C> (issuer + subject), which is unique across providers. Keep the users table up to date with a "store user" mutation on login, or with provider webhooks through an HTTP action.</>}
+        note={<>Key users on <InlineCode>tokenIdentifier</InlineCode> (issuer + subject), which is unique across providers. Keep the users table up to date with a "store user" mutation on login, or with provider webhooks through an HTTP action.</>}
       />
       <Callout kind="warn" title="Authorization is your job, in every public function">
         Convex authenticates (who is this?). Your functions authorize (may they do this?). There's no row-level-security
-        layer by default: every exported <C>query</C>/<C>mutation</C>/<C>action</C> is a public API endpoint. Check identity
-        and ownership in each one, or wrap them with <C>customQuery</C>/<C>customMutation</C> from convex-helpers.
+        layer by default: every exported <InlineCode>query</InlineCode>/<InlineCode>mutation</InlineCode>/<InlineCode>action</InlineCode> is a public API endpoint. Check identity
+        and ownership in each one, or wrap them with <InlineCode>customQuery</InlineCode>/<InlineCode>customMutation</InlineCode> from convex-helpers.
       </Callout>
     </Section>
 
     <Section id="pf-search" title="Full-text search: reactive, transactional search indexes">
       <p>
-        A <C>searchIndex</C> is declared in the schema next to normal indexes. It names one <C>searchField</C> (a string that
-        gets tokenized) and optional <C>filterFields</C> for fast equality filters. Search indexes are kept up to date
+        A <InlineCode>searchIndex</InlineCode> is declared in the schema next to normal indexes. It names one <InlineCode>searchField</InlineCode> (a string that
+        gets tokenized) and optional <InlineCode>filterFields</InlineCode> for fast equality filters. Search indexes are kept up to date
         transactionally like any other index: a document you just wrote shows up in search in the same snapshot. Search
-        queries are also <strong>reactive</strong>, so a <C>useQuery</C> on search results updates when matching documents
+        queries are also <strong>reactive</strong>, so a <InlineCode>useQuery</InlineCode> on search results updates when matching documents
         change.
       </p>
       <Code
@@ -369,18 +369,18 @@ export const search = query({
       />
       <ul>
         <li>Relevance uses BM25-style scoring over terms. The last term gets prefix matching (good for type-ahead), and there's limited fuzzy matching (check docs, this has changed over time).</li>
-        <li>Results are ordered by relevance only. You can't <C>.order()</C> a search query.</li>
-        <li>Filter fields are equality-only and part of the index. Anything else you <C>.filter()</C> after the fact, which costs scanned results.</li>
-        <li>There's a cap on how many results one search query can return (about 1024; check docs). Paginate with <C>.paginate()</C>.</li>
+        <li>Results are ordered by relevance only. You can't <InlineCode>.order()</InlineCode> a search query.</li>
+        <li>Filter fields are equality-only and part of the index. Anything else you <InlineCode>.filter()</InlineCode> after the fact, which costs scanned results.</li>
+        <li>There's a cap on how many results one search query can return (about 1024; check docs). Paginate with <InlineCode>.paginate()</InlineCode>.</li>
         <li>Under the hood the backend uses a Tantivy-based inverted index: segments built in the background from the transaction log, plus an in-memory index over recent writes so new documents are searchable immediately.</li>
       </ul>
     </Section>
 
     <Section id="pf-vector" title="Vector search: ANN in actions, documents in queries">
       <p>
-        A <C>vectorIndex</C> declares a <C>vectorField</C> (an <C>v.array(v.float64())</C> of fixed <C>dimensions</C>) and
-        optional <C>filterFields</C>. Vector search is <strong>only available in actions</strong>, through{' '}
-        <C>ctx.vectorSearch(table, index, {'{ vector, limit, filter }'})</C>. It returns <C>{'{ _id, _score }'}</C> pairs
+        A <InlineCode>vectorIndex</InlineCode> declares a <InlineCode>vectorField</InlineCode> (an <InlineCode>v.array(v.float64())</InlineCode> of fixed <InlineCode>dimensions</InlineCode>) and
+        optional <InlineCode>filterFields</InlineCode>. Vector search is <strong>only available in actions</strong>, through{' '}
+        <InlineCode>ctx.vectorSearch(table, index, {'{ vector, limit, filter }'})</InlineCode>. It returns <InlineCode>{'{ _id, _score }'}</InlineCode> pairs
         (cosine similarity), and you then load the documents with a query.
       </p>
       <Code
@@ -420,7 +420,7 @@ export const fetchChunks = internalQuery({
         caption="Search flavours compared"
         head={['', 'Database index', 'Search index', 'Vector index']}
         rows={[
-          ['Declared with', <C>.index()</C>, <C>.searchIndex()</C>, <C>.vectorIndex()</C>],
+          ['Declared with', <InlineCode>.index()</InlineCode>, <InlineCode>.searchIndex()</InlineCode>, <InlineCode>.vectorIndex()</InlineCode>],
           ['Used from', 'query / mutation', 'query / mutation', 'action only'],
           ['Reactive', 'yes', 'yes', 'no (fetch docs in a query)'],
           ['Ordering', 'index key order', 'relevance', 'similarity score'],
@@ -432,9 +432,9 @@ export const fetchChunks = internalQuery({
 
     <Section id="pf-http" title="HTTP actions: your public REST & webhook surface">
       <p>
-        HTTP actions use the standard <C>Request</C>/<C>Response</C> Fetch API and are routed in <C>convex/http.ts</C>. They're
-        served from your deployment's <C>.convex.site</C> domain (not <C>.convex.cloud</C>). They behave like actions: no
-        direct <C>ctx.db</C>, and they use <C>ctx.runQuery</C> / <C>ctx.runMutation</C> / <C>ctx.runAction</C>. They run in
+        HTTP actions use the standard <InlineCode>Request</InlineCode>/<InlineCode>Response</InlineCode> Fetch API and are routed in <InlineCode>convex/http.ts</InlineCode>. They're
+        served from your deployment's <InlineCode>.convex.site</InlineCode> domain (not <InlineCode>.convex.cloud</InlineCode>). They behave like actions: no
+        direct <InlineCode>ctx.db</InlineCode>, and they use <InlineCode>ctx.runQuery</InlineCode> / <InlineCode>ctx.runMutation</InlineCode> / <InlineCode>ctx.runAction</InlineCode>. They run in
         the Convex (V8) runtime.
       </p>
       <Code
@@ -507,8 +507,8 @@ export default http;
     <Section id="pf-components" title="Components: sandboxed backend packages">
       <p>
         Components are reusable backend modules (npm packages) with their <strong>own tables, functions, schema and
-        scheduled jobs</strong>, isolated from your app. You install one in <C>convex/convex.config.ts</C>; its tables don't
-        show up in your <C>ctx.db</C>, and it can only touch your data through the arguments you pass. Its functions are
+        scheduled jobs</strong>, isolated from your app. You install one in <InlineCode>convex/convex.config.ts</InlineCode>; its tables don't
+        show up in your <InlineCode>ctx.db</InlineCode>, and it can only touch your data through the arguments you pass. Its functions are
         called transactionally: a component mutation called from your mutation commits or rolls back with it.
       </p>
       <Code
@@ -562,16 +562,16 @@ export const send = mutation({
       />
       <Callout kind="insight" title="Why components can be transactional">
         A component is a separate namespace inside the same deployment and the same transaction log. Calling a component
-        mutation from your mutation is a sub-call inside one transaction (like <C>ctx.runMutation</C> inside a mutation).
+        mutation from your mutation is a sub-call inside one transaction (like <InlineCode>ctx.runMutation</InlineCode> inside a mutation).
         A rate-limit check, an aggregate update and your insert commit atomically. Microservices can't give you that.
       </Callout>
     </Section>
 
     <Section id="pf-ops" title="Env vars, logs, import/export, backups">
       <ul>
-        <li><strong>Environment variables</strong> are set per deployment (dashboard or <C>npx convex env set KEY value</C>) and read with <C>process.env.KEY</C> in any function. Changing one restarts nothing and needs no redeploy, though cached query results depend on them (check docs on invalidation).</li>
-        <li><strong>Logs</strong>: <C>console.log</C> from functions streams to the dashboard and to <C>npx convex dev</C> / <C>npx convex logs</C>. Log streams (Axiom, Datadog, webhook) are available on paid plans. Every function execution is also recorded with timing, read/write volume and errors.</li>
-        <li><strong>Import/export</strong>: <C>npx convex import</C> (JSON/JSONL/CSV, or a ZIP snapshot) and <C>npx convex export</C> (ZIP of tables + files). Snapshot import can replace or append tables atomically.</li>
+        <li><strong>Environment variables</strong> are set per deployment (dashboard or <InlineCode>npx convex env set KEY value</InlineCode>) and read with <InlineCode>process.env.KEY</InlineCode> in any function. Changing one restarts nothing and needs no redeploy, though cached query results depend on them (check docs on invalidation).</li>
+        <li><strong>Logs</strong>: <InlineCode>console.log</InlineCode> from functions streams to the dashboard and to <InlineCode>npx convex dev</InlineCode> / <InlineCode>npx convex logs</InlineCode>. Log streams (Axiom, Datadog, webhook) are available on paid plans. Every function execution is also recorded with timing, read/write volume and errors.</li>
+        <li><strong>Import/export</strong>: <InlineCode>npx convex import</InlineCode> (JSON/JSONL/CSV, or a ZIP snapshot) and <InlineCode>npx convex export</InlineCode> (ZIP of tables + files). Snapshot import can replace or append tables atomically.</li>
         <li><strong>Streaming export</strong> (Fivetran / Airbyte connectors) replicates tables to a warehouse by tailing the transaction log through document-delta APIs. Streaming import is also available.</li>
         <li><strong>Backups</strong>: on-demand or scheduled backups in the dashboard, restorable into the same or another deployment. A backup is a snapshot at a single timestamp, so it's consistent.</li>
       </ul>
@@ -595,19 +595,19 @@ npx convex dashboard           # open the dashboard for this deployment
       <Compare
         head={['Deployment', 'Created by', 'Used for', 'Notes']}
         rows={[
-          ['Dev (per developer)', <C>npx convex dev</C>, 'Your local loop', 'Each teammate gets their own backend; pushes on file save'],
-          ['Production', <C>npx convex deploy</C>, 'Real users', 'One per project; deployed from CI with a production deploy key'],
+          ['Dev (per developer)', <InlineCode>npx convex dev</InlineCode>, 'Your local loop', 'Each teammate gets their own backend; pushes on file save'],
+          ['Production', <InlineCode>npx convex deploy</InlineCode>, 'Real users', 'One per project; deployed from CI with a production deploy key'],
           ['Preview', 'deploy with a preview deploy key + branch name', 'PR previews (Vercel/Netlify)', 'Fresh deployment per branch, optional --preview-run to seed data, auto-cleaned'],
           ['Self-hosted', 'Docker image (open-source backend)', 'On-prem / compliance / local', 'SQLite or Postgres (also MySQL) persistence, S3-compatible or local storage; you run the dashboard too'],
         ]}
       />
       <p>
         <strong>Deploy keys</strong> are secrets scoped to a deployment type (prod or preview). In CI the frontend build
-        usually runs as <C>npx convex deploy --cmd 'npm run build'</C>. That pushes functions, then runs your build with{' '}
-        <C>CONVEX_URL</C> (or the framework-prefixed variant) injected, so the frontend points at the right backend.
+        usually runs as <InlineCode>npx convex deploy --cmd 'npm run build'</InlineCode>. That pushes functions, then runs your build with{' '}
+        <InlineCode>CONVEX_URL</InlineCode> (or the framework-prefixed variant) injected, so the frontend points at the right backend.
       </p>
       <Callout kind="deep" title="What a push actually does">
-        The CLI bundles <C>convex/</C> with esbuild, runs codegen and typechecks, then uploads modules. The backend analyzes
+        The CLI bundles <InlineCode>convex/</InlineCode> with esbuild, runs codegen and typechecks, then uploads modules. The backend analyzes
         them (exported functions, validators, crons, HTTP routes), validates the new schema against existing data, and
         backfills new indexes. Only then does it atomically switch to the new code version. If data violates the new schema,
         or an index is still backfilling, the push waits or fails instead of breaking production.
@@ -632,31 +632,31 @@ npx convex dashboard           # open the dashboard for this deployment
         ]}
       />
       <Check
-        q="A mutation inserts an order and calls ctx.scheduler.runAfter(0, internal.email.send, ...). Then it throws an error. What happens to the email job?"
+        question="A mutation inserts an order and calls ctx.scheduler.runAfter(0, internal.email.send, ...). Then it throws an error. What happens to the email job?"
         options={['It runs anyway, because scheduling is fire-and-forget', "It never exists: the job row is rolled back with the mutation's other writes", 'It runs once the mutation is retried', 'It is queued but marked failed']}
         answer={1}
         explain="In a mutation, scheduling writes a row into _scheduled_functions inside the same transaction. A thrown error aborts the transaction, so nothing commits, including the job."
       />
       <Check
-        q="Why can't you call ctx.vectorSearch inside a query?"
+        question="Why can't you call ctx.vectorSearch inside a query?"
         options={["Vector indexes live in a different database that queries can't reach", "ANN results aren't part of the deterministic, read-set-tracked model that makes queries reactive and cacheable", 'Queries are too slow for vectors', "It's a pricing restriction"]}
         answer={1}
         explain="Queries must be deterministic, and their read sets must be expressible as index ranges so the subscription manager can invalidate them. Approximate nearest neighbour doesn't fit, so it lives in actions. You then fetch documents with a (reactive) query."
       />
       <Check
-        q="Which upload strategy streams bytes without passing through a Convex function?"
+        question="Which upload strategy streams bytes without passing through a Convex function?"
         options={['ctx.storage.store in a mutation', 'An HTTP action calling ctx.storage.store', 'POSTing to a URL from ctx.storage.generateUploadUrl()', 'Passing the file as a v.bytes() mutation arg']}
         answer={2}
         explain="Upload URLs go straight to blob storage. Function arg/body limits don't apply, and you then save the returned storageId with a mutation. (Mutations can't call ctx.storage.store; it's available in actions.)"
       />
       <Check
-        q="Two users subscribe to api.notes.mine with identical args {}. Do they share a cached result?"
+        question="Two users subscribe to api.notes.mine with identical args {}. Do they share a cached result?"
         options={['Yes, the cache key is (function, args)', 'No, identity is part of the cache key', 'Only if they are on the same WebSocket', 'Only for public queries']}
         answer={1}
         explain="ctx.auth.getUserIdentity() is an input to the query, so the cache key includes identity. Results are never shared across users, and re-authenticating triggers a re-evaluation."
       />
       <Check
-        q="Your rate-limiter component check and your message insert run in the same mutation. The insert throws. What happens to the consumed rate-limit token?"
+        question="Your rate-limiter component check and your message insert run in the same mutation. The insert throws. What happens to the consumed rate-limit token?"
         options={['It stays consumed: components are separate services', 'It is rolled back: component mutations run inside your transaction', 'It is refunded asynchronously by a cron', 'Undefined behaviour']}
         answer={1}
         explain="Components share the deployment's transaction log. A component mutation called from your mutation is part of the same transaction and commits or aborts with it."

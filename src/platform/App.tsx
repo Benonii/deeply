@@ -22,9 +22,9 @@ import { fromBuiltin, fromGenerated, type GeneratedCourseDoc, type ShellCourse }
 
 /** Links from the single-course Convex app keep working. */
 function legacyRedirect(path: string): string | null {
-  const m = path.match(/^\/(m\/[\w-]+|playground|lab|source)$/);
-  if (!m) return null;
-  return m[1].startsWith('m/') ? `/c/convex/${m[1]}` : `/c/convex/p/${m[1]}`;
+  const match = path.match(/^\/(m\/[\w-]+|playground|lab|source)$/);
+  if (!match) return null;
+  return match[1].startsWith('m/') ? `/c/convex/${match[1]}` : `/c/convex/p/${match[1]}`;
 }
 
 function useRoute() {
@@ -54,24 +54,24 @@ function parse(path: string): Route {
   if (path === '/' || path === '') return { page: 'home' };
   if (path.startsWith('/create')) return { page: 'create' };
   if (path.startsWith('/account')) return { page: 'account' };
-  const m = path.match(/^\/(c|g)\/([\w-]+)(?:\/(m|p)\/([\w-]+))?\/?$/);
-  if (m) return { page: 'course', source: m[1] as 'c' | 'g', id: m[2], sub: m[3] ? { kind: m[3] as 'm' | 'p', id: m[4] } : undefined };
+  const match = path.match(/^\/(c|g)\/([\w-]+)(?:\/(m|p)\/([\w-]+))?\/?$/);
+  if (match) return { page: 'course', source: match[1] as 'c' | 'g', id: match[2], sub: match[3] ? { kind: match[3] as 'm' | 'p', id: match[4] } : undefined };
   return { page: 'notfound' };
 }
 
-function useReveal(dep: unknown) {
+function useReveal(dependency: unknown) {
   useEffect(() => {
-    const els = document.querySelectorAll('.reveal:not(.in)');
-    if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    const elements = document.querySelectorAll('.reveal:not(.in)');
+    if (!('IntersectionObserver' in window)) { elements.forEach((element) => element.classList.add('in')); return; }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add('in'); observer.unobserve(entry.target); } });
     }, { rootMargin: '0px 0px -8% 0px' });
-    els.forEach((e) => io.observe(e));
+    elements.forEach((element) => observer.observe(element));
     // Content that loads later (generated modules) gets revealed too.
-    const mo = new MutationObserver(() => document.querySelectorAll('.reveal:not(.in)').forEach((e) => io.observe(e)));
-    mo.observe(document.body, { childList: true, subtree: true });
-    return () => { io.disconnect(); mo.disconnect(); };
-  }, [dep]);
+    const mutationObserver = new MutationObserver(() => document.querySelectorAll('.reveal:not(.in)').forEach((element) => observer.observe(element)));
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    return () => { observer.disconnect(); mutationObserver.disconnect(); };
+  }, [dependency]);
 }
 
 /* ------------------------------------------------------------------ */
@@ -135,7 +135,7 @@ function PlatformNav({ route }: { route: string }) {
       {item('/create', 'Create a course', '+', route.startsWith('/create'))}
       {item('/account', 'Account & credits', '◎', route.startsWith('/account'))}
       <div className="nav-label">Courses</div>
-      {builtinCourses.map((c) => item(`/c/${c.id}`, c.title, '▸', false))}
+      {builtinCourses.map((builtinCourse) => item(`/c/${builtinCourse.id}`, builtinCourse.title, '▸', false))}
     </nav>
   );
 }
@@ -158,7 +158,7 @@ function GeneratedCourse({ slug, route, sub }: { slug: string; route: string; su
   if (doc === undefined) return <Shell brand={DEEPLY_BRAND} route={route} nav={<PlatformNav route={route} />}><div className="page-head"><span className="spinner" /> <p className="lede">Loading course…</p></div></Shell>;
   if (doc === null) return <Shell brand={DEEPLY_BRAND} route={route} nav={<PlatformNav route={route} />}><NotFound what="course" back="#/" /></Shell>;
   const course = fromGenerated(doc, DEEPLY_BRAND);
-  if (doc.course.status === 'failed' && !course.modules.some((m) => m.status === 'ready')) {
+  if (doc.course.status === 'failed' && !course.modules.some((courseModule) => courseModule.status === 'ready')) {
     return (
       <Shell brand={DEEPLY_BRAND} route={route} nav={<PlatformNav route={route} />}>
         <div className="page-head"><div className="eyebrow">Generation failed</div><h1>{course.title}</h1><p className="lede">{doc.course.error ?? 'Something went wrong while writing this course.'}</p></div>
@@ -185,8 +185,8 @@ export function App() {
   }, [client]);
 
   if (route.page === 'course' && route.source === 'c') {
-    const c = builtinCourses.find((x) => x.id === route.id);
-    if (c) return <CourseRoutes course={fromBuiltin(c)} route={path} sub={route.sub} />;
+    const course = builtinCourses.find((candidate) => candidate.id === route.id);
+    if (course) return <CourseRoutes course={fromBuiltin(course)} route={path} sub={route.sub} />;
   }
   if (route.page === 'course' && route.source === 'g') {
     if (!client) {

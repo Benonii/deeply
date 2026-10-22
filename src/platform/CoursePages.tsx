@@ -6,18 +6,18 @@ import { useProgress } from '../engine/progress';
 import { BrandShader } from './BrandShader';
 import type { ShellCourse, ShellModule } from './model';
 
-const pad = (n: number) => String(n).padStart(2, '0');
+const padTwoDigits = (digits: number) => String(digits).padStart(2, '0');
 
 /** Extra pages of a course: its own pages plus a challenges page for packs. */
-export function coursePages(c: ShellCourse) {
-  const pages = [...c.pages];
-  if (c.challenges?.length) pages.push({ id: 'challenges', label: 'Challenges', Component: () => <PackChallenges challenges={c.challenges!} course={c.title} /> });
+export function coursePages(course: ShellCourse) {
+  const pages = [...course.pages];
+  if (course.challenges?.length) pages.push({ id: 'challenges', label: 'Challenges', Component: () => <PackChallenges challenges={course.challenges!} course={course.title} /> });
   return pages;
 }
 
 export function CourseNav({ course, route }: { course: ShellCourse; route: string }) {
   const { progress } = useProgress(course.id);
-  const done = course.modules.filter((m) => progress.done[m.id]).length;
+  const done = course.modules.filter((courseModule) => progress.done[courseModule.id]).length;
   const pages = coursePages(course);
   return (
     <>
@@ -31,25 +31,25 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
       </div>
       <nav aria-label={`${course.title} modules`}>
         <div className="nav-label">Modules</div>
-        {course.modules.map((m) => {
-          const href = `${course.base}/m/${m.id}`;
-          const ready = m.status === 'ready';
+        {course.modules.map((courseModule) => {
+          const href = `${course.base}/m/${courseModule.id}`;
+          const ready = courseModule.status === 'ready';
           return (
-            <a key={m.id} href={`#${href}`} className={`nav-item ${route === href ? 'on' : ''} ${progress.done[m.id] ? 'done' : ''} ${ready ? '' : 'pending'}`} aria-disabled={!ready}>
-              <span className="nav-n">{pad(m.n)}</span>
-              <span className="nav-t">{m.title}</span>
-              <span className="nav-min">{ready ? `${m.minutes}m` : m.status === 'failed' ? 'failed' : 'writing'}</span>
+            <a key={courseModule.id} href={`#${href}`} className={`nav-item ${route === href ? 'on' : ''} ${progress.done[courseModule.id] ? 'done' : ''} ${ready ? '' : 'pending'}`} aria-disabled={!ready}>
+              <span className="nav-n">{padTwoDigits(courseModule.n)}</span>
+              <span className="nav-t">{courseModule.title}</span>
+              <span className="nav-min">{ready ? `${courseModule.minutes}m` : courseModule.status === 'failed' ? 'failed' : 'writing'}</span>
             </a>
           );
         })}
         {pages.length > 0 && <div className="nav-label">Practice</div>}
-        {pages.map((p) => {
-          const href = `${course.base}/p/${p.id}`;
+        {pages.map((page) => {
+          const href = `${course.base}/p/${page.id}`;
           return (
-            <a key={p.id} href={`#${href}`} className={`nav-item ${route.startsWith(href) ? 'on' : ''}`}>
+            <a key={page.id} href={`#${href}`} className={`nav-item ${route.startsWith(href) ? 'on' : ''}`}>
               <span className="nav-n">▸</span>
-              <span className="nav-t">{p.label}</span>
-              {p.badge && <span className="nav-min">{p.badge}</span>}
+              <span className="nav-t">{page.label}</span>
+              {page.badge && <span className="nav-min">{page.badge}</span>}
             </a>
           );
         })}
@@ -60,9 +60,9 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
 
 export function CourseHome({ course }: { course: ShellCourse }) {
   const { progress } = useProgress(course.id);
-  const ready = course.modules.filter((m) => m.status === 'ready');
-  const total = course.modules.reduce((s, m) => s + m.minutes, 0);
-  const next = ready.find((m) => !progress.done[m.id]) ?? ready[0];
+  const ready = course.modules.filter((courseModule) => courseModule.status === 'ready');
+  const total = course.modules.reduce((sum, courseModule) => sum + courseModule.minutes, 0);
+  const next = ready.find((courseModule) => !progress.done[courseModule.id]) ?? ready[0];
   const pages = coursePages(course);
   const [head, ...rest] = course.title.split(', ');
   return (
@@ -90,32 +90,32 @@ export function CourseHome({ course }: { course: ShellCourse }) {
         <div>
           <h3>Stuck? Simplify, or ask.</h3>
           <p>Every block has a <b>Simplify</b> button that rewrites it in plainer words, and a <b>Copy</b> button that turns it into a prompt you can paste to Claude.</p>
-          <CopyBtn label="Copy the course outline" get={() => buildPrompt([course.title, 'Course outline'], course.modules.map((m) => `${m.n}. ${m.title} (${m.minutes} min): ${m.summary}`).join('\n'))} />
+          <CopyBtn label="Copy the course outline" get={() => buildPrompt([course.title, 'Course outline'], course.modules.map((courseModule) => `${courseModule.n}. ${courseModule.title} (${courseModule.minutes} min): ${courseModule.summary}`).join('\n'))} />
         </div>
       </section>
 
       <section className="curriculum">
-        {course.modules.map((m, k) => {
-          const ok = m.status === 'ready';
+        {course.modules.map((courseModule, index) => {
+          const ok = courseModule.status === 'ready';
           const Tag = ok ? 'a' : 'div';
           return (
-            <Tag key={m.id} {...(ok ? { href: `#${course.base}/m/${m.id}` } : {})} className={`mod-card reveal ${progress.done[m.id] ? 'done' : ''} ${ok ? '' : 'pending'}`} style={{ transitionDelay: `${k * 40}ms` }}>
-              <div className="mod-n">{pad(m.n)}</div>
+            <Tag key={courseModule.id} {...(ok ? { href: `#${course.base}/m/${courseModule.id}` } : {})} className={`mod-card reveal ${progress.done[courseModule.id] ? 'done' : ''} ${ok ? '' : 'pending'}`} style={{ transitionDelay: `${index * 40}ms` }}>
+              <div className="mod-n">{padTwoDigits(courseModule.n)}</div>
               <div className="mod-body">
-                <div className="mod-kicker">{m.kicker}{m.kicker ? ' · ' : ''}{ok ? `${m.minutes} min` : m.status === 'failed' ? 'failed to generate' : 'being written…'}</div>
-                <div className="mod-title">{m.title}</div>
-                <p>{m.summary}</p>
+                <div className="mod-kicker">{courseModule.kicker}{courseModule.kicker ? ' · ' : ''}{ok ? `${courseModule.minutes} min` : courseModule.status === 'failed' ? 'failed to generate' : 'being written…'}</div>
+                <div className="mod-title">{courseModule.title}</div>
+                <p>{courseModule.summary}</p>
               </div>
-              <div className="mod-state">{progress.done[m.id] ? '✓' : ok ? '→' : m.status === 'failed' ? '!' : <span className="spinner" aria-label="Writing" />}</div>
+              <div className="mod-state">{progress.done[courseModule.id] ? '✓' : ok ? '→' : courseModule.status === 'failed' ? '!' : <span className="spinner" aria-label="Writing" />}</div>
             </Tag>
           );
         })}
-        {pages.map((p) => (
-          <a key={p.id} href={`#${course.base}/p/${p.id}`} className="mod-card reveal">
+        {pages.map((page) => (
+          <a key={page.id} href={`#${course.base}/p/${page.id}`} className="mod-card reveal">
             <div className="mod-n">▸</div>
             <div className="mod-body">
               <div className="mod-kicker">Practice</div>
-              <div className="mod-title">{p.label}</div>
+              <div className="mod-title">{page.label}</div>
             </div>
             <div className="mod-state">→</div>
           </a>
@@ -125,7 +125,7 @@ export function CourseHome({ course }: { course: ShellCourse }) {
   );
 }
 
-function ModuleBody({ m }: { m: ShellModule }) {
+function ModuleBody({ courseModule: m }: { courseModule: ShellModule }) {
   if (m.Component) return <m.Component />;
   if (m.pack) return <PackModule pack={m.pack} />;
   return (
@@ -136,36 +136,36 @@ function ModuleBody({ m }: { m: ShellModule }) {
 }
 
 export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId: string }) {
-  const idx = course.modules.findIndex((x) => x.id === moduleId);
+  const index = course.modules.findIndex((courseModule) => courseModule.id === moduleId);
   const { progress, markModule } = useProgress(course.id);
-  if (idx < 0) return <NotFound what="module" back={`#${course.base}`} />;
-  const mod = course.modules[idx];
-  const next = course.modules.slice(idx + 1).find((m) => m.status === 'ready');
+  if (index < 0) return <NotFound what="module" back={`#${course.base}`} />;
+  const courseModule = course.modules[index];
+  const next = course.modules.slice(index + 1).find((courseModule) => courseModule.status === 'ready');
   const pages = coursePages(course);
   return (
-    <ModuleCtx.Provider value={{ title: `Module ${mod.n}: ${mod.title}`, course: course.title }}>
+    <ModuleCtx.Provider value={{ title: `Module ${courseModule.n}: ${courseModule.title}`, course: course.title }}>
       <article className="module">
         <header className="module-head">
-          <div className="module-shader" aria-hidden><BrandShader brand={course.brand} role="band" seed={idx} /></div>
+          <div className="module-shader" aria-hidden><BrandShader brand={course.brand} role="band" seed={index} /></div>
           <div className="module-head-inner">
-            <div className="eyebrow">Module {pad(mod.n)}{mod.kicker ? ` · ${mod.kicker}` : ''} · {mod.minutes} min</div>
-            <h1>{mod.title}</h1>
-            <p className="lede">{mod.summary}</p>
+            <div className="eyebrow">Module {padTwoDigits(courseModule.n)}{courseModule.kicker ? ` · ${courseModule.kicker}` : ''} · {courseModule.minutes} min</div>
+            <h1>{courseModule.title}</h1>
+            <p className="lede">{courseModule.summary}</p>
           </div>
         </header>
-        <div className="module-body" key={mod.id}>
-          <ModuleBody m={mod} />
+        <div className="module-body" key={courseModule.id}>
+          <ModuleBody courseModule={courseModule} />
         </div>
         <footer className="module-foot">
           <div className="module-foot-shader" aria-hidden><BrandShader brand={course.brand} role="foot" /></div>
           <div className="module-foot-inner">
-            <button className={`btn ${progress.done[mod.id] ? 'ghost' : 'primary'}`} onClick={() => markModule(mod.id, !progress.done[mod.id])}>
-              {progress.done[mod.id] ? '✓ Completed' : 'Mark module complete'}
+            <button className={`btn ${progress.done[courseModule.id] ? 'ghost' : 'primary'}`} onClick={() => markModule(courseModule.id, !progress.done[courseModule.id])}>
+              {progress.done[courseModule.id] ? '✓ Completed' : 'Mark module complete'}
             </button>
             {next ? (
-              <a className="btn ghost" href={`#${course.base}/m/${next.id}`} onClick={() => markModule(mod.id, true)}>Next: {next.title} →</a>
+              <a className="btn ghost" href={`#${course.base}/m/${next.id}`} onClick={() => markModule(courseModule.id, true)}>Next: {next.title} →</a>
             ) : pages[0] ? (
-              <a className="btn ghost" href={`#${course.base}/p/${pages[0].id}`} onClick={() => markModule(mod.id, true)}>Go to {pages[0].label.toLowerCase()} →</a>
+              <a className="btn ghost" href={`#${course.base}/p/${pages[0].id}`} onClick={() => markModule(courseModule.id, true)}>Go to {pages[0].label.toLowerCase()} →</a>
             ) : null}
           </div>
         </footer>
@@ -175,7 +175,7 @@ export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId
 }
 
 export function PageView({ course, pageId }: { course: ShellCourse; pageId: string }) {
-  const page = coursePages(course).find((p) => p.id === pageId);
+  const page = coursePages(course).find((candidate) => candidate.id === pageId);
   if (!page) return <NotFound what="page" back={`#${course.base}`} />;
   return (
     <ModuleCtx.Provider value={{ title: page.label, course: course.title }}>

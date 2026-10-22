@@ -8,32 +8,32 @@ const api = anyApi;
 
 /* openSignIn() can be called from anywhere; the host below listens. */
 type SignInRequest = { reason?: string };
-const listeners = new Set<(r: SignInRequest) => void>();
-export function requestSignIn(r: SignInRequest = {}) {
-  listeners.forEach((l) => l(r));
+const listeners = new Set<(request: SignInRequest) => void>();
+export function requestSignIn(request: SignInRequest = {}) {
+  listeners.forEach((listener) => listener(request));
 }
 
 /** Mounted once inside the Convex provider: sign-in dialog + first-sign-in wallet setup. */
 export function AccountHost() {
-  const [req, setReq] = useState<SignInRequest | null>(null);
+  const [request, setRequest] = useState<SignInRequest | null>(null);
   const { isAuthenticated } = useConvexAuth();
   const ensure = useMutation(api.wallet.ensure);
 
   useEffect(() => {
-    const l = (r: SignInRequest) => setReq(r);
-    listeners.add(l);
-    return () => { listeners.delete(l); };
+    const listener = (nextRequest: SignInRequest) => setRequest(nextRequest);
+    listeners.add(listener);
+    return () => { listeners.delete(listener); };
   }, []);
   // Create the wallet (signup grant) as soon as the user is signed in.
   useEffect(() => {
     if (isAuthenticated) {
       ensure({}).catch(() => {});
-      setReq(null);
+      setRequest(null);
     }
   }, [isAuthenticated, ensure]);
 
-  if (!req) return null;
-  return <SignInDialog reason={req.reason} onClose={() => setReq(null)} />;
+  if (!request) return null;
+  return <SignInDialog reason={request.reason} onClose={() => setRequest(null)} />;
 }
 
 function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => void }) {
@@ -42,7 +42,7 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -54,10 +54,10 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
     setError(null);
     try {
       // Come back to the exact page (hash route included) after the provider redirect.
-      const res = await auth.signIn.social({ provider, callbackURL: window.location.href });
-      if (res?.error) throw new Error(res.error.message || 'Sign-in failed');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Sign-in failed');
+      const response = await auth.signIn.social({ provider, callbackURL: window.location.href });
+      if (response?.error) throw new Error(response.error.message || 'Sign-in failed');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Sign-in failed');
       setBusy(null);
     }
   };
@@ -65,7 +65,7 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
   const none = providers && !providers.github && !providers.google;
   return (
     <div className="acc-scrim" onClick={onClose}>
-      <div className="acc-dialog" role="dialog" aria-modal="true" aria-labelledby="acc-title" onClick={(e) => e.stopPropagation()}>
+      <div className="acc-dialog" role="dialog" aria-modal="true" aria-labelledby="acc-title" onClick={(event) => event.stopPropagation()}>
         <button className="acc-x" onClick={onClose} aria-label="Close">✕</button>
         <h2 id="acc-title">Sign in</h2>
         <p className="acc-sub">{reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get free credits.</p>

@@ -114,13 +114,13 @@ function AccountPageInner() {
     );
   }
 
-  const buy = async (pack: Pack['key']) => {
+  const buyPack = async (pack: Pack['key']) => {
     setBuying(pack);
     setError(null);
     try {
-      const res = (await checkout({ pack, returnUrl: `${location.origin}${location.pathname}#/account?purchase=success` })) as { url: string } | { error: string };
-      if ('url' in res) location.href = res.url;
-      else { setError(res.error); setBuying(null); }
+      const response = (await checkout({ pack, returnUrl: `${location.origin}${location.pathname}#/account?purchase=success` })) as { url: string } | { error: string };
+      if ('url' in response) location.href = response.url;
+      else { setError(response.error); setBuying(null); }
     } catch {
       setError('Checkout failed to start. Try again.');
       setBuying(null);
@@ -160,13 +160,13 @@ function AccountPageInner() {
         {packs && packs.length === 0 && <p className="acc-muted">Credit packs aren't on sale yet.</p>}
         {packs && packs.length > 0 && (
           <div className="acc-packs">
-            {packs.map((p) => (
-              <div key={p.key} className="acc-pack">
-                <div className="acc-pack-credits">{p.credits.toLocaleString()} credits</div>
-                <div className="acc-pack-name">{p.name}</div>
-                <div className="acc-pack-price">{formatPrice(p.priceCents, p.currency)}</div>
-                <button className="acc-primary" disabled={!!buying} onClick={() => buy(p.key)}>
-                  {buying === p.key ? 'Opening checkout…' : 'Buy'}
+            {packs.map((pack) => (
+              <div key={pack.key} className="acc-pack">
+                <div className="acc-pack-credits">{pack.credits.toLocaleString()} credits</div>
+                <div className="acc-pack-name">{pack.name}</div>
+                <div className="acc-pack-price">{formatPrice(pack.priceCents, pack.currency)}</div>
+                <button className="acc-primary" disabled={!!buying} onClick={() => buyPack(pack.key)}>
+                  {buying === pack.key ? 'Opening checkout…' : 'Buy'}
                 </button>
               </div>
             ))}
@@ -182,11 +182,11 @@ function AccountPageInner() {
         {history && history.length > 0 && (
           <table className="acc-table">
             <tbody>
-              {history.map((r) => (
-                <tr key={r.id}>
-                  <td>{REASON_LABEL[r.reason] ?? r.reason}</td>
-                  <td className="acc-when">{new Date(r.at).toLocaleString()}</td>
-                  <td className={`acc-delta ${r.delta > 0 ? 'plus' : 'minus'}`}>{r.delta > 0 ? `+${r.delta}` : r.delta}</td>
+              {history.map((entry) => (
+                <tr key={entry.id}>
+                  <td>{REASON_LABEL[entry.reason] ?? entry.reason}</td>
+                  <td className="acc-when">{new Date(entry.at).toLocaleString()}</td>
+                  <td className={`acc-delta ${entry.delta > 0 ? 'plus' : 'minus'}`}>{entry.delta > 0 ? `+${entry.delta}` : entry.delta}</td>
                 </tr>
               ))}
             </tbody>

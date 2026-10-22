@@ -1,10 +1,10 @@
-import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Check, C } from '../../../engine/kit';
+import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Check, InlineCode } from '../../../engine/kit';
 
 const Component = () => (
   <>
     <Section id="pt-api" title="Your functions ARE your API: validate and authorize everything">
       <p>
-        Every exported <C>query</C>, <C>mutation</C> and <C>action</C> can be called by anyone holding your deployment URL,
+        Every exported <InlineCode>query</InlineCode>, <InlineCode>mutation</InlineCode> and <InlineCode>action</InlineCode> can be called by anyone holding your deployment URL,
         with any arguments. There's no API gateway and no RLS policy layer between the client and your code. That keeps the
         security model simple: <strong>each public function is an endpoint, and its handler is the policy</strong>.
       </p>
@@ -18,7 +18,7 @@ export const deleteNote = mutation({
 });
 `}
         note={<>
-          Three bugs. (1) No <C>args</C> validator: the TypeScript type is erased at runtime, so a caller can send any value,
+          Three bugs. (1) No <InlineCode>args</InlineCode> validator: the TypeScript type is erased at runtime, so a caller can send any value,
           even an ID from another table. (2) No authentication. (3) No ownership check, so anyone can delete anyone's note.
         </>}
       />
@@ -41,21 +41,21 @@ export const deleteNote = mutation({
       <Callout kind="rule" title="The three-line rule">
         Every public function starts with: <strong>args validator</strong> → <strong>identity</strong> →{' '}
         <strong>authorization on the specific documents</strong>. Anything only your backend should call is an{' '}
-        <C>internalQuery</C> / <C>internalMutation</C> / <C>internalAction</C>. Those are only reachable through{' '}
-        <C>internal.*</C> refs from other functions, the scheduler, crons or the CLI/dashboard.
+        <InlineCode>internalQuery</InlineCode> / <InlineCode>internalMutation</InlineCode> / <InlineCode>internalAction</InlineCode>. Those are only reachable through{' '}
+        <InlineCode>internal.*</InlineCode> refs from other functions, the scheduler, crons or the CLI/dashboard.
       </Callout>
       <Callout kind="insight" title="ConvexError vs Error">
-        Throw <C>new ConvexError(data)</C> for expected, user-facing failures. Its <C>data</C> is sent to the client intact.
-        A plain <C>Error</C> in production is redacted to a generic "Server Error" (with a request ID), so internals don't
+        Throw <InlineCode>new ConvexError(data)</InlineCode> for expected, user-facing failures. Its <InlineCode>data</InlineCode> is sent to the client intact.
+        A plain <InlineCode>Error</InlineCode> in production is redacted to a generic "Server Error" (with a request ID), so internals don't
         leak.
       </Callout>
     </Section>
 
     <Section id="pt-helpers" title="convex-helpers: custom functions, RLS, relationships, Zod">
       <p>
-        <C>convex-helpers</C> is the semi-official utility library. The most important piece is{' '}
-        <strong>custom functions</strong>: wrap <C>query</C>/<C>mutation</C> once so every function gets auth, a{' '}
-        <C>user</C> on <C>ctx</C>, and optionally a row-level-security wrapped <C>ctx.db</C>.
+        <InlineCode>convex-helpers</InlineCode> is the semi-official utility library. The most important piece is{' '}
+        <strong>custom functions</strong>: wrap <InlineCode>query</InlineCode>/<InlineCode>mutation</InlineCode> once so every function gets auth, a{' '}
+        <InlineCode>user</InlineCode> on <InlineCode>ctx</InlineCode>, and optionally a row-level-security wrapped <InlineCode>ctx.db</InlineCode>.
       </p>
       <Code
         title="convex/lib/functions.ts"
@@ -95,13 +95,13 @@ export const userMutation = customMutation(mutation, customCtx(async (ctx) => {
 `}
       />
       <ul>
-        <li><strong>Relationships</strong>: <C>getOneFrom</C>, <C>getManyFrom</C>, <C>getManyVia</C> for 1:N and N:M lookups over indexes.</li>
-        <li><strong>Zod</strong>: <C>zCustomQuery</C> / <C>zodToConvex</C> if you prefer Zod schemas (refinements are checked in your handler, not by the backend validator).</li>
-        <li><strong>Triggers</strong>: run code whenever a table is written through a wrapped <C>ctx.db</C>. Good for denormalized counts and aggregates. It's a code-level wrapper, not a database trigger, so writes that bypass the wrapper don't fire.</li>
-        <li><strong>Others</strong>: <C>paginator</C>/<C>stream</C> helpers (merge/filter streams over indexes), <C>asyncMap</C>, CORS router, sessions, hono integration, <C>crud</C> generator.</li>
+        <li><strong>Relationships</strong>: <InlineCode>getOneFrom</InlineCode>, <InlineCode>getManyFrom</InlineCode>, <InlineCode>getManyVia</InlineCode> for 1:N and N:M lookups over indexes.</li>
+        <li><strong>Zod</strong>: <InlineCode>zCustomQuery</InlineCode> / <InlineCode>zodToConvex</InlineCode> if you prefer Zod schemas (refinements are checked in your handler, not by the backend validator).</li>
+        <li><strong>Triggers</strong>: run code whenever a table is written through a wrapped <InlineCode>ctx.db</InlineCode>. Good for denormalized counts and aggregates. It's a code-level wrapper, not a database trigger, so writes that bypass the wrapper don't fire.</li>
+        <li><strong>Others</strong>: <InlineCode>paginator</InlineCode>/<InlineCode>stream</InlineCode> helpers (merge/filter streams over indexes), <InlineCode>asyncMap</InlineCode>, CORS router, sessions, hono integration, <InlineCode>crud</InlineCode> generator.</li>
       </ul>
       <Callout kind="warn" title="RLS wrappers aren't magic">
-        The row-level-security wrapper checks rules on every document read through the wrapped <C>db</C>. Reads that a rule
+        The row-level-security wrapper checks rules on every document read through the wrapped <InlineCode>db</InlineCode>. Reads that a rule
         filters out still count against scan limits and cost. Use indexes to narrow first. The rules are a safety net for
         data you shouldn't see, not a query planner.
       </Callout>
@@ -109,9 +109,9 @@ export const userMutation = customMutation(mutation, customCtx(async (ctx) => {
 
     <Section id="pt-indexes" title="Read patterns: indexes, bounds, and the cost of .filter()">
       <p>
-        The backend has no query planner. <C>.filter()</C> is a predicate applied to every document the scan visits. Every
+        The backend has no query planner. <InlineCode>.filter()</InlineCode> is a predicate applied to every document the scan visits. Every
         document read counts toward the transaction's read limits and goes into the read set, which means it's a potential
-        cause of invalidation and conflicts. <C>withIndex</C> turns "scan and discard" into "seek a range".
+        cause of invalidation and conflicts. <InlineCode>withIndex</InlineCode> turns "scan and discard" into "seek a range".
       </p>
       <Code
         title="❌ Spot the bug"
@@ -147,25 +147,25 @@ export const unreadForUser = query({
       .take(50),
 });
 `}
-        note={<>The read set is now the index range <C>[userId, false, *]</C>. Only writes inside that range invalidate this subscription.</>}
+        note={<>The read set is now the index range <InlineCode>[userId, false, *]</InlineCode>. Only writes inside that range invalidate this subscription.</>}
       />
       <Compare
         caption="Pick the right read"
         head={['Pattern', 'When', 'Risk']}
         rows={[
-          [<C>.withIndex(...).unique()</C>, 'Exactly one match expected', 'Throws if more than one: good for invariants'],
-          [<C>.withIndex(...).first()</C>, 'Latest / any one match', 'None'],
-          [<C>.withIndex(...).take(n)</C>, 'Bounded lists', 'None'],
-          [<C>.withIndex(...).paginate(opts)</C>, 'Unbounded lists in UI', 'Pages are reactive and can grow or shrink'],
-          [<C>.withIndex(...).collect()</C>, 'Small bounded sets (≈ under 1000)', 'Unbounded growth → hits limits later'],
-          [<><C>.filter(...)</C> after withIndex</>, 'Residual predicate on a small range', 'Scans whatever the range holds'],
-          [<C>.query(t).collect()</C>, 'Admin / migration only', 'Full scan, whole-table read set'],
+          [<InlineCode>.withIndex(...).unique()</InlineCode>, 'Exactly one match expected', 'Throws if more than one: good for invariants'],
+          [<InlineCode>.withIndex(...).first()</InlineCode>, 'Latest / any one match', 'None'],
+          [<InlineCode>.withIndex(...).take(n)</InlineCode>, 'Bounded lists', 'None'],
+          [<InlineCode>.withIndex(...).paginate(opts)</InlineCode>, 'Unbounded lists in UI', 'Pages are reactive and can grow or shrink'],
+          [<InlineCode>.withIndex(...).collect()</InlineCode>, 'Small bounded sets (≈ under 1000)', 'Unbounded growth → hits limits later'],
+          [<><InlineCode>.filter(...)</InlineCode> after withIndex</>, 'Residual predicate on a small range', 'Scans whatever the range holds'],
+          [<InlineCode>.query(t).collect()</InlineCode>, 'Admin / migration only', 'Full scan, whole-table read set'],
         ]}
       />
       <Callout kind="rule" title="Index design heuristics">
-        Put equality fields first and the range/sort field last (<C>["channel", "_creationTime"]</C> is implicit, since every
-        index ends with <C>_creationTime</C> then <C>_id</C>). One index can serve many prefixes: <C>by_a_b_c</C> also serves
-        queries on <C>a</C> and on <C>a,b</C>, so you rarely need <C>by_a</C> too. Each index adds write cost and storage. A
+        Put equality fields first and the range/sort field last (<InlineCode>["channel", "_creationTime"]</InlineCode> is implicit, since every
+        index ends with <InlineCode>_creationTime</InlineCode> then <InlineCode>_id</InlineCode>). One index can serve many prefixes: <InlineCode>by_a_b_c</InlineCode> also serves
+        queries on <InlineCode>a</InlineCode> and on <InlineCode>a,b</InlineCode>, so you rarely need <InlineCode>by_a</InlineCode> too. Each index adds write cost and storage. A
         field you only display doesn't need indexing.
       </Callout>
     </Section>
@@ -195,12 +195,12 @@ const { results, status, loadMore } = usePaginatedQuery(
       />
       <Callout kind="deep" title="Why pages don't drift">
         Each page is its own subscription over a key range [cursor, endCursor]. When a page is first loaded, its end cursor
-        gets pinned: the client re-subscribes with <C>endCursor</C> so the page keeps covering the same key range as items
+        gets pinned: the client re-subscribes with <InlineCode>endCursor</InlineCode> so the page keeps covering the same key range as items
         are inserted or deleted. New messages make the first page grow instead of shifting every page by one. No duplicates,
         no gaps, fully reactive.
       </Callout>
       <Callout kind="warn" title="Offset pagination & counts">
-        There's no <C>OFFSET</C> and no cheap <C>count()</C>. "Page 37 of 120" or "1,204 results" needs an aggregate (the
+        There's no <InlineCode>OFFSET</InlineCode> and no cheap <InlineCode>count()</InlineCode>. "Page 37 of 120" or "1,204 results" needs an aggregate (the
         aggregate component gives O(log n) count/offset), or a denormalized counter you maintain in your mutations.
       </Callout>
     </Section>
@@ -262,22 +262,22 @@ export const addComment = mutation({
 `}
       />
       <Callout kind="insight" title="Reads cause conflicts, not just writes">
-        A mutation that does <C>.collect()</C> on a large range has a large read set. <em>Any</em> concurrent insert into that
-        range conflicts with it. Keep mutation read sets narrow (index-bounded, <C>take</C>/<C>first</C>), and move "scan
+        A mutation that does <InlineCode>.collect()</InlineCode> on a large range has a large read set. <em>Any</em> concurrent insert into that
+        range conflicts with it. Keep mutation read sets narrow (index-bounded, <InlineCode>take</InlineCode>/<InlineCode>first</InlineCode>), and move "scan
         everything" work into paginated background jobs.
       </Callout>
       <Callout kind="rule" title="Keep high-churn fields out of widely-read documents">
-        If <C>users</C> holds both <C>name</C> (read by every message list) and <C>lastSeen</C> (written every 10 s), every
+        If <InlineCode>users</InlineCode> holds both <InlineCode>name</InlineCode> (read by every message list) and <InlineCode>lastSeen</InlineCode> (written every 10 s), every
         heartbeat invalidates every query that read that user. Split volatile fields into their own table (e.g.{' '}
-        <C>presence</C>) so the invalidation scope matches the data.
+        <InlineCode>presence</InlineCode>) so the invalidation scope matches the data.
       </Callout>
     </Section>
 
     <Section id="pt-actions" title="Actions: thin shells around mutations">
       <p>
-        Actions aren't transactional. Each <C>ctx.runQuery</C>/<C>ctx.runMutation</C> inside one is its <em>own</em>{' '}
-        transaction at its <em>own</em> timestamp. Two sequential <C>runQuery</C> calls can see different database states,
-        and data can change between a <C>runQuery</C> and the following <C>runMutation</C>.
+        Actions aren't transactional. Each <InlineCode>ctx.runQuery</InlineCode>/<InlineCode>ctx.runMutation</InlineCode> inside one is its <em>own</em>{' '}
+        transaction at its <em>own</em> timestamp. Two sequential <InlineCode>runQuery</InlineCode> calls can see different database states,
+        and data can change between a <InlineCode>runQuery</InlineCode> and the following <InlineCode>runMutation</InlineCode>.
       </p>
       <Code
         title="❌ Spot the bug — check-then-act across transactions"
@@ -293,7 +293,7 @@ export const redeem = action({
   },
 });
 `}
-        note={<>Race: two concurrent calls both read <C>used=false</C>, and both credit the wallet. The coupon check and the credit are also separate transactions, so a crash between them leaves a half-done state.</>}
+        note={<>Race: two concurrent calls both read <InlineCode>used=false</InlineCode>, and both credit the wallet. The coupon check and the credit are also separate transactions, so a crash between them leaves a half-done state.</>}
       />
       <Code
         title="✅ Fixed — one mutation owns the invariant"
@@ -312,13 +312,13 @@ export const redeem = mutation({
   },
 });
 `}
-        note={<>Serializable OCC guarantees only one of two concurrent redeems commits; the other retries, sees <C>used=true</C>, and throws.</>}
+        note={<>Serializable OCC guarantees only one of two concurrent redeems commits; the other retries, sees <InlineCode>used=true</InlineCode>, and throws.</>}
       />
       <Callout kind="rule" title="Helpers, not ctx.runQuery, inside mutations and queries">
-        Inside a query or mutation, share logic as plain TypeScript functions that take <C>ctx</C> (e.g.{' '}
-        <C>{'async function creditWallet(ctx: MutationCtx, ...)'}</C>). <C>ctx.runQuery</C>/<C>ctx.runMutation</C> from a
+        Inside a query or mutation, share logic as plain TypeScript functions that take <InlineCode>ctx</InlineCode> (e.g.{' '}
+        <InlineCode>{'async function creditWallet(ctx: MutationCtx, ...)'}</InlineCode>). <InlineCode>ctx.runQuery</InlineCode>/<InlineCode>ctx.runMutation</InlineCode> from a
         mutation work, but they add overhead (a separate function invocation with its own arg validation) and buy you
-        nothing. Use <C>ctx.runMutation</C> from actions, and use sub-transactions only when you want a partial rollback
+        nothing. Use <InlineCode>ctx.runMutation</InlineCode> from actions, and use sub-transactions only when you want a partial rollback
         boundary.
       </Callout>
       <Callout kind="analogy" title="The action sandwich">
@@ -330,7 +330,7 @@ export const redeem = mutation({
 
     <Section id="pt-migrations" title="Schema evolution & migrations">
       <p>
-        Convex enforces the schema on push: if existing data doesn't match a new <C>defineSchema</C>, the deploy fails. That
+        Convex enforces the schema on push: if existing data doesn't match a new <InlineCode>defineSchema</InlineCode>, the deploy fails. That
         makes changes a three-phase process, <strong>widen → migrate → narrow</strong>:
       </p>
       <Flow
@@ -374,8 +374,8 @@ export const setDefaultRole = migrations.define({
 
     <Section id="pt-testing" title="Testing with convex-test">
       <p>
-        <C>convex-test</C> runs your functions against an in-memory mock of the Convex backend in Vitest (use the{' '}
-        <C>edge-runtime</C> environment). It enforces the schema, supports auth via <C>withIdentity</C>, and runs scheduled
+        <InlineCode>convex-test</InlineCode> runs your functions against an in-memory mock of the Convex backend in Vitest (use the{' '}
+        <InlineCode>edge-runtime</InlineCode> environment). It enforces the schema, supports auth via <InlineCode>withIdentity</InlineCode>, and runs scheduled
         functions with fake timers. For end-to-end fidelity you can also test against a local open-source backend.
       </p>
       <Code
@@ -436,14 +436,14 @@ export async function requireUser(ctx: QueryCtx | MutationCtx) { /* ... */ }
 `}
       />
       <Callout kind="insight" title="End-to-end types without codegen drift">
-        <C>npx convex dev</C> regenerates <C>_generated/api.d.ts</C> and <C>dataModel.d.ts</C> from your actual function
+        <InlineCode>npx convex dev</InlineCode> regenerates <InlineCode>_generated/api.d.ts</InlineCode> and <InlineCode>dataModel.d.ts</InlineCode> from your actual function
         exports and schema. Rename an argument and every client call site fails typechecking immediately. The validators
         enforce the same contract at runtime.
       </Callout>
       <Callout kind="warn" title="Circular inference">
-        An action that returns the result of <C>ctx.runQuery(internal.x.y)</C> from the same module can produce "implicitly
-        has type any" errors, because TypeScript can't infer through the generated <C>api</C> cycle. Add an explicit return
-        type annotation (or a <C>returns</C> validator) to the handler.
+        An action that returns the result of <InlineCode>ctx.runQuery(internal.x.y)</InlineCode> from the same module can produce "implicitly
+        has type any" errors, because TypeScript can't infer through the generated <InlineCode>api</InlineCode> cycle. Add an explicit return
+        type annotation (or a <InlineCode>returns</InlineCode> validator) to the handler.
       </Callout>
     </Section>
 
@@ -462,10 +462,10 @@ export async function requireUser(ctx: QueryCtx | MutationCtx) { /* ... */ }
         ]}
       />
       <ul>
-        <li><strong>Cache-friendly queries</strong>: keep args stable (don't pass <C>Date.now()</C> as an arg every render; round it, or use a scheduled "tick" document). Every distinct args tuple is a separate cache entry and subscription.</li>
-        <li><strong>Don't read time in queries</strong> for "expired" filtering. <C>Date.now()</C> in a query is frozen per execution and isn't tracked, so the result won't update when time passes. Store an <C>expired</C> flag via a scheduled mutation instead.</li>
-        <li><strong>Parallelize reads</strong> in one function: <C>await Promise.all(ids.map(id =&gt; ctx.db.get(id)))</C>.</li>
-        <li><strong>Skip queries</strong> client-side with <C>useQuery(api.x, cond ? args : "skip")</C> instead of returning early on the server.</li>
+        <li><strong>Cache-friendly queries</strong>: keep args stable (don't pass <InlineCode>Date.now()</InlineCode> as an arg every render; round it, or use a scheduled "tick" document). Every distinct args tuple is a separate cache entry and subscription.</li>
+        <li><strong>Don't read time in queries</strong> for "expired" filtering. <InlineCode>Date.now()</InlineCode> in a query is frozen per execution and isn't tracked, so the result won't update when time passes. Store an <InlineCode>expired</InlineCode> flag via a scheduled mutation instead.</li>
+        <li><strong>Parallelize reads</strong> in one function: <InlineCode>await Promise.all(ids.map(id =&gt; ctx.db.get(id)))</InlineCode>.</li>
+        <li><strong>Skip queries</strong> client-side with <InlineCode>useQuery(api.x, cond ? args : "skip")</InlineCode> instead of returning early on the server.</li>
         <li><strong>Watch the dashboard</strong>: per-function execution time, documents read and cache hit rate show you where to add an index.</li>
       </ul>
       <Code
@@ -480,21 +480,21 @@ export const activeSessions = query({
   },
 });
 `}
-        note={<>The result only changes when a <C>sessions</C> document changes, not as time passes, because time isn't part of the read set. It's also a full scan. Fix: index on <C>expiresAt</C>, have a scheduled mutation flip <C>active=false</C> at expiry, and query <C>withIndex("by_active", q =&gt; q.eq("active", true))</C>.</>}
+        note={<>The result only changes when a <InlineCode>sessions</InlineCode> document changes, not as time passes, because time isn't part of the read set. It's also a full scan. Fix: index on <InlineCode>expiresAt</InlineCode>, have a scheduled mutation flip <InlineCode>active=false</InlineCode> at expiry, and query <InlineCode>withIndex("by_active", q =&gt; q.eq("active", true))</InlineCode>.</>}
       />
     </Section>
 
     <Section id="pt-checklist" title="Production checklist">
       <ol>
-        <li>Every public function has <C>args</C> (and ideally <C>returns</C>) validators.</li>
-        <li>Every public function checks identity and ownership. Server-only work is <C>internal*</C>.</li>
-        <li>No <C>.filter()</C> on large tables, no unbounded <C>.collect()</C>. Indexes match your query shapes.</li>
+        <li>Every public function has <InlineCode>args</InlineCode> (and ideally <InlineCode>returns</InlineCode>) validators.</li>
+        <li>Every public function checks identity and ownership. Server-only work is <InlineCode>internal*</InlineCode>.</li>
+        <li>No <InlineCode>.filter()</InlineCode> on large tables, no unbounded <InlineCode>.collect()</InlineCode>. Indexes match your query shapes.</li>
         <li>Hot counters are sharded or use aggregate. Volatile fields live in separate documents.</li>
-        <li>External side effects only in actions, kicked off by <C>scheduler.runAfter</C> from mutations, and idempotent.</li>
+        <li>External side effects only in actions, kicked off by <InlineCode>scheduler.runAfter</InlineCode> from mutations, and idempotent.</li>
         <li>Webhooks verify signatures and upsert idempotently by event ID.</li>
         <li>The schema is defined and strict. Migrations follow widen → migrate → narrow.</li>
         <li>Secrets are in env vars (separate dev/prod values). The prod deploy key lives only in CI.</li>
-        <li><C>convex-test</C> suites cover authz edge cases, plus a CI step that runs <C>npx convex deploy --cmd ...</C>.</li>
+        <li><InlineCode>convex-test</InlineCode> suites cover authz edge cases, plus a CI step that runs <InlineCode>npx convex deploy --cmd ...</InlineCode>.</li>
         <li>Backups scheduled, log streaming / exception reporting configured, preview deployments for PRs.</li>
       </ol>
     </Section>
@@ -515,31 +515,31 @@ export const activeSessions = query({
         ]}
       />
       <Check
-        q="An action does runQuery(getBalance), checks balance ≥ 10, then runMutation(debit 10). What's wrong?"
+        question="An action does runQuery(getBalance), checks balance ≥ 10, then runMutation(debit 10). What's wrong?"
         options={["Nothing, actions are transactional", 'The check and the debit are separate transactions, so concurrent calls can overdraw', 'runMutation cannot be called from actions', 'It will deadlock']}
         answer={1}
         explain="Each runQuery/runMutation in an action is its own transaction. Put the check and the debit in one mutation; OCC then serializes concurrent debits."
       />
       <Check
-        q="A 'likes' counter on a viral post gets thousands of writes per second and mutations start failing. Best fix?"
+        question="A 'likes' counter on a viral post gets thousands of writes per second and mutations start failing. Best fix?"
         options={['Increase the mutation timeout', 'Move the increment into an action', 'Shard the counter across N docs (or use the sharded-counter component)', 'Use .filter() instead of withIndex']}
         answer={2}
         explain="The failures are OCC conflicts on one hot document. Spreading writes across shards removes most conflicts. Actions would lose atomicity, and timeouts don't affect conflicts."
       />
       <Check
-        q="Which query result updates automatically when a matching new row is inserted, but NOT when the wall-clock time passes?"
+        question="Which query result updates automatically when a matching new row is inserted, but NOT when the wall-clock time passes?"
         options={['One that filters with Date.now()', 'None, Convex tracks time', 'Both cases update automatically', 'Only paginated queries update']}
         answer={0}
         explain="Read sets are made of index ranges over data. Date.now() is frozen per execution and isn't tracked. Model time-dependent state as data written by scheduled mutations."
       />
       <Check
-        q="You need to rename field `title` to `name` on 2M documents. Correct sequence?"
+        question="You need to rename field `title` to `name` on 2M documents. Correct sequence?"
         options={['Edit schema to `name`, deploy, done', 'Widen (optional name), dual-write, batched backfill, then narrow (required name, drop title)', 'Export, edit JSON, re-import in prod', 'One mutation that patches all 2M docs']}
         answer={1}
         explain="Schema validation rejects the direct change, and one mutation would blow transaction limits. Widen → migrate in batches → narrow is the safe, online path."
       />
       <Check
-        q="Inside a mutation, how should you reuse logic from another mutation?"
+        question="Inside a mutation, how should you reuse logic from another mutation?"
         options={['ctx.runMutation(api.other.fn) always', 'Call a plain TS helper that takes ctx', 'Schedule it with runAfter(0)', 'Use an HTTP action']}
         answer={1}
         explain="Plain helpers run in the same transaction with no extra invocation overhead. Scheduling would make it non-atomic. ctx.runMutation works but adds overhead; save it for actions."

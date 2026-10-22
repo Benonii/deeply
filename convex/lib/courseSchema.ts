@@ -175,30 +175,30 @@ export const CoursePack = CourseMeta.extend({ modules: z.array(ModulePack).min(1
 export type CoursePack = z.infer<typeof CoursePack>;
 
 /** Structural checks zod can't express: ids referenced by flows and checks exist. */
-export function lintModule(m: ModulePack, codeRefIds: Set<string> = new Set()): string[] {
+export function lintModule(pack: ModulePack, codeRefIds: Set<string> = new Set()): string[] {
   const errs: string[] = [];
-  for (const s of m.sections) for (const b of s.blocks) {
-    if (b.type === 'check' && b.answer >= b.options.length) errs.push(`${m.id}/${s.id}: check answer out of range`);
-    if (b.type === 'flow') {
-      const ids = new Set(b.nodes.map((n) => n.id));
-      const eids = new Set(b.edges.map((e) => e.id));
-      for (const e of b.edges) if (!ids.has(e.from) || !ids.has(e.to)) errs.push(`${m.id}/${s.id}: flow "${b.title}" edge ${e.id} references unknown node`);
-      for (const st of b.steps) {
-        for (const n of st.nodes ?? []) if (!ids.has(n)) errs.push(`${m.id}/${s.id}: flow step references unknown node ${n}`);
-        for (const e of st.edges ?? []) if (!eids.has(e)) errs.push(`${m.id}/${s.id}: flow step references unknown edge ${e}`);
+  for (const section of pack.sections) for (const block of section.blocks) {
+    if (block.type === 'check' && block.answer >= block.options.length) errs.push(`${pack.id}/${section.id}: check answer out of range`);
+    if (block.type === 'flow') {
+      const ids = new Set(block.nodes.map((node) => node.id));
+      const eids = new Set(block.edges.map((edge) => edge.id));
+      for (const flowEdge of block.edges) if (!ids.has(flowEdge.from) || !ids.has(flowEdge.to)) errs.push(`${pack.id}/${section.id}: flow "${block.title}" edge ${flowEdge.id} references unknown node`);
+      for (const step of block.steps) {
+        for (const nodeID of step.nodes ?? []) if (!ids.has(nodeID)) errs.push(`${pack.id}/${section.id}: flow step references unknown node ${nodeID}`);
+        for (const edgeID of step.edges ?? []) if (!eids.has(edgeID)) errs.push(`${pack.id}/${section.id}: flow step references unknown edge ${edgeID}`);
       }
-      for (const n of b.nodes) {
-        if (n.x === undefined && (n.col === undefined || n.row === undefined)) errs.push(`${m.id}/${s.id}: node ${n.id} has no position`);
-        for (const c of n.code ?? []) if (!codeRefIds.has(c)) errs.push(`${m.id}: unknown code ref ${c}`);
+      for (const flowNode of block.nodes) {
+        if (flowNode.x === undefined && (flowNode.col === undefined || flowNode.row === undefined)) errs.push(`${pack.id}/${section.id}: node ${flowNode.id} has no position`);
+        for (const codeRefID of flowNode.code ?? []) if (!codeRefIds.has(codeRefID)) errs.push(`${pack.id}: unknown code ref ${codeRefID}`);
       }
       const cells = new Set<string>();
-      for (const n of b.nodes) if (n.col !== undefined) {
-        const k = `${n.col},${n.row}`;
-        if (cells.has(k)) errs.push(`${m.id}/${s.id}: two nodes share grid cell ${k}`);
-        cells.add(k);
+      for (const gridNode of block.nodes) if (gridNode.col !== undefined) {
+        const cellKey = `${gridNode.col},${gridNode.row}`;
+        if (cells.has(cellKey)) errs.push(`${pack.id}/${section.id}: two nodes share grid cell ${cellKey}`);
+        cells.add(cellKey);
       }
     }
-    if (b.type === 'compare') for (const r of b.rows) if (r.length !== b.head.length) errs.push(`${m.id}/${s.id}: compare row has ${r.length} cells, header has ${b.head.length}`);
+    if (block.type === 'compare') for (const row of block.rows) if (row.length !== block.head.length) errs.push(`${pack.id}/${section.id}: compare row has ${row.length} cells, header has ${block.head.length}`);
   }
   return errs;
 }

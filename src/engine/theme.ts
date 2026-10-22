@@ -30,33 +30,33 @@ const FALLBACK = {
 };
 
 /** Brand → the CSS custom properties the engine styles read. */
-export function brandVars(b: Brand): React.CSSProperties {
-  const c = b.colors;
+export function brandVars(brand: Brand): React.CSSProperties {
+  const colors = brand.colors;
   return {
-    '--bg': c.bg,
-    '--bg2': c.surface,
-    '--panel': c.surface2,
-    '--panel2': `color-mix(in oklab, ${c.surface2} 82%, ${c.fg})`,
-    '--fg': c.fg,
-    '--fg2': c.fg2,
-    '--muted': c.muted,
-    '--line': c.line,
-    '--line2': `color-mix(in oklab, ${c.line} 75%, ${c.fg})`,
-    '--accent': c.accent,
-    '--accent2': c.accent2,
-    '--accent3': c.accent3,
-    '--on-accent': c.onAccent,
-    '--font-display': `'${b.fonts.display}', ${FALLBACK.display}`,
-    '--font-body': `'${b.fonts.body}', ${FALLBACK.body}`,
-    '--font-mono': `'${b.fonts.mono}', ${FALLBACK.mono}`,
+    '--bg': colors.bg,
+    '--bg2': colors.surface,
+    '--panel': colors.surface2,
+    '--panel2': `color-mix(in oklab, ${colors.surface2} 82%, ${colors.fg})`,
+    '--fg': colors.fg,
+    '--fg2': colors.fg2,
+    '--muted': colors.muted,
+    '--line': colors.line,
+    '--line2': `color-mix(in oklab, ${colors.line} 75%, ${colors.fg})`,
+    '--accent': colors.accent,
+    '--accent2': colors.accent2,
+    '--accent3': colors.accent3,
+    '--on-accent': colors.onAccent,
+    '--font-display': `'${brand.fonts.display}', ${FALLBACK.display}`,
+    '--font-body': `'${brand.fonts.body}', ${FALLBACK.body}`,
+    '--font-mono': `'${brand.fonts.mono}', ${FALLBACK.mono}`,
   } as React.CSSProperties;
 }
 
 const loaded = new Set<string>();
 /** Loads a brand's Google Fonts once. Each family gets its own link so one bad name can't block the others. */
-export function useBrandFonts(b: Brand) {
+export function useBrandFonts(brand: Brand) {
   useEffect(() => {
-    for (const family of [b.fonts.display, b.fonts.body, b.fonts.mono]) {
+    for (const family of [brand.fonts.display, brand.fonts.body, brand.fonts.mono]) {
       if (!family || loaded.has(family)) continue;
       loaded.add(family);
       const name = encodeURIComponent(family).replace(/%20/g, '+');
@@ -71,38 +71,38 @@ export function useBrandFonts(b: Brand) {
         document.head.appendChild(link);
       }
     }
-  }, [b.fonts.display, b.fonts.body, b.fonts.mono]);
+  }, [brand.fonts.display, brand.fonts.body, brand.fonts.mono]);
 }
 
 /** Shader palette for a brand: explicit, or derived from its colors. */
-export function shaderColors(b: Brand) {
-  return b.shader?.colors ?? [b.colors.bg, b.colors.accent3, b.colors.accent2, b.colors.accent, b.colors.bg];
+export function shaderColors(brand: Brand) {
+  return brand.shader?.colors ?? [brand.colors.bg, brand.colors.accent3, brand.colors.accent2, brand.colors.accent, brand.colors.bg];
 }
 
 const COLOR = /^(#[0-9a-fA-F]{3,8}|(rgb|hsl|oklch|oklab)a?\([0-9.,%\s/-]+\))$/;
 const FONT = /^[A-Za-z0-9 ]{2,40}$/;
 /** Untrusted brands (generated courses): keep only well-formed colors and font names, drop the logo. */
-export function sanitizeBrand(b: any, fallback: Brand = DEEPLY_BRAND): Brand {
-  if (!b || typeof b !== 'object') return fallback;
+export function sanitizeBrand(brand: any, fallback: Brand = DEEPLY_BRAND): Brand {
+  if (!brand || typeof brand !== 'object') return fallback;
   const colors = Object.fromEntries(
-    Object.entries(fallback.colors).map(([k, v]) => [k, typeof b.colors?.[k] === 'string' && COLOR.test(b.colors[k].trim()) ? b.colors[k].trim() : v]),
+    Object.entries(fallback.colors).map(([key, value]) => [key, typeof brand.colors?.[key] === 'string' && COLOR.test(brand.colors[key].trim()) ? brand.colors[key].trim() : value]),
   ) as Brand['colors'];
-  const font = (k: keyof Brand['fonts']) => (typeof b.fonts?.[k] === 'string' && FONT.test(b.fonts[k]) ? b.fonts[k] : fallback.fonts[k]);
-  const shaderColors = Array.isArray(b.shader?.colors) ? b.shader.colors.filter((c: unknown) => typeof c === 'string' && COLOR.test(c)) : [];
+  const font = (fontKey: keyof Brand['fonts']) => (typeof brand.fonts?.[fontKey] === 'string' && FONT.test(brand.fonts[fontKey]) ? brand.fonts[fontKey] : fallback.fonts[fontKey]);
+  const shaderColors = Array.isArray(brand.shader?.colors) ? brand.shader.colors.filter((color: unknown) => typeof color === 'string' && COLOR.test(color)) : [];
   return {
-    name: typeof b.name === 'string' ? b.name.slice(0, 60) : fallback.name,
+    name: typeof brand.name === 'string' ? brand.name.slice(0, 60) : fallback.name,
     colors,
     fonts: { display: font('display'), body: font('body'), mono: font('mono') },
-    shader: ['mesh', 'grain', 'dither'].includes(b.shader?.kind) && shaderColors.length >= 2 ? { kind: b.shader.kind, colors: shaderColors.slice(0, 5) } : undefined,
-    source: typeof b.source === 'string' ? b.source.slice(0, 200) : undefined,
+    shader: ['mesh', 'grain', 'dither'].includes(brand.shader?.kind) && shaderColors.length >= 2 ? { kind: brand.shader.kind, colors: shaderColors.slice(0, 5) } : undefined,
+    source: typeof brand.source === 'string' ? brand.source.slice(0, 200) : undefined,
   };
 }
 
 /** Whether a background is light (so native controls and scrollbars should be light too). */
 export function isLight(hex: string) {
-  const m = /^#([0-9a-f]{6})/i.exec(hex);
-  if (!m) return false;
-  const n = parseInt(m[1], 16);
-  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 150;
+  const match = /^#([0-9a-f]{6})/i.exec(hex);
+  if (!match) return false;
+  const rgbValue = parseInt(match[1], 16);
+  const [red, green, blue] = [(rgbValue >> 16) & 255, (rgbValue >> 8) & 255, rgbValue & 255];
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue > 150;
 }

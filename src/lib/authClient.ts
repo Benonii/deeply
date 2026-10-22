@@ -9,9 +9,9 @@ import { convexClient, crossDomainClient } from '@convex-dev/better-auth/client/
  */
 export function convexSiteUrl(convexUrl: string) {
   if (convexUrl.includes('.convex.cloud')) return convexUrl.replace('.convex.cloud', '.convex.site');
-  const u = new URL(convexUrl);
-  if (u.port) u.port = String(Number(u.port) + 1);
-  return u.toString().replace(/\/$/, '');
+  const parsedURL = new URL(convexUrl);
+  if (parsedURL.port) parsedURL.port = String(Number(parsedURL.port) + 1);
+  return parsedURL.toString().replace(/\/$/, '');
 }
 
 export function makeAuthClient(convexUrl: string) {
@@ -27,6 +27,6 @@ let client: AuthClient | null = null;
 export function getAuthClient() {
   return client;
 }
-export function setAuthClient(c: AuthClient | null) {
-  client = c;
+export function setAuthClient(nextClient: AuthClient | null) {
+  client = nextClient;
 }

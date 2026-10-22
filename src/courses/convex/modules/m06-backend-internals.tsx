@@ -1,16 +1,16 @@
-import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, C } from '../../../engine/kit';
+import { Module, Section, Callout, KeyTerms, Compare, Code, Flow, Diagram, Check, InlineCode } from '../../../engine/kit';
 
 const Component = () => (
   <>
     <Section id="oss" title="It's open source, and it's Rust">
       <p>
-        The Convex backend lives at <C>github.com/get-convex/convex-backend</C>. It is a large Rust workspace (dozens of
-        crates) plus the TypeScript runtime pieces (the <C>convex</C> npm package, the UDF runtime that runs inside V8, the
+        The Convex backend lives at <InlineCode>github.com/get-convex/convex-backend</InlineCode>. It is a large Rust workspace (dozens of
+        crates) plus the TypeScript runtime pieces (the <InlineCode>convex</InlineCode> npm package, the UDF runtime that runs inside V8, the
         dashboard). The same code powers Convex Cloud and self-hosted deployments; the cloud adds multi-tenant
         orchestration, Node action infrastructure, backups and so on.
       </p>
       <p>
-        A <strong>deployment</strong> (e.g. <C>happy-otter-123</C>) is, approximately, one backend process with its own
+        A <strong>deployment</strong> (e.g. <InlineCode>happy-otter-123</InlineCode>) is, approximately, one backend process with its own
         database, function code, file storage, scheduler and search indexes. Dev, prod and preview deployments are fully
         separate databases.
       </p>
@@ -60,15 +60,15 @@ const Component = () => (
     <Section id="runtime" title="The function runtime: V8 isolates, not Node">
       <p>
         Queries, mutations, HTTP actions and default actions run in the <strong>Convex JS runtime</strong>: V8 embedded in
-        Rust via <C>rusty_v8</C>. Your bundled modules are loaded into an isolate; the runtime exposes a small set of
-        “syscalls” back into Rust — <C>ctx.db.get</C>, index scans, inserts, <C>ctx.auth</C>, scheduler, storage — via
-        async ops. There is no Node <C>fs</C>, no <C>process</C>, no native modules.
+        Rust via <InlineCode>rusty_v8</InlineCode>. Your bundled modules are loaded into an isolate; the runtime exposes a small set of
+        “syscalls” back into Rust — <InlineCode>ctx.db.get</InlineCode>, index scans, inserts, <InlineCode>ctx.auth</InlineCode>, scheduler, storage — via
+        async ops. There is no Node <InlineCode>fs</InlineCode>, no <InlineCode>process</InlineCode>, no native modules.
       </p>
       <ul>
-        <li><strong>Why isolates?</strong> Startup in milliseconds (not seconds), strong memory isolation per request, tight control over determinism (patched <C>Math.random</C>, frozen <C>Date</C>), and the ability to block <C>fetch</C> in queries/mutations.</li>
+        <li><strong>Why isolates?</strong> Startup in milliseconds (not seconds), strong memory isolation per request, tight control over determinism (patched <InlineCode>Math.random</InlineCode>, frozen <InlineCode>Date</InlineCode>), and the ability to block <InlineCode>fetch</InlineCode> in queries/mutations.</li>
         <li><strong>Every DB call crosses into Rust.</strong> That’s where read sets are recorded and where limits (documents scanned, bytes read) are enforced.</li>
-        <li><strong>Web-standard APIs</strong> (<C>fetch</C> in actions, <C>TextEncoder</C>, <C>crypto.subtle</C>, <C>URL</C>, <C>Blob</C>, streams) are available in the default runtime.</li>
-        <li><strong>Node runtime:</strong> a file starting with <C>"use node"</C> can only define actions; those run on a Node.js executor (AWS Lambda in the cloud; a local Node process when self-hosting). Node actions have slower cold starts and can’t share a file with queries/mutations.</li>
+        <li><strong>Web-standard APIs</strong> (<InlineCode>fetch</InlineCode> in actions, <InlineCode>TextEncoder</InlineCode>, <InlineCode>crypto.subtle</InlineCode>, <InlineCode>URL</InlineCode>, <InlineCode>Blob</InlineCode>, streams) are available in the default runtime.</li>
+        <li><strong>Node runtime:</strong> a file starting with <InlineCode>"use node"</InlineCode> can only define actions; those run on a Node.js executor (AWS Lambda in the cloud; a local Node process when self-hosting). Node actions have slower cold starts and can’t share a file with queries/mutations.</li>
       </ul>
       <Code
         title="convex/ai.ts — Node runtime action"
@@ -88,7 +88,7 @@ export const summarize = action({
 });`}
       />
       <Check
-        q="Why can't a file marked 'use node' export a mutation?"
+        question="Why can't a file marked 'use node' export a mutation?"
         options={['Node is too slow', 'Mutations must run in the deterministic V8 runtime colocated with the database; Node actions run in a separate executor', 'It can, with a flag', 'Because Node lacks TypeScript']}
         answer={1}
         explain="Queries and mutations need the deterministic, sandboxed Convex runtime that records read sets and runs close to the DB. The Node executor is a separate environment used only for actions."
@@ -149,8 +149,8 @@ export const summarize = action({
         ]}
       />
       <p>
-        Index keys are encoded so that byte-order matches Convex’s value ordering (<C>undefined &lt; null &lt; number &lt; …</C>), and every
-        user index implicitly has <C>_creationTime</C> and <C>_id</C> appended so keys are unique and ties are ordered. A read
+        Index keys are encoded so that byte-order matches Convex’s value ordering (<InlineCode>undefined &lt; null &lt; number &lt; …</InlineCode>), and every
+        user index implicitly has <InlineCode>_creationTime</InlineCode> and <InlineCode>_id</InlineCode> appended so keys are unique and ties are ordered. A read
         “at ts=T” takes, for each key, the newest entry with ts ≤ T — that’s MVCC on top of plain ordered rows.
       </p>
       <Callout kind="insight" title="Why this design?">
@@ -186,7 +186,7 @@ export const summarize = action({
         ]}
       />
       <Check
-        q="Approximately how is a Convex table stored in Postgres when self-hosting with Postgres?"
+        question="Approximately how is a Convex table stored in Postgres when self-hosting with Postgres?"
         options={['One Postgres table per Convex table with columns per field', 'All tables share generic documents/indexes tables keyed by id+ts and index id+key+ts', 'As JSONB in one row per table', 'In Postgres large objects']}
         answer={1}
         explain="Convex treats persistence as an ordered log/KV store. Documents and index entries for every table live in shared physical tables, versioned by timestamp. Schema and semantics are enforced in Rust."
@@ -196,8 +196,8 @@ export const summarize = action({
     <Section id="system-tables" title="System tables & metadata">
       <p>
         Convex dogfoods its own database for metadata. Tables, indexes, schemas, modules, scheduled jobs and file metadata are
-        stored as documents in system tables (approximately <C>_tables</C>, <C>_index</C>, <C>_schemas</C>, <C>_modules</C>,
-        <C>_scheduled_functions</C>, <C>_storage</C>, <C>_cron_jobs</C>…). That gives metadata the same transactional
+        stored as documents in system tables (approximately <InlineCode>_tables</InlineCode>, <InlineCode>_index</InlineCode>, <InlineCode>_schemas</InlineCode>, <InlineCode>_modules</InlineCode>,
+        <InlineCode>_scheduled_functions</InlineCode>, <InlineCode>_storage</InlineCode>, <InlineCode>_cron_jobs</InlineCode>…). That gives metadata the same transactional
         guarantees as your data: scheduling a function in a mutation is just an insert into a system table, committed
         atomically with your writes.
       </p>
@@ -220,8 +220,8 @@ export const fileMeta = query({
       />
       <Callout kind="deep" title="Table numbers & IDs">
         Each table has a numeric identifier; document IDs encode the table number plus a random internal id (and a checksum),
-        rendered as a string. That’s why <C>v.id("users")</C> can validate that an id belongs to a specific table, and why
-        <C>ctx.db.get(id)</C> doesn’t need the table name.
+        rendered as a string. That’s why <InlineCode>v.id("users")</InlineCode> can validate that an id belongs to a specific table, and why
+        <InlineCode>ctx.db.get(id)</InlineCode> doesn’t need the table name.
       </Callout>
     </Section>
 
@@ -257,7 +257,7 @@ export const fileMeta = query({
         ]}
       />
       <Check
-        q="You add a new index to schema.ts on a table with 5M rows and push. What happens?"
+        question="You add a new index to schema.ts on a table with 5M rows and push. What happens?"
         options={['The push blocks writes until done', 'The index is backfilled before the push completes; queries using it work once live', 'You must write a migration to build it', 'The index only covers new documents']}
         answer={1}
         explain="Convex backfills new indexes as part of the push (approximately: in the background, without blocking writes), and only switches to the new schema once the index is ready. You never get an index covering only part of the table."
@@ -292,7 +292,7 @@ ctx.db.query("messages").withSearchIndex("search_body", (q) =>
 const hits = await ctx.vectorSearch("chunks", "by_embedding", { vector, limit: 8 });`}
       />
       <Check
-        q="Where can you call vector search?"
+        question="Where can you call vector search?"
         options={['Queries only', 'Actions (ctx.vectorSearch)', 'Mutations only', 'Anywhere']}
         answer={1}
         explain="Vector search is exposed via ctx.vectorSearch in actions. It returns ids and scores; load documents with ctx.runQuery. Full-text search, by contrast, works in queries and is reactive."
@@ -301,10 +301,10 @@ const hits = await ctx.vectorSearch("chunks", "by_embedding", { vector, limit: 8
 
     <Section id="components" title="Components: isolated namespaces">
       <p>
-        <strong>Convex components</strong> (e.g. <C>@convex-dev/aggregate</C>, <C>rate-limiter</C>, <C>workpool</C>,
-        <C>workflow</C>, <C>presence</C>) are mini Convex backends installed into your app via <C>convex.config.ts</C>. Each
+        <strong>Convex components</strong> (e.g. <InlineCode>@convex-dev/aggregate</InlineCode>, <InlineCode>rate-limiter</InlineCode>, <InlineCode>workpool</InlineCode>,
+        <InlineCode>workflow</InlineCode>, <InlineCode>presence</InlineCode>) are mini Convex backends installed into your app via <InlineCode>convex.config.ts</InlineCode>. Each
         component has its <strong>own tables, functions and scheduler namespace</strong>: your code can’t read its tables
-        directly and it can’t read yours. You interact via its API (<C>components.aggregate.…</C>). Calls into a component
+        directly and it can’t read yours. You interact via its API (<InlineCode>components.aggregate.…</InlineCode>). Calls into a component
         from a mutation run in the <em>same transaction</em> — so a component write commits or rolls back with yours.
       </p>
       <Code
@@ -327,10 +327,10 @@ export default app;`}
 
     <Section id="self-host" title="Self-hosting and operations">
       <ul>
-        <li><strong>Docker:</strong> the <C>convex-backend</C> image plus a <C>dashboard</C> image. Default persistence is SQLite on a volume; point it at Postgres or MySQL via a database URL env var for production. Files go to local disk or S3-compatible storage.</li>
-        <li><strong>CLI:</strong> set <C>CONVEX_SELF_HOSTED_URL</C> and <C>CONVEX_SELF_HOSTED_ADMIN_KEY</C> (generated by a script in the container) and use <C>npx convex dev/deploy</C> as usual.</li>
+        <li><strong>Docker:</strong> the <InlineCode>convex-backend</InlineCode> image plus a <InlineCode>dashboard</InlineCode> image. Default persistence is SQLite on a volume; point it at Postgres or MySQL via a database URL env var for production. Files go to local disk or S3-compatible storage.</li>
+        <li><strong>CLI:</strong> set <InlineCode>CONVEX_SELF_HOSTED_URL</InlineCode> and <InlineCode>CONVEX_SELF_HOSTED_ADMIN_KEY</InlineCode> (generated by a script in the container) and use <InlineCode>npx convex dev/deploy</InlineCode> as usual.</li>
         <li><strong>Node actions</strong> self-hosted run in a local Node process rather than Lambda.</li>
-        <li><strong>Data out:</strong> snapshot export/import (<C>npx convex export / import</C>), streaming export to warehouses (e.g. via Fivetran/Airbyte), log streams (Axiom, Datadog, webhooks) on paid cloud plans.</li>
+        <li><strong>Data out:</strong> snapshot export/import (<InlineCode>npx convex export / import</InlineCode>), streaming export to warehouses (e.g. via Fivetran/Airbyte), log streams (Axiom, Datadog, webhooks) on paid cloud plans.</li>
         <li><strong>Backups:</strong> cloud offers scheduled backups and restores; self-host you back up the persistence DB + file storage.</li>
       </ul>
       <Code
@@ -346,7 +346,7 @@ CONVEX_SELF_HOSTED_ADMIN_KEY=<key>
 npx convex dev`}
       />
       <Check
-        q="What's the default persistence backend of a fresh self-hosted Convex Docker setup?"
+        question="What's the default persistence backend of a fresh self-hosted Convex Docker setup?"
         options={['Postgres', 'SQLite', 'MySQL', 'RocksDB']}
         answer={1}
         explain="SQLite on a mounted volume by default; Postgres and MySQL are supported via configuration for production setups."

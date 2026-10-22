@@ -24,11 +24,11 @@ function socialProviders(): BetterAuthOptions['socialProviders'] {
   return providers;
 }
 
-export const createAuth = (ctx: GenericCtx<DataModel>) =>
+export const createAuth = (context: GenericCtx<DataModel>) =>
   betterAuth({
     baseURL: process.env.CONVEX_SITE_URL,
     trustedOrigins: [siteUrl],
-    database: authComponent.adapter(ctx),
+    database: authComponent.adapter(context),
     socialProviders: socialProviders(),
     // Local testing only: set AUTH_DEV_PASSWORD=1 on a dev deployment to allow email+password.
     emailAndPassword: { enabled: process.env.AUTH_DEV_PASSWORD === '1', requireEmailVerification: false },
@@ -36,8 +36,8 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
   });
 
 /** The signed-in Better Auth user, or null. Works in queries, mutations and actions. */
-export async function currentUser(ctx: GenericCtx<DataModel>) {
-  return (await authComponent.safeGetAuthUser(ctx)) ?? null;
+export async function currentUser(context: GenericCtx<DataModel>) {
+  return (await authComponent.safeGetAuthUser(context)) ?? null;
 }
 
 /** Which sign-in methods are configured, so the UI only shows working buttons. */

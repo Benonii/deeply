@@ -33,7 +33,7 @@ export type ShellCourse = {
 };
 
 function packModules(pack: CoursePack): ShellModule[] {
-  return pack.modules.map((m) => ({ ...m, status: 'ready' as const, pack: m }));
+  return pack.modules.map((courseModule) => ({ ...courseModule, status: 'ready' as const, pack: courseModule }));
 }
 
 /** Make a pack's verified source excerpts openable from its diagrams. */
@@ -41,13 +41,13 @@ function registerPackRefs(refs: Record<string, unknown> | undefined) {
   if (refs) registerRefs(refs as Record<string, CodeRef>);
 }
 
-export function fromBuiltin(c: BuiltinCourse): ShellCourse {
-  if (c.format === 'pack') registerPackRefs(c.pack.codeRefs);
-  const base = { base: `/c/${c.id}`, id: c.id, title: c.title, tagline: c.tagline, summary: c.summary, kind: c.kind, brand: c.brand, pages: c.pages ?? [] };
-  if (c.format === 'react') {
-    return { ...base, modules: c.modules.map((m) => ({ id: m.id, n: m.n, title: m.title, kicker: m.kicker, minutes: m.minutes, summary: m.summary, status: 'ready', Component: m.Component })) };
+export function fromBuiltin(course: BuiltinCourse): ShellCourse {
+  if (course.format === 'pack') registerPackRefs(course.pack.codeRefs);
+  const base = { base: `/c/${course.id}`, id: course.id, title: course.title, tagline: course.tagline, summary: course.summary, kind: course.kind, brand: course.brand, pages: course.pages ?? [] };
+  if (course.format === 'react') {
+    return { ...base, modules: course.modules.map((courseModule) => ({ id: courseModule.id, n: courseModule.n, title: courseModule.title, kicker: courseModule.kicker, minutes: courseModule.minutes, summary: courseModule.summary, status: 'ready', Component: courseModule.Component })) };
   }
-  return { ...base, modules: packModules(c.pack), challenges: c.pack.challenges };
+  return { ...base, modules: packModules(course.pack), challenges: course.pack.challenges };
 }
 
 /** Shape returned by `courses.getBySlug` (generator workstream). */
@@ -71,18 +71,18 @@ export function fromGenerated(doc: GeneratedCourseDoc, fallbackBrand: Brand): Sh
     pages: [],
     generating: doc.course.status !== 'ready' && doc.course.status !== 'failed',
     modules: [...doc.modules]
-      .sort((a, b) => a.n - b.n)
-      .map((m) => {
-        const o = m.pack ?? m.outline ?? {};
+      .sort((first, second) => first.n - second.n)
+      .map((courseModule) => {
+        const details = courseModule.pack ?? courseModule.outline ?? {};
         return {
-          id: o.id ?? `m${m.n}`,
-          n: m.n,
-          title: o.title ?? `Module ${m.n}`,
-          kicker: o.kicker ?? '',
-          minutes: o.minutes ?? 20,
-          summary: o.summary ?? '',
-          status: m.status,
-          pack: m.status === 'ready' ? m.pack : undefined,
+          id: details.id ?? `m${courseModule.n}`,
+          n: courseModule.n,
+          title: details.title ?? `Module ${courseModule.n}`,
+          kicker: details.kicker ?? '',
+          minutes: details.minutes ?? 20,
+          summary: details.summary ?? '',
+          status: courseModule.status,
+          pack: courseModule.status === 'ready' ? courseModule.pack : undefined,
         };
       }),
   };

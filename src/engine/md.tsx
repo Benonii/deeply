@@ -9,34 +9,34 @@ const INLINE = /(`[^`\n]+`)|(\*\*[^*\n]+\*\*)|(\*[^*\n]+\*)|(\[[^\]\n]+\]\((http
 export function Inline({ text }: { text: string }) {
   const out: React.ReactNode[] = [];
   let last = 0;
-  let k = 0;
-  let m: RegExpExecArray | null;
+  let keyCounter = 0;
+  let match: RegExpExecArray | null;
   INLINE.lastIndex = 0;
-  while ((m = INLINE.exec(text))) {
-    if (m.index > last) out.push(text.slice(last, m.index));
-    const [tok, code, bold, em, link, href] = m;
-    if (code) out.push(<code key={k++} className="ic">{code.slice(1, -1)}</code>);
-    else if (bold) out.push(<strong key={k++}>{bold.slice(2, -2)}</strong>);
-    else if (em) out.push(<em key={k++}>{em.slice(1, -1)}</em>);
-    else if (link) out.push(<a key={k++} href={href} target="_blank" rel="noreferrer">{link.slice(1, link.indexOf(']'))}</a>);
-    last = m.index + tok.length;
+  while ((match = INLINE.exec(text))) {
+    if (match.index > last) out.push(text.slice(last, match.index));
+    const [token, code, bold, emphasis, link, href] = match;
+    if (code) out.push(<code key={keyCounter++} className="ic">{code.slice(1, -1)}</code>);
+    else if (bold) out.push(<strong key={keyCounter++}>{bold.slice(2, -2)}</strong>);
+    else if (emphasis) out.push(<em key={keyCounter++}>{emphasis.slice(1, -1)}</em>);
+    else if (link) out.push(<a key={keyCounter++} href={href} target="_blank" rel="noreferrer">{link.slice(1, link.indexOf(']'))}</a>);
+    last = match.index + token.length;
   }
   if (last < text.length) out.push(text.slice(last));
   return <>{out}</>;
 }
 
 /** Paragraphs, and "- " / "1. " lists, separated by blank lines. */
-export function Md({ text }: { text: string }) {
+export function Markdown({ text }: { text: string }) {
   const blocks = text.trim().split(/\n\s*\n/);
   return (
     <>
-      {blocks.map((b, i) => {
-        const lines = b.split('\n').map((l) => l.trim()).filter(Boolean);
-        if (lines.length && lines.every((l) => /^[-*•] /.test(l)))
-          return <ul key={i}>{lines.map((l, j) => <li key={j}><Inline text={l.replace(/^[-*•] /, '')} /></li>)}</ul>;
-        if (lines.length && lines.every((l) => /^\d+[.)] /.test(l)))
-          return <ol key={i}>{lines.map((l, j) => <li key={j}><Inline text={l.replace(/^\d+[.)] /, '')} /></li>)}</ol>;
-        return <p key={i}><Inline text={lines.join(' ')} /></p>;
+      {blocks.map((block, blockIndex) => {
+        const lines = block.split('\n').map((line) => line.trim()).filter(Boolean);
+        if (lines.length && lines.every((line) => /^[-*•] /.test(line)))
+          return <ul key={blockIndex}>{lines.map((line, lineIndex) => <li key={lineIndex}><Inline text={line.replace(/^[-*•] /, '')} /></li>)}</ul>;
+        if (lines.length && lines.every((line) => /^\d+[.)] /.test(line)))
+          return <ol key={blockIndex}>{lines.map((line, lineIndex) => <li key={lineIndex}><Inline text={line.replace(/^\d+[.)] /, '')} /></li>)}</ol>;
+        return <p key={blockIndex}><Inline text={lines.join(' ')} /></p>;
       })}
     </>
   );
