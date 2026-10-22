@@ -5,6 +5,7 @@ import { makeAuthClient, setAuthClient } from '../lib/authClient';
 import { AccountHost } from '../account/host';
 import { anyApi } from 'convex/server';
 import { getProgress, setProgress, useProgress } from '../engine/progress';
+import type { WireTappedWebSocket } from '../types';
 
 export const api = anyApi;
 
@@ -39,20 +40,20 @@ function record(direction: 'up' | 'down', data: unknown) {
 }
 
 function installWireTap() {
-  const OriginalWebSocket = window.WebSocket as any;
-  if (OriginalWebSocket.__tapped) return;
+  const OriginalWebSocket: typeof WebSocket & WireTappedWebSocket = window.WebSocket;
+  if (OriginalWebSocket.isTapped) return;
   class Tapped extends OriginalWebSocket {
-    constructor(...args: any[]) {
+    static isTapped = true;
+    constructor(...args: ConstructorParameters<typeof WebSocket>) {
       super(...args);
       this.addEventListener('message', (event: MessageEvent) => record('down', event.data));
     }
-    send(data: any) {
+    send(data: Parameters<WebSocket['send']>[0]) {
       record('up', data);
       super.send(data);
     }
   }
-  (Tapped as any).__tapped = true;
-  window.WebSocket = Tapped as any;
+  window.WebSocket = Tapped;
 }
 
 export function useFrames() {

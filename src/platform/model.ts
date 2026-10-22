@@ -4,6 +4,7 @@ import type React from 'react';
 import type { Brand, Challenge, CoursePack, ModulePack } from '../../convex/lib/courseSchema';
 import type { BuiltinCourse, CoursePage } from '../engine/course';
 import { sanitizeBrand } from '../engine/theme';
+import type { GeneratedCourseMeta, GeneratedModuleDetails } from '../types';
 
 export type ShellModule = {
   id: string;
@@ -49,13 +50,13 @@ export function fromBuiltin(course: BuiltinCourse): ShellCourse {
 }
 
 export type GeneratedCourseDoc = {
-  course: { slug: string; status: string; topic: string; kind: 'concept' | 'repo'; meta?: any; error?: string };
-  modules: { n: number; status: ShellModule['status']; outline: any; pack?: ModulePack; error?: string }[];
+  course: { slug: string; status: string; topic: string; kind: 'concept' | 'repo'; meta?: GeneratedCourseMeta; error?: string };
+  modules: { n: number; status: ShellModule['status']; outline?: GeneratedModuleDetails; pack?: ModulePack; error?: string }[];
 };
 
 export function fromGenerated(doc: GeneratedCourseDoc, fallbackBrand: Brand): ShellCourse {
-  registerPackRefs((doc.course.meta as { codeRefs?: Record<string, unknown> } | undefined)?.codeRefs);
-  const meta = doc.course.meta ?? {};
+  registerPackRefs(doc.course.meta?.codeRefs);
+  const meta: GeneratedCourseMeta = doc.course.meta ?? {};
   return {
     base: `/g/${doc.course.slug}`,
     id: `g-${doc.course.slug}`,
@@ -70,7 +71,7 @@ export function fromGenerated(doc: GeneratedCourseDoc, fallbackBrand: Brand): Sh
     modules: [...doc.modules]
       .sort((first, second) => first.n - second.n)
       .map((courseModule) => {
-        const details = courseModule.pack ?? courseModule.outline ?? {};
+        const details: GeneratedModuleDetails = courseModule.pack ?? courseModule.outline ?? {};
         return {
           id: details.id ?? `m${courseModule.n}`,
           n: courseModule.n,

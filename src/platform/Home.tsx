@@ -9,6 +9,7 @@ import { BrandShader } from './BrandShader';
 import { useConvexClient } from './convexClient';
 import { ErrorBoundary } from './ErrorBoundary';
 import { fromBuiltin } from './model';
+import type { PublicCourseListing } from '../types';
 
 type CardData = { href: string; title: string; tagline: string; brand: Brand; kind: 'concept' | 'repo'; modules: number; minutes?: number; done?: number; logo?: string; community?: boolean };
 
@@ -24,7 +25,7 @@ function CourseCard({ card: c }: { card: CardData }) {
   useBrandFonts(c.brand);
   const [head, ...rest] = c.title.split(', ');
   return (
-    <a className="cc reveal" href={c.href} style={{ ['--cc-accent' as any]: c.brand.colors.accent }}>
+    <a className="cc reveal" href={c.href} style={{ '--cc-accent': c.brand.colors.accent } as React.CSSProperties}>
       <div className="cc-top">
         {c.logo ? <span className="cc-logo" dangerouslySetInnerHTML={{ __html: c.logo }} /> : <Swatches brand={c.brand} />}
         <span className="cc-kind">{c.community ? 'Community · ' : ''}{c.kind === 'repo' ? 'Codebase' : 'Concept'}</span>
@@ -43,7 +44,7 @@ function CourseCard({ card: c }: { card: CardData }) {
 }
 
 function CommunityCourses() {
-  const list = useQuery(anyApi.courses.listPublic, {}) as any[] | undefined;
+  const list = useQuery(anyApi.courses.listPublic, {}) as PublicCourseListing[] | undefined;
   if (list === undefined) return <p className="muted small">Loading community courses…</p>;
   if (!list.length) return <p className="muted">No community courses yet. <a href="#/create">Create the first one.</a></p>;
   return (
@@ -53,11 +54,11 @@ function CommunityCourses() {
           key={publicCourse.slug}
           card={{
             href: `#/g/${publicCourse.slug}`,
-            title: publicCourse.title ?? publicCourse.meta?.title ?? publicCourse.topic,
-            tagline: publicCourse.tagline ?? publicCourse.meta?.tagline ?? '',
-            brand: sanitizeBrand(publicCourse.brand ?? publicCourse.meta?.brand),
-            kind: publicCourse.kind ?? 'concept',
-            modules: publicCourse.moduleCount ?? publicCourse.modules ?? 0,
+            title: publicCourse.title,
+            tagline: publicCourse.tagline,
+            brand: sanitizeBrand(publicCourse.brand),
+            kind: publicCourse.kind,
+            modules: publicCourse.moduleCount,
             community: true,
           }}
         />

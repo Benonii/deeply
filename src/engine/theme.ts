@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type React from 'react';
 import type { Brand } from '../../convex/lib/courseSchema';
+import type { UntrustedBrand } from '../types';
 
 export const DEEPLY_BRAND: Brand = {
   name: 'Deeply',
@@ -76,18 +77,24 @@ export function shaderColors(brand: Brand) {
 
 const COLOR = /^(#[0-9a-fA-F]{3,8}|(rgb|hsl|oklch|oklab)a?\([0-9.,%\s/-]+\))$/;
 const FONT = /^[A-Za-z0-9 ]{2,40}$/;
-export function sanitizeBrand(brand: any, fallback: Brand = DEEPLY_BRAND): Brand {
-  if (!brand || typeof brand !== 'object') return fallback;
+const SHADER_KINDS = ['mesh', 'grain', 'dither'] as const;
+const isShaderKind = (value: unknown): value is (typeof SHADER_KINDS)[number] => SHADER_KINDS.some((kind) => kind === value);
+export function sanitizeBrand(input: unknown, fallback: Brand = DEEPLY_BRAND): Brand {
+  if (!input || typeof input !== 'object') return fallback;
+  const brand = input as UntrustedBrand;
+  const readColor = (value: unknown) => (typeof value === 'string' && COLOR.test(value.trim()) ? value.trim() : undefined);
+  const readFont = (value: unknown) => (typeof value === 'string' && FONT.test(value) ? value : undefined);
   const colors = Object.fromEntries(
-    Object.entries(fallback.colors).map(([key, value]) => [key, typeof brand.colors?.[key] === 'string' && COLOR.test(brand.colors[key].trim()) ? brand.colors[key].trim() : value]),
+    Object.entries(fallback.colors).map(([key, value]) => [key, readColor(brand.colors?.[key]) ?? value]),
   ) as Brand['colors'];
-  const font = (fontKey: keyof Brand['fonts']) => (typeof brand.fonts?.[fontKey] === 'string' && FONT.test(brand.fonts[fontKey]) ? brand.fonts[fontKey] : fallback.fonts[fontKey]);
-  const shaderColors = Array.isArray(brand.shader?.colors) ? brand.shader.colors.filter((color: unknown) => typeof color === 'string' && COLOR.test(color)) : [];
+  const font = (fontKey: keyof Brand['fonts']) => readFont(brand.fonts?.[fontKey]) ?? fallback.fonts[fontKey];
+  const shaderColors = Array.isArray(brand.shader?.colors) ? brand.shader.colors.filter((color: unknown): color is string => typeof color === 'string' && COLOR.test(color)) : [];
+  const shaderKind = brand.shader?.kind;
   return {
     name: typeof brand.name === 'string' ? brand.name.slice(0, 60) : fallback.name,
     colors,
     fonts: { display: font('display'), body: font('body'), mono: font('mono') },
-    shader: ['mesh', 'grain', 'dither'].includes(brand.shader?.kind) && shaderColors.length >= 2 ? { kind: brand.shader.kind, colors: shaderColors.slice(0, 5) } : undefined,
+    shader: isShaderKind(shaderKind) && shaderColors.length >= 2 ? { kind: shaderKind, colors: shaderColors.slice(0, 5) } : undefined,
     source: typeof brand.source === 'string' ? brand.source.slice(0, 200) : undefined,
   };
 }
