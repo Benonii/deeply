@@ -197,72 +197,6 @@
 .cr-status.s-failed {
   color: var(--accent2);
 }
-.cr-spin {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid color-mix(in oklab, var(--accent) 30%, transparent);
-  border-top-color: var(--accent);
-  animation: cr-spin 0.8s linear infinite;
-}
-@keyframes cr-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.cr-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 8px;
-}
-.cr-steps li {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 14px;
-  color: var(--muted);
-  margin: 0;
-}
-.cr-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--line2);
-  flex: none;
-}
-.cr-steps .st-done {
-  color: var(--fg2);
-}
-.cr-steps .st-done .cr-dot {
-  background: var(--ok);
-}
-.cr-steps .st-active {
-  color: var(--fg);
-  border-color: var(--line2);
-}
-.cr-steps .st-active .cr-dot {
-  background: var(--accent);
-  animation: cr-pulse 1.4s ease infinite;
-}
-.cr-steps .st-failed {
-  color: var(--accent2);
-}
-.cr-steps .st-failed .cr-dot {
-  background: var(--accent2);
-}
-@keyframes cr-pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-
 .cr-mods {
   list-style: none;
   margin: 0;
@@ -397,11 +331,5 @@
   }
   .cr-mod-state {
     grid-column: 2;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cr-spin,
-  .cr-steps .st-active .cr-dot {
-    animation: none;
   }
 }

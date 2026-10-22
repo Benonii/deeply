@@ -4,7 +4,11 @@ import { anyApi } from 'convex/server';
 import { openSignIn, useCredits } from '../account';
 import { useConvexClient } from '../platform/convexClient';
 import { COST } from '../../convex/lib/pricing';
+import { LoadingState } from '../components/ai/LoadingState';
+import { ThinkingTrace } from '../components/ai/ThinkingTrace';
 import './create.css';
+
+import type { TraceStep } from '../types';
 
 const api = anyApi;
 
@@ -251,7 +255,12 @@ const STATUS_LABEL: Record<Status, string> = {
 function Progress({ slug }: { slug: string }) {
   const data = useQuery(api.courses.getBySlug, { slug });
   const events = useQuery(api.courses.events, data ? { courseId: data.course.id } : 'skip');
-  if (data === undefined) return <p className="cr-note">Loading…</p>;
+  if (data === undefined)
+    return (
+      <div className="cr-note">
+        <LoadingState label="Loading" />
+      </div>
+    );
   if (data === null)
     return (
       <p className="cr-note">
@@ -262,7 +271,8 @@ function Progress({ slug }: { slug: string }) {
   const status = course.status as Status;
   const ready = modules.filter((courseModule: { status: string }) => courseModule.status === 'ready').length;
   const title = course.meta?.title ?? course.topic;
-  const steps: { label: string; state: 'done' | 'active' | 'todo' | 'failed' }[] = [
+  const isWorking = status !== 'ready' && status !== 'failed';
+  const steps: TraceStep[] = [
     {
       label: course.kind === 'repo' ? 'Research the repository' : 'Research the topic',
       state:
@@ -303,10 +313,11 @@ function Progress({ slug }: { slug: string }) {
     <section className="cr-progress" aria-live="polite">
       <div className="cr-progress-top">
         <div>
-          <div className={`cr-status s-${status}`}>
-            {status !== 'ready' && status !== 'failed' && <span className="cr-spin" aria-hidden />}
-            {STATUS_LABEL[status]}
-          </div>
+          {isWorking ? (
+            <LoadingState label={STATUS_LABEL[status]} startedAt={course.createdAt} />
+          ) : (
+            <div className={`cr-status s-${status}`}>{STATUS_LABEL[status]}</div>
+          )}
           <h2>{title}</h2>
           {course.meta?.tagline && <p className="muted">{course.meta.tagline}</p>}
         </div>
@@ -323,14 +334,12 @@ function Progress({ slug }: { slug: string }) {
       </div>
       {course.error && <p className="cr-problem">{course.error}</p>}
 
-      <ol className="cr-steps">
-        {steps.map((step) => (
-          <li key={step.label} className={`st-${step.state}`}>
-            <span className="cr-dot" aria-hidden />
-            {step.label}
-          </li>
-        ))}
-      </ol>
+      <ThinkingTrace
+        steps={steps}
+        isWorking={isWorking}
+        activeLabel={course.kind === 'repo' ? 'Studying the repository' : 'Writing your course'}
+        doneLabel={status === 'failed' ? 'Generation stopped' : 'Course written'}
+      />
 
       {modules.length > 0 && (
         <ul className="cr-mods">

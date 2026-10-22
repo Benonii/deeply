@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Markdown } from './md';
+import { LoadingState } from '../components/ai/LoadingState';
+import { StreamingText } from '../components/ai/StreamingText';
 
 export type SimplifyLevel = 1 | 2 | 3;
 export type SimplifyResult =
@@ -175,14 +176,12 @@ export function SimplifiedView({
       </div>
       {state.kind === 'loading' && (
         <div className="simplified-loading">
-          <span />
-          <span />
-          <span />
+          <LoadingState label="Simplifying" />
         </div>
       )}
       {state.kind === 'done' && (
         <div className="simplified-text">
-          <Markdown text={state.text} />
+          <StreamingText text={state.text} />
         </div>
       )}
       {state.kind === 'msg' && <p className="simplified-msg">{state.msg}</p>}

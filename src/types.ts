@@ -40,3 +40,10 @@ export interface UntrustedBrand {
 export interface WireTappedWebSocket {
   isTapped?: boolean;
 }
+
+export type TraceStepState = 'done' | 'active' | 'todo' | 'failed';
+
+export interface TraceStep {
+  label: string;
+  state: TraceStepState;
+}
