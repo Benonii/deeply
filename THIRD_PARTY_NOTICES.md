@@ -11,4 +11,6 @@ The convex-backend excerpts are used for non-commercial education, a Permitted P
 
 Convex is a trademark of Convex, Inc. This is an independent, unofficial learning resource. Convex, Inc. has not endorsed it.
 
+`src/components/ai/` adapts the Loading State, Thinking and Streaming Text components from [Beautiful UI](https://www.beautifului.dev/) (MIT, Copyright (c) 2026 Shane Levine), rewritten in plain CSS.
+
 Other dependencies (React, Farm, @paper-design/shaders-react and others) are installed from npm under their own licenses and are not vendored here.
