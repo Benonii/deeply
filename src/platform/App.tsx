@@ -113,7 +113,7 @@ function Shell({ brand, nav, children, route }: { brand: Brand; nav: React.React
           {nav}
           <div className="side-foot">
             <AccountButton />
-            <span className="side-legal">Open source. Course content about third-party projects is unofficial. <a href="https://github.com/Benonii" target="_blank" rel="noreferrer">GitHub</a></span>
+            <span className="side-legal">Open source. Course content about third-party projects is unofficial. <a href="https://github.com/Benonii/deeply" target="_blank" rel="noreferrer">GitHub</a></span>
           </div>
         </aside>
         <main className="main">{children}</main>

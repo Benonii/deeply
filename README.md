@@ -1,5 +1,7 @@
 # Deeply
 
+**Live:** https://deeply-six.vercel.app
+
 Open-source deep-dive courses on how things really work. Each course has animated, step-through diagrams of every moving part, the real source code behind them (for codebases), quick checks, challenges, and a **Simplify** button on every block for when an explanation gets too dense.
 
 - **Built-in courses:** *Convex, Deeply* (a reactive database and sync engine, mapped to Convex's real Rust and TypeScript source) and *CRDTs, Deeply* (local-first sync).
@@ -8,7 +10,7 @@ Open-source deep-dive courses on how things really work. Each course has animate
 
 Stack: Farm + React 18, Convex (database, functions, scheduling), Better Auth, Polar (credits), Claude (generation and Simplify), shaders from paper.design.
 
-MIT licensed · course content about third-party projects is unofficial and not affiliated with them.
+[![CI](https://github.com/Benonii/deeply/actions/workflows/ci.yml/badge.svg)](https://github.com/Benonii/deeply/actions/workflows/ci.yml) · MIT licensed · course content about third-party projects is unofficial and not affiliated with them.
 
 ## Local development
 ```bash
