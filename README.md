@@ -5,10 +5,10 @@
 Open-source deep-dive courses on how things really work. Each course has animated, step-through diagrams of every moving part, the real source code behind them (for codebases), quick checks, challenges, and a **Simplify** button on every block for when an explanation gets too dense.
 
 - **Built-in courses:** *Convex, Deeply* (a reactive database and sync engine, mapped to Convex's real Rust and TypeScript source) and *CRDTs, Deeply* (local-first sync).
-- **Create your own:** sign in, name a concept or paste a public GitHub repo, and Deeply researches it, takes its visual identity from the project's own brand, and writes a full course with Claude. Code excerpts are copied verbatim from the repo, never written by the model.
+- **Create your own:** sign in, name a concept or paste a public GitHub repo, and Deeply researches it, takes its visual identity from the project's own brand, and writes a full course with an LLM (OpenAI or Claude, via the Vercel AI SDK). Code excerpts are copied verbatim from the repo, never written by the model.
 - **Simplify:** rewrites any block at three levels (Plainer, Like I'm new, Like I'm 12). Rewrites are cached and shared, so each one is only paid for once.
 
-Stack: Farm + React 18, Convex (database, functions, scheduling), Better Auth, Polar (credits), Claude (generation and Simplify), shaders from paper.design.
+Stack: Farm + React 18, Convex (database, functions, scheduling), Better Auth, Polar (credits), Vercel AI SDK with OpenAI or Claude (generation and Simplify), shaders from paper.design.
 
 [![CI](https://github.com/Benonii/deeply/actions/workflows/ci.yml/badge.svg)](https://github.com/Benonii/deeply/actions/workflows/ci.yml) · MIT licensed · course content about third-party projects is unofficial and not affiliated with them.
 
@@ -18,7 +18,7 @@ npm install
 npx convex dev   # creates a dev deployment, writes CONVEX_URL to .env.local, pushes convex/
 npm run dev      # http://localhost:9000
 ```
-The built-in courses work without a backend. Sign-in, Simplify, community courses and the Convex Live Lab need one. To try the generator without an Anthropic key, set `GENERATOR_FAKE=1` on a **dev** deployment and it writes a small fixture course.
+The built-in courses work without a backend. Sign-in, Simplify, community courses and the Convex Live Lab need one. To try the generator without an API key, set `GENERATOR_FAKE=1` on a **dev** deployment and it writes a small fixture course.
 
 Full production setup (OAuth apps, Polar, environment variables, Vercel): [docs/SETUP.md](docs/SETUP.md).
 
