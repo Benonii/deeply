@@ -9,5 +9,5 @@ export const crdtsCourse: BuiltinCourse = {
   kind: crdtsPack.kind,
   brand: crdtsPack.brand,
   format: 'pack',
-  pack: crdtsPack,
+  pack: crdtsPack
 };

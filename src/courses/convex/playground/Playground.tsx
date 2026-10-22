@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './playground.css';
 import { SyncSim } from './SyncSim';
 import { OccSim } from './OccSim';
@@ -10,7 +10,7 @@ const SIMS = [
   { id: 'sync', label: 'Sync & subscriptions', C: SyncSim },
   { id: 'occ', label: 'OCC conflicts', C: OccSim },
   { id: 'index', label: 'Indexes & read sets', C: IndexSim },
-  { id: 'opt', label: 'Optimistic updates', C: OptimisticSim },
+  { id: 'opt', label: 'Optimistic updates', C: OptimisticSim }
 ];
 
 export function Playground() {
@@ -22,17 +22,38 @@ export function Playground() {
       <header className="pg-head">
         <div className="eyebrow">Practice · simulators, 49 challenges, boss level</div>
         <h1>Playground</h1>
-        <p className="lede">Poke the machinery, then prove you understand it. Every simulator state and every challenge can be copied to Claude.</p>
+        <p className="lede">
+          Poke the machinery, then prove you understand it. Every simulator state and every challenge can be copied to
+          Claude.
+        </p>
       </header>
       <nav className="pg-tabs" role="tablist">
-        {([['sims', 'Simulators'], ['challenges', 'Challenges'], ['boss', 'Boss level']] as const).map(([id, label]) => (
-          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'on' : ''} onClick={() => setTab(id)}>{label}</button>
+        {(
+          [
+            ['sims', 'Simulators'],
+            ['challenges', 'Challenges'],
+            ['boss', 'Boss level']
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            className={tab === id ? 'on' : ''}
+            onClick={() => setTab(id)}
+          >
+            {label}
+          </button>
         ))}
       </nav>
       {tab === 'sims' && (
         <>
           <div className="pg-chips pg-simnav">
-            {SIMS.map((s) => <button key={s.id} className={sim === s.id ? 'on' : ''} onClick={() => setSim(s.id)}>{s.label}</button>)}
+            {SIMS.map((s) => (
+              <button key={s.id} className={sim === s.id ? 'on' : ''} onClick={() => setSim(s.id)}>
+                {s.label}
+              </button>
+            ))}
           </div>
           <Active />
         </>

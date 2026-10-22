@@ -18,8 +18,8 @@ export const m08: ModulePack = {
       ),
       ul(
         '**Move as delete + insert**: dragging a list item is often implemented as "delete at old position, insert at new". Two users concurrently move the same item to different places, and the merge contains two copies. A real move operation (Kleppmann 2020, "Moving elements in list CRDTs"; Loro\'s movable list) keeps one item with an LWW position.',
-        '**Edit vs delete**: Alice deletes a task while Bob edits its title. Depending on the design the edit is lost, or the task is resurrected with only Bob\'s field. Decide which you want and test it.',
-        '**Concurrent container creation**: both users create `doc.settings = {}` and fill it (module 6). One object wins; the other\'s fields vanish.',
+        "**Edit vs delete**: Alice deletes a task while Bob edits its title. Depending on the design the edit is lost, or the task is resurrected with only Bob's field. Decide which you want and test it.",
+        "**Concurrent container creation**: both users create `doc.settings = {}` and fill it (module 6). One object wins; the other's fields vanish.",
         '**LWW on rich data**: concurrent edits to a whole JSON blob stored in one register drop one side completely. Store fields separately so they merge independently.',
         '**Interleaving**: concurrent text runs merged character by character (module 5).'
       ),
@@ -30,7 +30,12 @@ export const m08: ModulePack = {
       ),
       check(
         'Two users concurrently drag the same card to different columns. Your app implements moves as delete-then-insert in a list CRDT. What happens after merge?',
-        ['The card ends up in one column', 'The card appears twice, once in each column', 'The card disappears', 'The merge fails'],
+        [
+          'The card ends up in one column',
+          'The card appears twice, once in each column',
+          'The card disappears',
+          'The merge fails'
+        ],
         1,
         'Both deletes remove the one original element (idempotently), and both inserts add a new element, so two copies remain. A move operation that updates a single position register avoids this.'
       )
@@ -46,10 +51,10 @@ export const m08: ModulePack = {
         ['Invariant', 'With these operations', 'I-confluent?', 'Why'],
         ['Count ≥ 0', 'increments only', 'Yes', 'Merging two non-negative counts that only grew stays non-negative'],
         ['Count ≥ 0', 'decrements', 'No', 'Two replicas each take the last unit: −1 after merge'],
-        ['Unique ids', 'ids from (replica, counter)', 'Yes', 'Generated ids can\'t collide'],
+        ['Unique ids', 'ids from (replica, counter)', 'Yes', "Generated ids can't collide"],
         ['Unique usernames', 'users choose names', 'No', 'Two replicas accept the same name concurrently'],
         ['Foreign key', 'insert children only', 'Yes', 'Parents are never removed'],
-        ['Foreign key', 'delete parents', 'No', 'A child added concurrently with its parent\'s deletion dangles'],
+        ['Foreign key', 'delete parents', 'No', "A child added concurrently with its parent's deletion dangles"],
         ['Value ≤ limit', 'increments', 'No', 'Each side stays under the limit; the sum exceeds it']
       ),
       callout(
@@ -59,7 +64,12 @@ export const m08: ModulePack = {
       ),
       check(
         'Which invariant can a CRDT preserve without any coordination?',
-        ['A wallet balance never goes below zero under withdrawals', 'Every comment references an existing post, and posts can be deleted', 'Ids generated as (replicaId, counter) are unique', 'At most 10 people can RSVP'],
+        [
+          'A wallet balance never goes below zero under withdrawals',
+          'Every comment references an existing post, and posts can be deleted',
+          'Ids generated as (replicaId, counter) are unique',
+          'At most 10 people can RSVP'
+        ],
         2,
         'Locally generated (replica, counter) ids are unique by construction, so merging never creates a duplicate. The others all have concurrent operation pairs that are each valid locally but invalid together.'
       )
@@ -124,38 +134,81 @@ const north = new BoundedCounter('north', { north: 5, south: 5 });
           { id: 'b', label: 'Client B', sub: 'delete @0', col: 0, row: 2, tone: 'purple' },
           { id: 'srv', label: 'Server', sub: 'orders ops', col: 2, row: 1, tone: 'red' },
           { id: 't', label: 'Transform', sub: 'insert "x" @1', col: 3, row: 0, tone: 'plain' },
-          { id: 'ack', label: 'Broadcast', sub: 'rev 41, rev 42', col: 4, row: 1, tone: 'red' },
+          { id: 'ack', label: 'Broadcast', sub: 'rev 41, rev 42', col: 4, row: 1, tone: 'red' }
         ],
         edges: [
           { id: 'e1', from: 'a', to: 'srv', label: 'rev 40' },
           { id: 'e2', from: 'b', to: 'srv', label: 'rev 40' },
           { id: 'e3', from: 'srv', to: 't' },
-          { id: 'e4', from: 't', to: 'ack' },
+          { id: 'e4', from: 't', to: 'ack' }
         ],
         steps: [
-          { title: 'Both edit revision 40', text: 'A inserts "x" at index 2. B deletes index 0. Both ops were made against revision 40.', nodes: ['a', 'b'] },
-          { title: 'Server picks an order', text: 'B\'s delete arrives first and becomes revision 41.', nodes: ['srv'], edges: ['e2'] },
-          { title: 'Transform the late op', text: 'A\'s insert was based on revision 40, but revision 41 deleted a character before index 2. The server transforms it to insert at index 1, preserving A\'s intent.', nodes: ['t'], edges: ['e1', 'e3'] },
-          { title: 'Broadcast in order', text: 'Clients receive revisions 41 and 42 in order. A, which already applied its own insert at 2 locally, transforms the incoming delete against its pending op instead.', nodes: ['ack'], edges: ['e4'] },
-          { title: 'The dependency', text: 'All of this hinges on one ordering authority. Without the server, every pair of clients would need to agree on transformations, which is where OT gets hard.', nodes: ['srv'] },
-        ],
+          {
+            title: 'Both edit revision 40',
+            text: 'A inserts "x" at index 2. B deletes index 0. Both ops were made against revision 40.',
+            nodes: ['a', 'b']
+          },
+          {
+            title: 'Server picks an order',
+            text: "B's delete arrives first and becomes revision 41.",
+            nodes: ['srv'],
+            edges: ['e2']
+          },
+          {
+            title: 'Transform the late op',
+            text: "A's insert was based on revision 40, but revision 41 deleted a character before index 2. The server transforms it to insert at index 1, preserving A's intent.",
+            nodes: ['t'],
+            edges: ['e1', 'e3']
+          },
+          {
+            title: 'Broadcast in order',
+            text: 'Clients receive revisions 41 and 42 in order. A, which already applied its own insert at 2 locally, transforms the incoming delete against its pending op instead.',
+            nodes: ['ack'],
+            edges: ['e4']
+          },
+          {
+            title: 'The dependency',
+            text: 'All of this hinges on one ordering authority. Without the server, every pair of clients would need to agree on transformations, which is where OT gets hard.',
+            nodes: ['srv']
+          }
+        ]
       }),
       p(
-        '**Server-authoritative sync engines** (Convex, Firebase, Replicache/Zero, Linear\'s engine) go further: the server runs every write as a transaction against the one true state, can check any invariant, and pushes results to clients. Clients apply optimistic updates locally and **rebase** them when the server\'s result arrives. In Convex, for example, mutations are serializable transactions using optimistic concurrency control, and queries are reactive, so every client sees a consistent snapshot. There is nothing to merge, because writes never fork.'
+        "**Server-authoritative sync engines** (Convex, Firebase, Replicache/Zero, Linear's engine) go further: the server runs every write as a transaction against the one true state, can check any invariant, and pushes results to clients. Clients apply optimistic updates locally and **rebase** them when the server's result arrives. In Convex, for example, mutations are serializable transactions using optimistic concurrency control, and queries are reactive, so every client sees a consistent snapshot. There is nothing to merge, because writes never fork."
       ),
       compare(
         'Three ways to build collaborative apps',
         ['', 'CRDT (local-first)', 'OT', 'Server-authoritative (e.g. Convex)'],
-        ['Offline writes', 'First-class, final immediately', 'Queued; transformed on reconnect', 'Optimistic only; may be rejected'],
+        [
+          'Offline writes',
+          'First-class, final immediately',
+          'Queued; transformed on reconnect',
+          'Optimistic only; may be rejected'
+        ],
         ['Needs a server', 'No (but usually has one)', 'Yes, in practice', 'Yes'],
         ['Enforce any invariant', 'No (only I-confluent ones)', 'Partly (server sees order)', 'Yes, in transactions'],
-        ['Merge logic lives in', 'Data types on every replica', 'Transformation functions', 'Your mutation code on the server'],
+        [
+          'Merge logic lives in',
+          'Data types on every replica',
+          'Transformation functions',
+          'Your mutation code on the server'
+        ],
         ['Metadata cost', 'Ids, tombstones, history', 'Op log on server', 'Low on clients'],
-        ['Best at', 'Text/docs, offline-first, P2P', 'Text with a central server', 'Business data, permissions, multi-user apps']
+        [
+          'Best at',
+          'Text/docs, offline-first, P2P',
+          'Text with a central server',
+          'Business data, permissions, multi-user apps'
+        ]
       ),
       check(
         'A team task tracker needs offline edits, but also "an assignee must be a current team member" and per-field permissions. Which design fits best?',
-        ['Pure peer-to-peer CRDTs', 'Server-authoritative data with optimistic updates, plus a CRDT only for long-form description text', 'OT for every field', 'LWW for everything'],
+        [
+          'Pure peer-to-peer CRDTs',
+          'Server-authoritative data with optimistic updates, plus a CRDT only for long-form description text',
+          'OT for every field',
+          'LWW for everything'
+        ],
         1,
         'The membership invariant and permissions need a server that can validate. Collaborative rich text is where CRDTs shine, so embed one there. That hybrid is common in production.'
       )
@@ -171,7 +224,7 @@ const north = new BoundedCounter('north', { north: 5, south: 5 });
           { id: 'ydoc', label: 'Y.Doc', sub: 'description text', col: 1, row: 2, tone: 'purple' },
           { id: 'tx', label: 'Transaction', sub: 'validate + commit', col: 3, row: 0, tone: 'red' },
           { id: 'relay', label: 'Doc sync', sub: 'per-task room', col: 3, row: 2, tone: 'purple' },
-          { id: 'store', label: 'Database', sub: 'row + doc bytes', col: 4, row: 1, tone: 'plain' },
+          { id: 'store', label: 'Database', sub: 'row + doc bytes', col: 4, row: 1, tone: 'plain' }
         ],
         edges: [
           { id: 'e1', from: 'ui', to: 'mut' },
@@ -179,18 +232,42 @@ const north = new BoundedCounter('north', { north: 5, south: 5 });
           { id: 'e3', from: 'mut', to: 'tx', label: 'may reject' },
           { id: 'e4', from: 'ydoc', to: 'relay', label: 'updates' },
           { id: 'e5', from: 'tx', to: 'store' },
-          { id: 'e6', from: 'relay', to: 'store', label: 'compacted' },
+          { id: 'e6', from: 'relay', to: 'store', label: 'compacted' }
         ],
         steps: [
-          { title: 'Split by field', text: 'Structured fields (title, assignee, status) and the long-form description are edited through different paths.', nodes: ['ui'] },
-          { title: 'Structured fields are mutations', text: 'Changing the assignee calls a server mutation, applied optimistically on the client.', nodes: ['mut'], edges: ['e1'] },
-          { title: 'The server validates', text: 'The transaction checks the assignee is a current member and the user may edit the task. Invalid writes are rejected and the optimistic change is rolled back.', nodes: ['tx'], edges: ['e3'] },
-          { title: 'Text is a CRDT', text: 'The description is a Y.Doc. Keystrokes merge without coordination, work offline, and never get rejected. Access is checked once, when joining the task\'s room.', nodes: ['ydoc', 'relay'], edges: ['e2', 'e4'] },
-          { title: 'One database', text: 'Both end up in the same row: normal columns, plus the compacted Yjs update as bytes. Search indexing can read a plain-text projection of the document.', nodes: ['store'], edges: ['e5', 'e6'] },
-        ],
+          {
+            title: 'Split by field',
+            text: 'Structured fields (title, assignee, status) and the long-form description are edited through different paths.',
+            nodes: ['ui']
+          },
+          {
+            title: 'Structured fields are mutations',
+            text: 'Changing the assignee calls a server mutation, applied optimistically on the client.',
+            nodes: ['mut'],
+            edges: ['e1']
+          },
+          {
+            title: 'The server validates',
+            text: 'The transaction checks the assignee is a current member and the user may edit the task. Invalid writes are rejected and the optimistic change is rolled back.',
+            nodes: ['tx'],
+            edges: ['e3']
+          },
+          {
+            title: 'Text is a CRDT',
+            text: "The description is a Y.Doc. Keystrokes merge without coordination, work offline, and never get rejected. Access is checked once, when joining the task's room.",
+            nodes: ['ydoc', 'relay'],
+            edges: ['e2', 'e4']
+          },
+          {
+            title: 'One database',
+            text: 'Both end up in the same row: normal columns, plus the compacted Yjs update as bytes. Search indexing can read a plain-text projection of the document.',
+            nodes: ['store'],
+            edges: ['e5', 'e6']
+          }
+        ]
       }),
       ul(
-        '**Server reconciliation** (Replicache, Zero): clients run mutations locally for instant UI, the server re-runs the same mutations authoritatively, and clients rebase pending mutations on the server\'s state. You get offline-tolerant UX with server-checked invariants, at the cost of possible rejections.',
+        "**Server reconciliation** (Replicache, Zero): clients run mutations locally for instant UI, the server re-runs the same mutations authoritatively, and clients rebase pending mutations on the server's state. You get offline-tolerant UX with server-checked invariants, at the cost of possible rejections.",
         '**CRDT with a server tiebreak**: let clients merge freely, but have the server periodically validate the merged document and append corrective changes (for example, removing a duplicate username). Users may see the correction appear.',
         '**Escrow / reservations** (above): pre-allocate scarce resources to replicas.'
       )
@@ -246,7 +323,7 @@ test('OR-Set replicas converge under any merge order', () => {
           'The test runs too few iterations',
           'The test checks convergence but not intent: the agreed state can still drop edits',
           'Property tests cannot test CRDTs',
-          'The CRDT is not idempotent',
+          'The CRDT is not idempotent'
         ],
         1,
         'Convergence says nothing about whether the result is what users wanted (LWW converges while dropping writes). Add assertions from your conflict table, such as "a concurrent edit and delete keeps the edit".'
@@ -265,7 +342,12 @@ test('OR-Set replicas converge under any merge order', () => {
       ),
       check(
         'Why must a Yjs client id be unique per live session?',
-        ['It is used as the encryption key', 'Items are identified by (clientID, clock); two sessions sharing an id can create different items with the same id', 'The server rejects duplicates', 'Awareness requires it'],
+        [
+          'It is used as the encryption key',
+          'Items are identified by (clientID, clock); two sessions sharing an id can create different items with the same id',
+          'The server rejects duplicates',
+          'Awareness requires it'
+        ],
         1,
         'Two sessions with one clientID would both issue clock 57 for different content. Replicas then disagree on what item (id, 57) is, breaking convergence.'
       )
@@ -300,6 +382,6 @@ test('OR-Set replicas converge under any merge order', () => {
         'Weidner, Gentle and Kleppmann, "The Art of the Fugue" (2023); Gentle and Kleppmann, Eg-walker paper.',
         'The Yjs INTERNALS.md and Automerge binary format docs.'
       )
-    ),
-  ],
+    )
+  ]
 };

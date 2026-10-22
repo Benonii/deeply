@@ -5,15 +5,17 @@ import { makeAuthClient, setAuthClient } from '../lib/authClient';
 import { AccountHost } from '../account/host';
 import { anyApi } from 'convex/server';
 import { getProgress, setProgress, useProgress } from '../engine/progress';
+import type { WireTappedWebSocket } from '../types';
 
-// Function references without codegen: anyApi.lab.send === api.lab.send
 export const api = anyApi;
 
 const URL_KEY = 'convex-academy-url';
 export function getConvexUrl(): string | undefined {
-  const env = process.env.FARM_CONVEX_URL; // inlined at build time by farm.config.ts
+  const env = process.env.FARM_CONVEX_URL;
   let stored: string | null = null;
-  try { stored = localStorage.getItem(URL_KEY); } catch {}
+  try {
+    stored = localStorage.getItem(URL_KEY);
+  } catch {}
   return stored || env || undefined;
 }
 export function setConvexUrl(url: string | null) {
@@ -24,57 +26,54 @@ export function setConvexUrl(url: string | null) {
   location.reload();
 }
 
-/* ------------------------------------------------------------------ */
-/* Wire tap: record every WebSocket frame so the Live Lab can show the */
-/* real sync protocol (ModifyQuerySet, Transition, MutationResponse…). */
-/* ------------------------------------------------------------------ */
-
 export type Frame = { id: number; dir: 'up' | 'down'; t: number; type: string; raw: string };
 const frames: Frame[] = [];
 const frameListeners = new Set<() => void>();
 let frameId = 0;
 
-function record(dir: 'up' | 'down', data: unknown) {
+function record(direction: 'up' | 'down', data: unknown) {
   if (typeof data !== 'string') return;
   let type = 'binary';
-  try { type = JSON.parse(data).type ?? 'unknown'; } catch {}
-  frames.push({ id: frameId++, dir, t: Date.now(), type, raw: data });
+  try {
+    type = JSON.parse(data).type ?? 'unknown';
+  } catch {}
+  frames.push({ id: frameId++, dir: direction, t: Date.now(), type, raw: data });
   if (frames.length > 300) frames.shift();
-  frameListeners.forEach((l) => l());
+  frameListeners.forEach((listener) => listener());
 }
 
 function installWireTap() {
-  const W = window.WebSocket as any;
-  if (W.__tapped) return;
-  class Tapped extends W {
-    constructor(...args: any[]) {
+  const OriginalWebSocket: typeof WebSocket & WireTappedWebSocket = window.WebSocket;
+  if (OriginalWebSocket.isTapped) return;
+  class Tapped extends OriginalWebSocket {
+    static isTapped = true;
+    constructor(...args: ConstructorParameters<typeof WebSocket>) {
       super(...args);
-      this.addEventListener('message', (e: MessageEvent) => record('down', e.data));
+      this.addEventListener('message', (event: MessageEvent) => record('down', event.data));
     }
-    send(data: any) {
+    send(data: Parameters<WebSocket['send']>[0]) {
       record('up', data);
       super.send(data);
     }
   }
-  (Tapped as any).__tapped = true;
-  window.WebSocket = Tapped as any;
+  window.WebSocket = Tapped;
 }
 
 export function useFrames() {
   const [, force] = useState(0);
   useEffect(() => {
-    const l = () => force((n) => n + 1);
-    frameListeners.add(l);
-    return () => { frameListeners.delete(l); };
+    const rerender = () => force((count) => count + 1);
+    frameListeners.add(rerender);
+    return () => {
+      frameListeners.delete(rerender);
+    };
   }, []);
   return frames;
 }
 export function clearFrames() {
   frames.length = 0;
-  frameListeners.forEach((l) => l());
+  frameListeners.forEach((listener) => listener());
 }
-
-/* ------------------------------------------------------------------ */
 
 export function deviceId() {
   try {
@@ -99,7 +98,6 @@ function ProgressSync() {
   const { all: progress } = useProgress();
   const hydrated = useRef(false);
 
-  // First load: merge server progress into local.
   useEffect(() => {
     if (remote === undefined || hydrated.current) return;
     hydrated.current = true;
@@ -107,16 +105,17 @@ function ProgressSync() {
       const local = getProgress();
       setProgress({
         done: { ...remote.done, ...local.done },
-        challenges: { ...remote.challenges, ...local.challenges },
+        challenges: { ...remote.challenges, ...local.challenges }
       });
     }
   }, [remote]);
 
-  // Afterwards: push changes up (debounced).
   useEffect(() => {
     if (!hydrated.current) return;
-    const t = setTimeout(() => { save({ deviceId: id, ...progress }).catch(() => {}); }, 600);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => {
+      save({ deviceId: id, ...progress }).catch(() => {});
+    }, 600);
+    return () => clearTimeout(timer);
   }, [progress, id, save]);
   return null;
 }

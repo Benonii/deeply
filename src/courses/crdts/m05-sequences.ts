@@ -12,9 +12,9 @@ export const m05: ModulePack = {
   sections: [
     section(
       'indexes',
-      'Why indexes don\'t work',
+      "Why indexes don't work",
       p(
-        'A naive text op says "insert \'x\' at index 3". If Alice inserts at index 3 while Bob concurrently deletes index 1, Alice\'s index now points one character too far on Bob\'s replica. Indexes are relative to a document state, and concurrent replicas have different states.'
+        "A naive text op says \"insert 'x' at index 3\". If Alice inserts at index 3 while Bob concurrently deletes index 1, Alice's index now points one character too far on Bob's replica. Indexes are relative to a document state, and concurrent replicas have different states."
       ),
       p(
         'Operational transformation fixes this by rewriting indexes against concurrent ops. Sequence CRDTs fix it differently: **give every character a unique, immutable id**, and express inserts relative to ids ("insert \'x\' after character A:17") instead of positions. Ids never shift, so concurrent ops refer to the same things on every replica.'
@@ -107,7 +107,7 @@ console.log(a.text(), b.text()); // "Hoa" "Hoa": B > A breaks the tie, newest/gr
           { id: 'skip', label: 'Skip rule', sub: 'skip ids > mine', col: 2, row: 1, tone: 'plain' },
           { id: 'ra', label: 'Alice applies 2B', sub: 'H a → H o a', col: 3, row: 0, tone: 'yellow' },
           { id: 'rb', label: 'Bob applies 2A', sub: 'H o → H o a', col: 3, row: 2, tone: 'purple' },
-          { id: 'out', label: 'Both', sub: '"Hoa"', col: 4, row: 1, tone: 'red' },
+          { id: 'out', label: 'Both', sub: '"Hoa"', col: 4, row: 1, tone: 'red' }
         ],
         edges: [
           { id: 'e1', from: 'h', to: 'xa' },
@@ -117,16 +117,41 @@ console.log(a.text(), b.text()); // "Hoa" "Hoa": B > A breaks the tie, newest/gr
           { id: 'e5', from: 'skip', to: 'ra' },
           { id: 'e6', from: 'skip', to: 'rb' },
           { id: 'e7', from: 'ra', to: 'out' },
-          { id: 'e8', from: 'rb', to: 'out' },
+          { id: 'e8', from: 'rb', to: 'out' }
         ],
         steps: [
           { title: 'Shared prefix', text: 'Both replicas hold "H" with id 1A (Lamport 1, replica A).', nodes: ['h'] },
-          { title: 'Concurrent inserts at the same anchor', text: 'Alice types "a" after H; it gets id 2A. Bob, concurrently, types "o" after H; it gets id 2B. Both ops say "after 1A".', nodes: ['xa', 'yb'], edges: ['e1', 'e2'] },
-          { title: 'The integration rule', text: 'Start right after the anchor and skip over existing characters whose id is greater than the new one. Ids compare by counter, then replica: 2B > 2A.', nodes: ['skip'], edges: ['e3', 'e4'] },
-          { title: 'Alice receives "o" (2B)', text: 'After H sits "a" (2A). Is 2A > 2B? No, so stop and insert before it: "Hoa".', nodes: ['ra'], edges: ['e5'] },
-          { title: 'Bob receives "a" (2A)', text: 'After H sits "o" (2B). 2B > 2A, so skip it. End of list: insert there: "Hoa".', nodes: ['rb'], edges: ['e6'] },
-          { title: 'Same answer, no coordination', text: 'Both replicas computed "Hoa" from ids alone. The skip rule also keeps a run of characters typed by one user together, because each new character in a run has a higher id than the one before.', nodes: ['out'], edges: ['e7', 'e8'] },
-        ],
+          {
+            title: 'Concurrent inserts at the same anchor',
+            text: 'Alice types "a" after H; it gets id 2A. Bob, concurrently, types "o" after H; it gets id 2B. Both ops say "after 1A".',
+            nodes: ['xa', 'yb'],
+            edges: ['e1', 'e2']
+          },
+          {
+            title: 'The integration rule',
+            text: 'Start right after the anchor and skip over existing characters whose id is greater than the new one. Ids compare by counter, then replica: 2B > 2A.',
+            nodes: ['skip'],
+            edges: ['e3', 'e4']
+          },
+          {
+            title: 'Alice receives "o" (2B)',
+            text: 'After H sits "a" (2A). Is 2A > 2B? No, so stop and insert before it: "Hoa".',
+            nodes: ['ra'],
+            edges: ['e5']
+          },
+          {
+            title: 'Bob receives "a" (2A)',
+            text: 'After H sits "o" (2B). 2B > 2A, so skip it. End of list: insert there: "Hoa".',
+            nodes: ['rb'],
+            edges: ['e6']
+          },
+          {
+            title: 'Same answer, no coordination',
+            text: 'Both replicas computed "Hoa" from ids alone. The skip rule also keeps a run of characters typed by one user together, because each new character in a run has a higher id than the one before.',
+            nodes: ['out'],
+            edges: ['e7', 'e8']
+          }
+        ]
       }),
       check(
         'In RGA, why are deleted characters kept as tombstones instead of being removed from the list?',
@@ -134,7 +159,7 @@ console.log(a.text(), b.text()); // "Hoa" "Hoa": B > A breaks the tie, newest/gr
           'To support undo',
           'Concurrent or delayed inserts may reference them as their anchor',
           'Because the list is append-only on disk',
-          'To keep the document size constant',
+          'To keep the document size constant'
         ],
         1,
         'An insert that arrives later may say "after character 7B". If 7B had been physically removed, the replica could not place the new character consistently with others.'
@@ -189,7 +214,7 @@ export function between(lo: Pos, hi: Pos | undefined, replica: string): Pos {
         'Kleppmann, Gomes, Mulligan and Beresford (2019) named a correctness problem beyond convergence. Alice types "Hello" and Bob concurrently types "World" at the same position. Every replica converges, but the result might be "HWeolrllod": the two runs are interleaved character by character. Logoot and LSEQ interleave in this forward-typing case. RGA keeps forward-typed runs together but can interleave text typed backwards (each character inserted before the previous one). Treedoc and naive fractional indexing can interleave too.'
       ),
       p(
-        '**Fugue** (Weidner, Gentle and Kleppmann, 2023) is designed to be *maximally non-interleaving*: it treats the document as a tree where each character is a left or right child of an existing character, and orders concurrent siblings so that runs from one user stay contiguous in both forward and backward typing. It is used in Loro\'s text type.'
+        "**Fugue** (Weidner, Gentle and Kleppmann, 2023) is designed to be *maximally non-interleaving*: it treats the document as a tree where each character is a left or right child of an existing character, and orders concurrent siblings so that runs from one user stay contiguous in both forward and backward typing. It is used in Loro's text type."
       ),
       compare(
         'Sequence algorithms at a glance',
@@ -198,7 +223,13 @@ export function between(lo: Pos, hi: Pos | undefined, replica: string): Pos {
         ['RGA', 'Left neighbor id', 'No', 'Can interleave', 'Automerge (RGA-like list)'],
         ['YATA', 'Left and right origin', 'No', 'Mostly no (edge cases exist)', 'Yjs'],
         ['Fugue', 'Left or right parent in a tree', 'No', 'No (maximal non-interleaving)', 'Loro'],
-        ['Eg-walker', 'Event graph replayed into a temporary CRDT', 'Depends on the CRDT used inside (Fugue-like)', 'No', 'Diamond Types']
+        [
+          'Eg-walker',
+          'Event graph replayed into a temporary CRDT',
+          'Depends on the CRDT used inside (Fugue-like)',
+          'No',
+          'Diamond Types'
+        ]
       ),
       callout(
         'insight',
@@ -216,7 +247,7 @@ export function between(lo: Pos, hi: Pos | undefined, replica: string): Pos {
       'yata',
       'YATA: the algorithm inside Yjs',
       p(
-        '**YATA** (Nicolaescu, Jahns, Derntl and Klamma, 2016) is the algorithm Yjs implements. Each inserted item remembers both its **origin** (the item to its left when it was inserted) and its **rightOrigin** (the item to its right). To integrate a new item, Yjs scans the items currently between origin and rightOrigin. Any of them are concurrent insertions at the same spot, and YATA\'s rules order them using their own origins and, as a final tiebreak, client ids.'
+        "**YATA** (Nicolaescu, Jahns, Derntl and Klamma, 2016) is the algorithm Yjs implements. Each inserted item remembers both its **origin** (the item to its left when it was inserted) and its **rightOrigin** (the item to its right). To integrate a new item, Yjs scans the items currently between origin and rightOrigin. Any of them are concurrent insertions at the same spot, and YATA's rules order them using their own origins and, as a final tiebreak, client ids."
       ),
       flow({
         title: 'YATA integration (simplified)',
@@ -227,23 +258,49 @@ export function between(lo: Pos, hi: Pos | undefined, replica: string): Pos {
           { id: 'c1', label: 'Conflict 1', sub: 'same origin', col: 1, row: 2, tone: 'purple' },
           { id: 'c2', label: 'Conflict 2', sub: 'origin = Conflict 1', col: 2, row: 2, tone: 'purple' },
           { id: 'c3', label: 'Conflict 3', sub: 'same origin', col: 3, row: 2, tone: 'purple' },
-          { id: 'place', label: 'Insert here', sub: 'deterministic slot', col: 3, row: 0, tone: 'red' },
+          { id: 'place', label: 'Insert here', sub: 'deterministic slot', col: 3, row: 0, tone: 'red' }
         ],
         edges: [
           { id: 'e0', from: 'l', to: 'c1' },
           { id: 'e1', from: 'c1', to: 'c2' },
           { id: 'e2', from: 'c2', to: 'c3' },
           { id: 'e3', from: 'c3', to: 'r' },
-          { id: 'e4', from: 'new', to: 'place' },
+          { id: 'e4', from: 'new', to: 'place' }
         ],
         steps: [
-          { title: 'An item records two anchors', text: 'When a user types, Yjs creates an item with id (clientID, clock) and stores origin = left neighbor and rightOrigin = right neighbor at that moment.', nodes: ['new', 'l', 'r'] },
-          { title: 'Find the conflict zone', text: 'On another replica, items may already sit between origin and rightOrigin. They were inserted concurrently into the same gap.', nodes: ['c1', 'c2', 'c3'], edges: ['e0', 'e1', 'e2', 'e3'] },
-          { title: 'Items with the same origin', text: 'For an item with the same origin as the new one, order by client id: the lower client id goes left (approximate rule; see Yjs\'s Item.integrate for exact detail).', nodes: ['c1', 'c3'] },
-          { title: 'Items anchored inside the zone', text: 'An item whose origin is another conflicting item (Conflict 2 hangs off Conflict 1) belongs to that item\'s run, so the new item is placed relative to the whole run, not in its middle. This keeps runs together.', nodes: ['c2'] },
-          { title: 'Place and link', text: 'The new item is spliced into the doubly linked list at the slot the rules select. Every replica scanning the same items with the same rules picks the same slot.', nodes: ['place'], edges: ['e4'] },
-          { title: 'Why two anchors', text: 'Storing rightOrigin as well as origin gives YATA enough information to avoid most interleaving that left-only schemes allow. The cost is one more id per item, which Yjs compresses heavily.', nodes: ['l', 'r'] },
-        ],
+          {
+            title: 'An item records two anchors',
+            text: 'When a user types, Yjs creates an item with id (clientID, clock) and stores origin = left neighbor and rightOrigin = right neighbor at that moment.',
+            nodes: ['new', 'l', 'r']
+          },
+          {
+            title: 'Find the conflict zone',
+            text: 'On another replica, items may already sit between origin and rightOrigin. They were inserted concurrently into the same gap.',
+            nodes: ['c1', 'c2', 'c3'],
+            edges: ['e0', 'e1', 'e2', 'e3']
+          },
+          {
+            title: 'Items with the same origin',
+            text: "For an item with the same origin as the new one, order by client id: the lower client id goes left (approximate rule; see Yjs's Item.integrate for exact detail).",
+            nodes: ['c1', 'c3']
+          },
+          {
+            title: 'Items anchored inside the zone',
+            text: "An item whose origin is another conflicting item (Conflict 2 hangs off Conflict 1) belongs to that item's run, so the new item is placed relative to the whole run, not in its middle. This keeps runs together.",
+            nodes: ['c2']
+          },
+          {
+            title: 'Place and link',
+            text: 'The new item is spliced into the doubly linked list at the slot the rules select. Every replica scanning the same items with the same rules picks the same slot.',
+            nodes: ['place'],
+            edges: ['e4']
+          },
+          {
+            title: 'Why two anchors',
+            text: 'Storing rightOrigin as well as origin gives YATA enough information to avoid most interleaving that left-only schemes allow. The cost is one more id per item, which Yjs compresses heavily.',
+            nodes: ['l', 'r']
+          }
+        ]
       }),
       callout(
         'deep',
@@ -270,17 +327,22 @@ export function between(lo: Pos, hi: Pos | undefined, replica: string): Pos {
       ),
       check(
         'Yjs garbage collection is on. A user deletes a long paragraph. What remains in the document?',
-        ['Nothing; the items are removed', 'The full deleted text, marked deleted', 'Compact markers preserving the ids and lengths of the deleted items, without their content', 'A copy in a separate undo log'],
+        [
+          'Nothing; the items are removed',
+          'The full deleted text, marked deleted',
+          'Compact markers preserving the ids and lengths of the deleted items, without their content',
+          'A copy in a separate undo log'
+        ],
         2,
         'With GC on, Yjs drops deleted content but keeps enough structure (ids and lengths) for concurrent and future ops to be integrated correctly.'
       ),
       check(
         'Why do Logoot-style algorithms not need tombstones to order characters?',
         [
-          'Every character\'s position id alone determines its order, so nothing else references deleted characters',
+          "Every character's position id alone determines its order, so nothing else references deleted characters",
           'They use vector clocks instead',
           'They never delete characters',
-          'They rely on a server',
+          'They rely on a server'
         ],
         0,
         'Order comes from comparing position ids directly, not from anchors. (They may still need to remember deletes to stay idempotent when an insert and its delete arrive out of order.)'
@@ -290,16 +352,21 @@ export function between(lo: Pos, hi: Pos | undefined, replica: string): Pos {
       'recap',
       'Recap',
       terms(
-        ['Stable character id', 'Unique (replica, counter) per character so edits reference identities, not shifting indexes.'],
+        [
+          'Stable character id',
+          'Unique (replica, counter) per character so edits reference identities, not shifting indexes.'
+        ],
         ['RGA', 'Insert after a left anchor; skip greater ids; tombstone deletes.'],
         ['Logoot / LSEQ', 'Dense position identifiers; simple but interleave concurrent runs.'],
-        ['YATA', 'Left and right origins; Yjs\'s algorithm; items merged into runs.'],
+        ['YATA', "Left and right origins; Yjs's algorithm; items merged into runs."],
         ['Fugue', 'Tree-based ordering designed for maximal non-interleaving; used by Loro.'],
         ['Interleaving anomaly', 'Concurrent runs merged character by character: converged but unintended.'],
         ['Tombstone', 'Deleted element kept so it can still be referenced.']
       ),
       h3('Next'),
-      p('Text is one type. Real apps need maps, lists and text nested inside each other. Module 6 looks at how Automerge, Yjs, Loro and Diamond Types build whole documents.')
-    ),
-  ],
+      p(
+        'Text is one type. Real apps need maps, lists and text nested inside each other. Module 6 looks at how Automerge, Yjs, Loro and Diamond Types build whole documents.'
+      )
+    )
+  ]
 };

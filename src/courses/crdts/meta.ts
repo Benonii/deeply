@@ -10,16 +10,16 @@ export const crdtsBrand: Brand = {
     fg2: '#cfcfcf',
     muted: '#8c8c8c',
     line: '#272727',
-    accent: '#3ee6c1', // merge mint: two states becoming one
-    accent2: '#ff5fa2', // replica pink
-    accent3: '#8b7cff', // causality violet
-    onAccent: '#00140f',
+    accent: '#3ee6c1',
+    accent2: '#ff5fa2',
+    accent3: '#8b7cff',
+    onAccent: '#00140f'
   },
   fonts: { display: 'Syne', body: 'IBM Plex Sans', mono: 'IBM Plex Mono' },
   shader: { kind: 'mesh', colors: ['#000000', '#3ee6c1', '#8b7cff', '#ff5fa2', '#000000'] },
   logoSvg:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#000"/><circle cx="25" cy="32" r="15" fill="none" stroke="#ff5fa2" stroke-width="5"/><circle cx="39" cy="32" r="15" fill="none" stroke="#8b7cff" stroke-width="5"/><path d="M32 19.6a15 15 0 0 1 0 24.8a15 15 0 0 1 0-24.8z" fill="#3ee6c1"/></svg>',
-  source: 'designed',
+  source: 'designed'
 };
 
 const c = (
@@ -31,65 +31,564 @@ const c = (
   options: string[],
   answer: number,
   explain: string,
-  extra: Partial<Challenge> = {},
+  extra: Partial<Challenge> = {}
 ): Challenge => ({ id, topic, difficulty, type, q, options, answer, explain, ...extra });
 
 export const crdtsChallenges: Challenge[] = [
-  /* Module 1 */
-  c('m1-1', 'Why sync is hard', 1, 'mcq', 'What does strong eventual consistency guarantee?', ['All replicas always show the same data', 'Replicas that delivered the same updates have the same state', 'Writes are linearizable', 'Conflicts are reported to the user'], 1, 'SEC is about equal delivered updates implying equal state, with no coordination step. Replicas may differ while updates are still in flight.'),
-  c('m1-2', 'Why sync is hard', 2, 'mcq', 'Under PACELC, a local-first CRDT app that is fully connected trades what for what?', ['Availability for partition tolerance', 'Consistency for lower latency', 'Durability for speed', 'Nothing; there is no trade without a partition'], 1, 'With no partition, the "else" branch of PACELC is latency vs consistency. Local-first writes return immediately and skip coordination, so they are not linearizable.'),
-  c('m1-3', 'Why sync is hard', 1, 'predict', 'Two replicas both hold count = 10, both increment once offline, then sync by overwriting with the other\'s value. What is the final count?', ['10', '11', '12', '22'], 1, 'Each has 11; overwriting with 11 gives 11 on both. One increment is lost. That is why counters need per-replica entries.'),
-  c('m1-4', 'Why sync is hard', 2, 'mcq', 'Which consistency model is the strongest that can remain available under partition?', ['Linearizability', 'Sequential consistency', 'Causal consistency (real-time causal)', 'Snapshot isolation'], 2, 'Mahajan, Alvisi and Dahlin showed real-time causal consistency is the strongest model achievable with always-available, convergent replicas.'),
+  c(
+    'm1-1',
+    'Why sync is hard',
+    1,
+    'mcq',
+    'What does strong eventual consistency guarantee?',
+    [
+      'All replicas always show the same data',
+      'Replicas that delivered the same updates have the same state',
+      'Writes are linearizable',
+      'Conflicts are reported to the user'
+    ],
+    1,
+    'SEC is about equal delivered updates implying equal state, with no coordination step. Replicas may differ while updates are still in flight.'
+  ),
+  c(
+    'm1-2',
+    'Why sync is hard',
+    2,
+    'mcq',
+    'Under PACELC, a local-first CRDT app that is fully connected trades what for what?',
+    [
+      'Availability for partition tolerance',
+      'Consistency for lower latency',
+      'Durability for speed',
+      'Nothing; there is no trade without a partition'
+    ],
+    1,
+    'With no partition, the "else" branch of PACELC is latency vs consistency. Local-first writes return immediately and skip coordination, so they are not linearizable.'
+  ),
+  c(
+    'm1-3',
+    'Why sync is hard',
+    1,
+    'predict',
+    "Two replicas both hold count = 10, both increment once offline, then sync by overwriting with the other's value. What is the final count?",
+    ['10', '11', '12', '22'],
+    1,
+    'Each has 11; overwriting with 11 gives 11 on both. One increment is lost. That is why counters need per-replica entries.'
+  ),
+  c(
+    'm1-4',
+    'Why sync is hard',
+    2,
+    'mcq',
+    'Which consistency model is the strongest that can remain available under partition?',
+    ['Linearizability', 'Sequential consistency', 'Causal consistency (real-time causal)', 'Snapshot isolation'],
+    2,
+    'Mahajan, Alvisi and Dahlin showed real-time causal consistency is the strongest model achievable with always-available, convergent replicas.'
+  ),
 
-  /* Module 2 */
-  c('m2-1', 'Time & causality', 1, 'predict', 'Replica B\'s Lamport clock is 4. It receives a message stamped 9. What is B\'s clock after the receive event?', ['5', '9', '10', '13'], 2, 'max(4, 9) + 1 = 10.'),
-  c('m2-2', 'Time & causality', 2, 'mcq', 'Event X has Lamport time 3 and event Y has Lamport time 8. What can you conclude?', ['X happened before Y', 'Y did not happen before X', 'They are concurrent', 'Nothing at all'], 1, 'If Y → X then L(Y) < L(X), which is false. So Y did not happen before X. But X → Y is not implied: they could be concurrent.'),
-  c('m2-3', 'Time & causality', 2, 'predict', 'Compare vector clocks {A:2, B:3, C:1} and {A:2, B:3, C:4}.', ['First happened before second', 'Second happened before first', 'Concurrent', 'Equal'], 0, 'Every entry of the first is ≤ the second and C differs, so the first happened before the second.'),
-  c('m2-4', 'Time & causality', 3, 'mcq', 'What problem did dotted version vectors solve in Riak?', ['Clock skew between servers', 'Sibling explosion and false concurrency when many clients write through few servers', 'Slow anti-entropy', 'Large vector clocks for reads'], 1, 'Server-keyed version vectors couldn\'t distinguish concurrent client writes through one server, causing lost updates or ever-growing siblings. A dot per sibling plus causal context fixes it.'),
-  c('m2-5', 'Time & causality', 2, 'bug', 'This vector clock merge is used when receiving a message. What is wrong?', ['Nothing', 'It takes the minimum instead of the maximum', 'It should increment every entry', 'It must sort the keys first'], 1, 'Merge must take the entry-wise maximum so the receiver knows about everything the sender knew. Min forgets causal history.', { code: 'function merge(a: VClock, b: VClock) {\n  const out = { ...a };\n  for (const k in b) out[k] = Math.min(out[k] ?? 0, b[k]);\n  return out;\n}' }),
+  c(
+    'm2-1',
+    'Time & causality',
+    1,
+    'predict',
+    "Replica B's Lamport clock is 4. It receives a message stamped 9. What is B's clock after the receive event?",
+    ['5', '9', '10', '13'],
+    2,
+    'max(4, 9) + 1 = 10.'
+  ),
+  c(
+    'm2-2',
+    'Time & causality',
+    2,
+    'mcq',
+    'Event X has Lamport time 3 and event Y has Lamport time 8. What can you conclude?',
+    ['X happened before Y', 'Y did not happen before X', 'They are concurrent', 'Nothing at all'],
+    1,
+    'If Y → X then L(Y) < L(X), which is false. So Y did not happen before X. But X → Y is not implied: they could be concurrent.'
+  ),
+  c(
+    'm2-3',
+    'Time & causality',
+    2,
+    'predict',
+    'Compare vector clocks {A:2, B:3, C:1} and {A:2, B:3, C:4}.',
+    ['First happened before second', 'Second happened before first', 'Concurrent', 'Equal'],
+    0,
+    'Every entry of the first is ≤ the second and C differs, so the first happened before the second.'
+  ),
+  c(
+    'm2-4',
+    'Time & causality',
+    3,
+    'mcq',
+    'What problem did dotted version vectors solve in Riak?',
+    [
+      'Clock skew between servers',
+      'Sibling explosion and false concurrency when many clients write through few servers',
+      'Slow anti-entropy',
+      'Large vector clocks for reads'
+    ],
+    1,
+    "Server-keyed version vectors couldn't distinguish concurrent client writes through one server, causing lost updates or ever-growing siblings. A dot per sibling plus causal context fixes it."
+  ),
+  c(
+    'm2-5',
+    'Time & causality',
+    2,
+    'bug',
+    'This vector clock merge is used when receiving a message. What is wrong?',
+    [
+      'Nothing',
+      'It takes the minimum instead of the maximum',
+      'It should increment every entry',
+      'It must sort the keys first'
+    ],
+    1,
+    'Merge must take the entry-wise maximum so the receiver knows about everything the sender knew. Min forgets causal history.',
+    {
+      code: 'function merge(a: VClock, b: VClock) {\n  const out = { ...a };\n  for (const k in b) out[k] = Math.min(out[k] ?? 0, b[k]);\n  return out;\n}'
+    }
+  ),
 
-  /* Module 3 */
-  c('m3-1', 'State-based CRDTs', 1, 'mcq', 'Which three properties must a state-based merge have?', ['Idempotent, commutative, associative', 'Reversible, commutative, total', 'Monotonic, invertible, associative', 'Linearizable, durable, isolated'], 0, 'A join in a semilattice is idempotent, commutative and associative, which makes duplicates, reordering and regrouping harmless.'),
-  c('m3-2', 'State-based CRDTs', 2, 'predict', 'G-Counter A = {A:5, B:2, C:0}, B = {A:3, B:4, C:1}. What is value(merge(A, B))?', ['7', '10', '11', '15'], 1, 'Per-entry max: {A:5, B:4, C:1}, sum 10.'),
-  c('m3-3', 'State-based CRDTs', 2, 'bug', 'This PN-Counter decrement breaks convergence. Why?', ['Decrements must be negative numbers', 'It decrements P, moving the state down the lattice so max-merge can undo it', 'It should decrement every replica\'s entry', 'Nothing is wrong'], 1, 'Decrements must increment the N counter. Lowering an entry of P is not inflationary, and merging with an older state restores the old max.', { code: 'function dec(c: PNCounter, me: string) {\n  return { ...c, p: { ...c.p, [me]: (c.p[me] ?? 0) - 1 } };\n}' }),
-  c('m3-4', 'State-based CRDTs', 2, 'mcq', 'In a 2P-Set, element x was added and then removed. Can x be added again?', ['Yes, add always wins', 'No, the tombstone is permanent', 'Only with a later timestamp', 'Only on the replica that removed it'], 1, 'The remove-set only grows, so x stays removed forever. Use an OR-Set if re-adding must work.'),
-  c('m3-5', 'State-based CRDTs', 3, 'predict', 'OR-Set: "x" has tags {A:1}. Alice removes x. Concurrently Bob adds x (tag B:2) and then removes x after seeing only his own state {A:1, B:2}. After full merge, is x present?', ['Yes', 'No', 'Depends on timestamps', 'Undefined'], 1, 'Alice tombstoned A:1. Bob tombstoned A:1 and B:2. Union of tombstones covers every tag, so x is absent.'),
-  c('m3-6', 'State-based CRDTs', 2, 'mcq', 'Two concurrent writes to an LWW-Register carry equal timestamps. How does the merge stay deterministic?', ['It keeps both', 'It breaks the tie by replica id', 'It picks randomly', 'It rejects both'], 1, 'Ordering by (timestamp, replicaId) makes the order total, so every replica picks the same winner.'),
+  c(
+    'm3-1',
+    'State-based CRDTs',
+    1,
+    'mcq',
+    'Which three properties must a state-based merge have?',
+    [
+      'Idempotent, commutative, associative',
+      'Reversible, commutative, total',
+      'Monotonic, invertible, associative',
+      'Linearizable, durable, isolated'
+    ],
+    0,
+    'A join in a semilattice is idempotent, commutative and associative, which makes duplicates, reordering and regrouping harmless.'
+  ),
+  c(
+    'm3-2',
+    'State-based CRDTs',
+    2,
+    'predict',
+    'G-Counter A = {A:5, B:2, C:0}, B = {A:3, B:4, C:1}. What is value(merge(A, B))?',
+    ['7', '10', '11', '15'],
+    1,
+    'Per-entry max: {A:5, B:4, C:1}, sum 10.'
+  ),
+  c(
+    'm3-3',
+    'State-based CRDTs',
+    2,
+    'bug',
+    'This PN-Counter decrement breaks convergence. Why?',
+    [
+      'Decrements must be negative numbers',
+      'It decrements P, moving the state down the lattice so max-merge can undo it',
+      "It should decrement every replica's entry",
+      'Nothing is wrong'
+    ],
+    1,
+    'Decrements must increment the N counter. Lowering an entry of P is not inflationary, and merging with an older state restores the old max.',
+    { code: 'function dec(c: PNCounter, me: string) {\n  return { ...c, p: { ...c.p, [me]: (c.p[me] ?? 0) - 1 } };\n}' }
+  ),
+  c(
+    'm3-4',
+    'State-based CRDTs',
+    2,
+    'mcq',
+    'In a 2P-Set, element x was added and then removed. Can x be added again?',
+    [
+      'Yes, add always wins',
+      'No, the tombstone is permanent',
+      'Only with a later timestamp',
+      'Only on the replica that removed it'
+    ],
+    1,
+    'The remove-set only grows, so x stays removed forever. Use an OR-Set if re-adding must work.'
+  ),
+  c(
+    'm3-5',
+    'State-based CRDTs',
+    3,
+    'predict',
+    'OR-Set: "x" has tags {A:1}. Alice removes x. Concurrently Bob adds x (tag B:2) and then removes x after seeing only his own state {A:1, B:2}. After full merge, is x present?',
+    ['Yes', 'No', 'Depends on timestamps', 'Undefined'],
+    1,
+    'Alice tombstoned A:1. Bob tombstoned A:1 and B:2. Union of tombstones covers every tag, so x is absent.'
+  ),
+  c(
+    'm3-6',
+    'State-based CRDTs',
+    2,
+    'mcq',
+    'Two concurrent writes to an LWW-Register carry equal timestamps. How does the merge stay deterministic?',
+    ['It keeps both', 'It breaks the tie by replica id', 'It picks randomly', 'It rejects both'],
+    1,
+    'Ordering by (timestamp, replicaId) makes the order total, so every replica picks the same winner.'
+  ),
 
-  /* Module 4 */
-  c('m4-1', 'Operation-based CRDTs', 1, 'mcq', 'What delivery guarantee do op-based CRDTs typically need?', ['At-most-once, any order', 'Exactly-once, causal order', 'At-least-once, FIFO per sender only', 'Total order broadcast'], 1, 'Ops must be applied exactly once and after their causal dependencies. Total order is not needed; concurrent ops commute.'),
-  c('m4-2', 'Operation-based CRDTs', 2, 'mcq', 'Which pairs of operations must commute in an op-based CRDT?', ['All pairs', 'Only concurrent pairs', 'Only pairs from the same replica', 'None, if delivery is causal'], 1, 'Causally ordered ops are applied in the same order everywhere. Concurrent ops can arrive in either order, so their effects must commute.'),
-  c('m4-3', 'Operation-based CRDTs', 3, 'predict', 'Carol has delivered {A:3, B:1}. She receives an op from A with vector {A:5, B:1}. What happens?', ['Delivered immediately', 'Buffered until A\'s 4th op is delivered', 'Dropped as duplicate', 'Delivered and A:4 requested'], 1, 'From A she needs exactly the next op (A:4) first. A:5 waits in the buffer.'),
-  c('m4-4', 'Operation-based CRDTs', 2, 'mcq', 'What is causal stability used for?', ['Ordering concurrent ops', 'Knowing when metadata for an op can be garbage-collected', 'Detecting duplicates', 'Choosing a leader'], 1, 'Once every replica has delivered an op, nothing can be concurrent with it, so tags or tombstones for it can be discarded.'),
+  c(
+    'm4-1',
+    'Operation-based CRDTs',
+    1,
+    'mcq',
+    'What delivery guarantee do op-based CRDTs typically need?',
+    [
+      'At-most-once, any order',
+      'Exactly-once, causal order',
+      'At-least-once, FIFO per sender only',
+      'Total order broadcast'
+    ],
+    1,
+    'Ops must be applied exactly once and after their causal dependencies. Total order is not needed; concurrent ops commute.'
+  ),
+  c(
+    'm4-2',
+    'Operation-based CRDTs',
+    2,
+    'mcq',
+    'Which pairs of operations must commute in an op-based CRDT?',
+    ['All pairs', 'Only concurrent pairs', 'Only pairs from the same replica', 'None, if delivery is causal'],
+    1,
+    'Causally ordered ops are applied in the same order everywhere. Concurrent ops can arrive in either order, so their effects must commute.'
+  ),
+  c(
+    'm4-3',
+    'Operation-based CRDTs',
+    3,
+    'predict',
+    'Carol has delivered {A:3, B:1}. She receives an op from A with vector {A:5, B:1}. What happens?',
+    [
+      'Delivered immediately',
+      "Buffered until A's 4th op is delivered",
+      'Dropped as duplicate',
+      'Delivered and A:4 requested'
+    ],
+    1,
+    'From A she needs exactly the next op (A:4) first. A:5 waits in the buffer.'
+  ),
+  c(
+    'm4-4',
+    'Operation-based CRDTs',
+    2,
+    'mcq',
+    'What is causal stability used for?',
+    [
+      'Ordering concurrent ops',
+      'Knowing when metadata for an op can be garbage-collected',
+      'Detecting duplicates',
+      'Choosing a leader'
+    ],
+    1,
+    'Once every replica has delivered an op, nothing can be concurrent with it, so tags or tombstones for it can be discarded.'
+  ),
 
-  /* Module 5 */
-  c('m5-1', 'Sequence CRDTs', 1, 'mcq', 'Why do sequence CRDTs give each character a unique id?', ['To support undo', 'So ops refer to stable identities instead of shifting indexes', 'For encryption', 'To sort by time'], 1, 'Indexes change under concurrent edits; ids never do.'),
-  c('m5-2', 'Sequence CRDTs', 2, 'predict', 'RGA document "H"(1A). Alice inserts "x"(2A) after 1A; Bob concurrently inserts "y"(2B) after 1A; Carol concurrently inserts "z"(2C) after 1A. Final text?', ['Hxyz', 'Hzyx', 'Hyxz', 'Hzxy'], 1, 'After the anchor, greater ids come first: 2C > 2B > 2A, so "Hzyx".'),
-  c('m5-3', 'Sequence CRDTs', 2, 'mcq', 'Which algorithm is known for interleaving concurrent forward-typed words?', ['RGA', 'YATA', 'Logoot/LSEQ', 'Fugue'], 2, 'Dense position ids allocated in the same interval scatter characters from both users. Fugue was designed to avoid interleaving entirely.'),
-  c('m5-4', 'Sequence CRDTs', 2, 'mcq', 'What two anchors does a Yjs item record?', ['Parent and child', 'origin and rightOrigin', 'Previous and next timestamp', 'Start and end index'], 1, 'YATA items remember the left and right neighbors at insertion time and integrate between them.'),
-  c('m5-5', 'Sequence CRDTs', 3, 'bug', 'This RGA integrate places concurrent inserts inconsistently across replicas. What is the bug?', ['It should skip elements with smaller ids, not greater', 'It compares ids without the replica tiebreak, so equal counters order differently depending on arrival', 'It must insert at the end', 'Deleted elements should be skipped first'], 1, 'Two inserts with the same counter from different replicas are neither greater than the other under counter-only comparison, so the result depends on which arrived first. A total order needs the replica id tiebreak.', { code: 'const greater = (a: Id, b: Id) => a.c > b.c; // no replica tiebreak\nwhile (i < els.length && greater(els[i].id, op.id)) i++;' }),
+  c(
+    'm5-1',
+    'Sequence CRDTs',
+    1,
+    'mcq',
+    'Why do sequence CRDTs give each character a unique id?',
+    [
+      'To support undo',
+      'So ops refer to stable identities instead of shifting indexes',
+      'For encryption',
+      'To sort by time'
+    ],
+    1,
+    'Indexes change under concurrent edits; ids never do.'
+  ),
+  c(
+    'm5-2',
+    'Sequence CRDTs',
+    2,
+    'predict',
+    'RGA document "H"(1A). Alice inserts "x"(2A) after 1A; Bob concurrently inserts "y"(2B) after 1A; Carol concurrently inserts "z"(2C) after 1A. Final text?',
+    ['Hxyz', 'Hzyx', 'Hyxz', 'Hzxy'],
+    1,
+    'After the anchor, greater ids come first: 2C > 2B > 2A, so "Hzyx".'
+  ),
+  c(
+    'm5-3',
+    'Sequence CRDTs',
+    2,
+    'mcq',
+    'Which algorithm is known for interleaving concurrent forward-typed words?',
+    ['RGA', 'YATA', 'Logoot/LSEQ', 'Fugue'],
+    2,
+    'Dense position ids allocated in the same interval scatter characters from both users. Fugue was designed to avoid interleaving entirely.'
+  ),
+  c(
+    'm5-4',
+    'Sequence CRDTs',
+    2,
+    'mcq',
+    'What two anchors does a Yjs item record?',
+    ['Parent and child', 'origin and rightOrigin', 'Previous and next timestamp', 'Start and end index'],
+    1,
+    'YATA items remember the left and right neighbors at insertion time and integrate between them.'
+  ),
+  c(
+    'm5-5',
+    'Sequence CRDTs',
+    3,
+    'bug',
+    'This RGA integrate places concurrent inserts inconsistently across replicas. What is the bug?',
+    [
+      'It should skip elements with smaller ids, not greater',
+      'It compares ids without the replica tiebreak, so equal counters order differently depending on arrival',
+      'It must insert at the end',
+      'Deleted elements should be skipped first'
+    ],
+    1,
+    'Two inserts with the same counter from different replicas are neither greater than the other under counter-only comparison, so the result depends on which arrived first. A total order needs the replica id tiebreak.',
+    {
+      code: 'const greater = (a: Id, b: Id) => a.c > b.c; // no replica tiebreak\nwhile (i < els.length && greater(els[i].id, op.id)) i++;'
+    }
+  ),
 
-  /* Module 6 */
-  c('m6-1', 'Document CRDTs', 1, 'mcq', 'In Yjs, what is a state vector?', ['A snapshot of the document', 'A map from client id to the next expected clock', 'A list of deleted items', 'The undo stack'], 1, 'It summarizes everything a doc has seen, so a peer can compute exactly what to send.'),
-  c('m6-2', 'Document CRDTs', 2, 'mcq', 'How does Automerge represent concurrent histories?', ['A linear log with timestamps', 'A DAG of changes linked by dependency hashes', 'A vector clock per character', 'Server revision numbers'], 1, 'Each change lists the hashes it depends on, like Git commits. Concurrency shows up as multiple heads.'),
-  c('m6-3', 'Document CRDTs', 2, 'mcq', 'Why does Automerge\'s columnar encoding compress well?', ['It uses gzip on JSON', 'Values in each column (actor, counter, object) form long runs and small deltas', 'It drops history', 'It stores only the latest state'], 1, 'Typing produces sequences with the same actor and object and counters increasing by one, which run-length and delta encoding shrink dramatically.'),
-  c('m6-4', 'Document CRDTs', 3, 'mcq', 'What is Eg-walker\'s key idea?', ['Store character ids forever', 'Store the event graph of original ops; build CRDT state only temporarily to merge concurrent branches', 'Use a central server to order ops', 'Use LWW for text'], 1, 'Steady-state cost resembles a plain text buffer; CRDT machinery is used only during merges.'),
+  c(
+    'm6-1',
+    'Document CRDTs',
+    1,
+    'mcq',
+    'In Yjs, what is a state vector?',
+    [
+      'A snapshot of the document',
+      'A map from client id to the next expected clock',
+      'A list of deleted items',
+      'The undo stack'
+    ],
+    1,
+    'It summarizes everything a doc has seen, so a peer can compute exactly what to send.'
+  ),
+  c(
+    'm6-2',
+    'Document CRDTs',
+    2,
+    'mcq',
+    'How does Automerge represent concurrent histories?',
+    [
+      'A linear log with timestamps',
+      'A DAG of changes linked by dependency hashes',
+      'A vector clock per character',
+      'Server revision numbers'
+    ],
+    1,
+    'Each change lists the hashes it depends on, like Git commits. Concurrency shows up as multiple heads.'
+  ),
+  c(
+    'm6-3',
+    'Document CRDTs',
+    2,
+    'mcq',
+    "Why does Automerge's columnar encoding compress well?",
+    [
+      'It uses gzip on JSON',
+      'Values in each column (actor, counter, object) form long runs and small deltas',
+      'It drops history',
+      'It stores only the latest state'
+    ],
+    1,
+    'Typing produces sequences with the same actor and object and counters increasing by one, which run-length and delta encoding shrink dramatically.'
+  ),
+  c(
+    'm6-4',
+    'Document CRDTs',
+    3,
+    'mcq',
+    "What is Eg-walker's key idea?",
+    [
+      'Store character ids forever',
+      'Store the event graph of original ops; build CRDT state only temporarily to merge concurrent branches',
+      'Use a central server to order ops',
+      'Use LWW for text'
+    ],
+    1,
+    'Steady-state cost resembles a plain text buffer; CRDT machinery is used only during merges.'
+  ),
 
-  /* Module 7 */
-  c('m7-1', 'Local-first architecture', 1, 'mcq', 'In a local-first app, what is the source of truth for a user\'s document?', ['The cloud database', 'The local copy on their device', 'Whichever replica wrote last', 'The CDN'], 1, 'Local storage is authoritative for the user; servers relay and back up.'),
-  c('m7-2', 'Local-first architecture', 2, 'mcq', 'Where should cursor positions and "is typing" indicators live?', ['In the CRDT document', 'In an ephemeral presence channel such as Yjs awareness', 'In local storage only', 'In the server database'], 1, 'Presence changes constantly and has no long-term value; storing it in the document bloats history.'),
-  c('m7-3', 'Local-first architecture', 3, 'mcq', 'Why is per-document access control the common model for CRDT sync servers?', ['CRDTs forbid finer control', 'Updates are low-level and already final on clients, so finer validation is hard; whole-document read/write checks are a clean enforcement point', 'It is faster', 'Browsers require it'], 1, 'Validating semantic intent inside opaque updates is difficult and rejecting them leaves clients diverged. Splitting data by permission boundary is simpler and robust.'),
+  c(
+    'm7-1',
+    'Local-first architecture',
+    1,
+    'mcq',
+    "In a local-first app, what is the source of truth for a user's document?",
+    ['The cloud database', 'The local copy on their device', 'Whichever replica wrote last', 'The CDN'],
+    1,
+    'Local storage is authoritative for the user; servers relay and back up.'
+  ),
+  c(
+    'm7-2',
+    'Local-first architecture',
+    2,
+    'mcq',
+    'Where should cursor positions and "is typing" indicators live?',
+    [
+      'In the CRDT document',
+      'In an ephemeral presence channel such as Yjs awareness',
+      'In local storage only',
+      'In the server database'
+    ],
+    1,
+    'Presence changes constantly and has no long-term value; storing it in the document bloats history.'
+  ),
+  c(
+    'm7-3',
+    'Local-first architecture',
+    3,
+    'mcq',
+    'Why is per-document access control the common model for CRDT sync servers?',
+    [
+      'CRDTs forbid finer control',
+      'Updates are low-level and already final on clients, so finer validation is hard; whole-document read/write checks are a clean enforcement point',
+      'It is faster',
+      'Browsers require it'
+    ],
+    1,
+    'Validating semantic intent inside opaque updates is difficult and rejecting them leaves clients diverged. Splitting data by permission boundary is simpler and robust.'
+  ),
 
-  /* Module 8 */
-  c('m8-1', 'Patterns & pitfalls', 2, 'mcq', 'Which invariant is I-confluent?', ['Balance ≥ 0 with withdrawals', 'Unique usernames chosen by users', 'Monotonically increasing counter ≥ 0 with increments only', 'At most 3 admins'], 2, 'Merging two states that only grew from a non-negative value stays non-negative. The others can be violated by two individually valid concurrent operations.'),
-  c('m8-2', 'Patterns & pitfalls', 2, 'mcq', 'A bounded counter keeps stock ≥ 0 by…', ['Using LWW on the stock value', 'Splitting rights among replicas; each spends only its own rights', 'Rejecting all offline writes', 'Taking the minimum on merge'], 1, 'Each replica can only decrement within its rights, so the total can never go negative; transferring rights is the only coordination.'),
-  c('m8-3', 'Patterns & pitfalls', 1, 'mcq', 'Why does OT usually need a central server?', ['Transformations need a single agreed order of ops to be practical and correct', 'OT cannot run in browsers', 'OT uses vector clocks', 'Servers make ops commute'], 0, 'Decentralized OT has to satisfy strong transformation properties that many published algorithms got wrong. A server that orders ops sidesteps that.'),
+  c(
+    'm8-1',
+    'Patterns & pitfalls',
+    2,
+    'mcq',
+    'Which invariant is I-confluent?',
+    [
+      'Balance ≥ 0 with withdrawals',
+      'Unique usernames chosen by users',
+      'Monotonically increasing counter ≥ 0 with increments only',
+      'At most 3 admins'
+    ],
+    2,
+    'Merging two states that only grew from a non-negative value stays non-negative. The others can be violated by two individually valid concurrent operations.'
+  ),
+  c(
+    'm8-2',
+    'Patterns & pitfalls',
+    2,
+    'mcq',
+    'A bounded counter keeps stock ≥ 0 by…',
+    [
+      'Using LWW on the stock value',
+      'Splitting rights among replicas; each spends only its own rights',
+      'Rejecting all offline writes',
+      'Taking the minimum on merge'
+    ],
+    1,
+    'Each replica can only decrement within its rights, so the total can never go negative; transferring rights is the only coordination.'
+  ),
+  c(
+    'm8-3',
+    'Patterns & pitfalls',
+    1,
+    'mcq',
+    'Why does OT usually need a central server?',
+    [
+      'Transformations need a single agreed order of ops to be practical and correct',
+      'OT cannot run in browsers',
+      'OT uses vector clocks',
+      'Servers make ops commute'
+    ],
+    0,
+    'Decentralized OT has to satisfy strong transformation properties that many published algorithms got wrong. A server that orders ops sidesteps that.'
+  ),
 
-  /* Boss level */
-  c('boss-1', 'Boss level', 3, 'mcq', 'A shared kanban board stores cards in an RGA list and implements drag as delete + insert. Users report duplicated cards. What is the best fix?', ['Switch the list to LWW', 'Use a move operation: one element per card with an LWW position register, so concurrent moves pick one destination', 'Deduplicate cards by title on the server', 'Disable offline mode'], 1, 'Concurrent delete+insert pairs each insert a new copy. A real move keeps one identity and resolves concurrent moves to a single position.', { boss: true }),
-  c('boss-2', 'Boss level', 3, 'mcq', 'An event ticketing app must never oversell, but box offices lose connectivity for hours. Which design keeps selling offline without overselling?', ['PN-Counter of remaining seats', 'OR-Set of sold seat numbers', 'Pre-allocate seat blocks (escrow) to each box office; sell locally within the block', 'LWW on remaining seats'], 2, 'Overselling is not I-confluent. Escrow makes the invariant local: each office can only sell seats it holds.', { boss: true }),
-  c('boss-3', 'Boss level', 3, 'mcq', 'Your Yjs app copies a saved Y.Doc (including its clientID) to a second tab to speed up loading. Edits from the two tabs start corrupting the document. Why?', ['IndexedDB is not shared across tabs', 'Both tabs issue items under the same (clientID, clock) ids for different content', 'Awareness timed out', 'State vectors are too large'], 1, 'Item ids must be unique. Each session needs its own clientID; let Yjs generate one per doc instance.', { boss: true }),
-  c('boss-4', 'Boss level', 3, 'mcq', 'A note-taking app uses LWW with Date.now() timestamps per note. One user\'s laptop clock is set a year ahead; their edits always win and others\' changes vanish. Which change fixes this without coordination?', ['Use HLC timestamps and bound accepted skew at the relay', 'Use a vector clock per note and keep siblings (MV-Register) or merge text with a sequence CRDT', 'Both A and B address different parts of the problem', 'Switch to a PN-Counter'], 2, 'HLCs stop future-clock domination for fields where LWW is acceptable; for note bodies, LWW is the wrong type entirely and a text CRDT (or MV-Register) preserves both edits.', { boss: true }),
-  c('boss-5', 'Boss level', 3, 'mcq', 'An op-based OR-Set runs over a transport that guarantees at-least-once, FIFO-per-sender delivery. Elements occasionally reappear after being removed. Which missing guarantee explains it?', ['Exactly-once', 'Causal delivery across senders: a remove from Bob can arrive before the add from Alice it observed', 'Total order', 'Encryption'], 1, 'FIFO per sender doesn\'t order Alice\'s add before Bob\'s remove that depends on it. The remove finds no tags, then the late add inserts the element. Duplicates are a separate problem handled by unique tags.', { boss: true }),
-  c('boss-6', 'Boss level', 3, 'mcq', 'A product needs offline-capable collaborative docs, per-workspace billing limits, and admin-only settings. Which architecture fits?', ['Everything in one Automerge document per workspace', 'Server-authoritative backend for billing, membership and settings; one CRDT document per page for content, with access checked per document at the sync server', 'OT for everything', 'Peer-to-peer only with E2E encryption'], 1, 'Billing limits and admin-only settings need validation; page content benefits from CRDT merges and offline editing. Splitting by document gives clean permission boundaries.', { boss: true }),
+  c(
+    'boss-1',
+    'Boss level',
+    3,
+    'mcq',
+    'A shared kanban board stores cards in an RGA list and implements drag as delete + insert. Users report duplicated cards. What is the best fix?',
+    [
+      'Switch the list to LWW',
+      'Use a move operation: one element per card with an LWW position register, so concurrent moves pick one destination',
+      'Deduplicate cards by title on the server',
+      'Disable offline mode'
+    ],
+    1,
+    'Concurrent delete+insert pairs each insert a new copy. A real move keeps one identity and resolves concurrent moves to a single position.',
+    { boss: true }
+  ),
+  c(
+    'boss-2',
+    'Boss level',
+    3,
+    'mcq',
+    'An event ticketing app must never oversell, but box offices lose connectivity for hours. Which design keeps selling offline without overselling?',
+    [
+      'PN-Counter of remaining seats',
+      'OR-Set of sold seat numbers',
+      'Pre-allocate seat blocks (escrow) to each box office; sell locally within the block',
+      'LWW on remaining seats'
+    ],
+    2,
+    'Overselling is not I-confluent. Escrow makes the invariant local: each office can only sell seats it holds.',
+    { boss: true }
+  ),
+  c(
+    'boss-3',
+    'Boss level',
+    3,
+    'mcq',
+    'Your Yjs app copies a saved Y.Doc (including its clientID) to a second tab to speed up loading. Edits from the two tabs start corrupting the document. Why?',
+    [
+      'IndexedDB is not shared across tabs',
+      'Both tabs issue items under the same (clientID, clock) ids for different content',
+      'Awareness timed out',
+      'State vectors are too large'
+    ],
+    1,
+    'Item ids must be unique. Each session needs its own clientID; let Yjs generate one per doc instance.',
+    { boss: true }
+  ),
+  c(
+    'boss-4',
+    'Boss level',
+    3,
+    'mcq',
+    "A note-taking app uses LWW with Date.now() timestamps per note. One user's laptop clock is set a year ahead; their edits always win and others' changes vanish. Which change fixes this without coordination?",
+    [
+      'Use HLC timestamps and bound accepted skew at the relay',
+      'Use a vector clock per note and keep siblings (MV-Register) or merge text with a sequence CRDT',
+      'Both A and B address different parts of the problem',
+      'Switch to a PN-Counter'
+    ],
+    2,
+    'HLCs stop future-clock domination for fields where LWW is acceptable; for note bodies, LWW is the wrong type entirely and a text CRDT (or MV-Register) preserves both edits.',
+    { boss: true }
+  ),
+  c(
+    'boss-5',
+    'Boss level',
+    3,
+    'mcq',
+    'An op-based OR-Set runs over a transport that guarantees at-least-once, FIFO-per-sender delivery. Elements occasionally reappear after being removed. Which missing guarantee explains it?',
+    [
+      'Exactly-once',
+      'Causal delivery across senders: a remove from Bob can arrive before the add from Alice it observed',
+      'Total order',
+      'Encryption'
+    ],
+    1,
+    "FIFO per sender doesn't order Alice's add before Bob's remove that depends on it. The remove finds no tags, then the late add inserts the element. Duplicates are a separate problem handled by unique tags.",
+    { boss: true }
+  ),
+  c(
+    'boss-6',
+    'Boss level',
+    3,
+    'mcq',
+    'A product needs offline-capable collaborative docs, per-workspace billing limits, and admin-only settings. Which architecture fits?',
+    [
+      'Everything in one Automerge document per workspace',
+      'Server-authoritative backend for billing, membership and settings; one CRDT document per page for content, with access checked per document at the sync server',
+      'OT for everything',
+      'Peer-to-peer only with E2E encryption'
+    ],
+    1,
+    'Billing limits and admin-only settings need validation; page content benefits from CRDT merges and offline editing. Splitting by document gives clean permission boundaries.',
+    { boss: true }
+  )
 ];

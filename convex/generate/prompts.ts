@@ -1,8 +1,3 @@
-/**
- * Prompts for the course generator. The JSON shapes here mirror
- * convex/lib/courseSchema.ts; output is validated with zod afterwards.
- */
-
 export const SYSTEM = `You write "Deeply" courses: interactive, technically deep explanations of how a system or concept actually works, for strong engineers who want to become experts in a few hours.
 
 Standards:
@@ -84,18 +79,23 @@ export const MODULE_RULES = `Module requirements:
 - At least 2 callouts (use "warn" for real gotchas and "deep" for internals), 1 "keyterms" block, and code examples where they help.
 - Every claim must be correct. Prefer specifics (data structures, invariants, complexity, message formats) over generalities.`;
 
-export function planPrompt(input: { topic: string; kind: 'concept' | 'repo'; repoSummary?: string; brandDigest?: string }) {
+export function planPrompt(input: {
+  topic: string;
+  kind: 'concept' | 'repo';
+  repoSummary?: string;
+  brandDigest?: string;
+}) {
   return `Plan a Deeply course.
 
 Topic: ${input.topic}
 Kind: ${input.kind}
 ${input.repoSummary ? `\nRepository research:\n${input.repoSummary}\n` : ''}${
-    input.brandDigest
-      ? `\nBrand hints scraped from the project's homepage (use these to match the real brand: pick its primary colours as accents, map its fonts to the closest Google Fonts):\n${input.brandDigest}\n`
-      : input.kind === 'concept'
-        ? `\nThis is a concept, not a product: design a distinctive visual identity that suits the subject.\n`
-        : ''
-  }
+  input.brandDigest
+    ? `\nBrand hints scraped from the project's homepage (use these to match the real brand: pick its primary colours as accents, map its fonts to the closest Google Fonts):\n${input.brandDigest}\n`
+    : input.kind === 'concept'
+      ? `\nThis is a concept, not a product: design a distinctive visual identity that suits the subject.\n`
+      : ''
+}
 Return JSON with exactly this shape:
 ${PLAN_SHAPE}`;
 }
@@ -107,12 +107,12 @@ export function modulePrompt(input: {
   outline: { id: string; title: string; kicker: string; summary: string; minutes: number; plan: string };
   n: number;
   allModules: { n: number; title: string; summary: string }[];
-  files?: string; // numbered source files for repo courses
+  files?: string;
 }) {
   return `Write module ${input.n} of the course "${input.courseTitle}" (topic: ${input.topic}).
 
 Course outline (for context; write only module ${input.n}):
-${input.allModules.map((m) => `${m.n}. ${m.title}: ${m.summary}`).join('\n')}
+${input.allModules.map((courseModule) => `${courseModule.n}. ${courseModule.title}: ${courseModule.summary}`).join('\n')}
 
 This module:
 id: ${input.outline.id}
@@ -124,10 +124,10 @@ ${input.outline.plan}
 
 ${MODULE_RULES}
 ${
-    input.files
-      ? `\nSource files from the repository, with line numbers. Quote real code only through codeRefs (pointers into these files) and attach their ids to the flow nodes/edges that the code implements. Aim for 3-6 codeRefs.\n\n${input.files}\n`
-      : '\n"codeRefs" must be [].\n'
-  }
+  input.files
+    ? `\nSource files from the repository, with line numbers. Quote real code only through codeRefs (pointers into these files) and attach their ids to the flow nodes/edges that the code implements. Aim for 3-6 codeRefs.\n\n${input.files}\n`
+    : '\n"codeRefs" must be [].\n'
+}
 Return JSON with exactly this shape:
 ${MODULE_SHAPE}`;
 }
@@ -139,11 +139,14 @@ export const CHALLENGE_SHAPE = `{ "challenges": [ {
   "boss"?: boolean                             // true for hard multi-concept scenario questions
 } ] }`;
 
-export function challengesPrompt(input: { courseTitle: string; modules: { n: number; title: string; summary: string; keyFacts: string }[] }) {
+export function challengesPrompt(input: {
+  courseTitle: string;
+  modules: { n: number; title: string; summary: string; keyFacts: string }[];
+}) {
   return `Write the challenge bank for "${input.courseTitle}".
 
 Modules and what they teach:
-${input.modules.map((m) => `${m.n}. ${m.title}: ${m.summary}\n${m.keyFacts}`).join('\n\n')}
+${input.modules.map((courseModule) => `${courseModule.n}. ${courseModule.title}: ${courseModule.summary}\n${courseModule.keyFacts}`).join('\n\n')}
 
 Write 24 challenges: a mix of mcq, predict and bug types across all modules and difficulties, plus exactly 4 with "boss": true that combine several modules in a realistic scenario. Wrong options must be plausible misconceptions. Explanations say why the answer is right and why the tempting wrong option is wrong.
 
@@ -152,5 +155,8 @@ ${CHALLENGE_SHAPE}`;
 }
 
 export function repairPrompt(errors: string[]) {
-  return `Your JSON failed validation:\n${errors.slice(0, 25).map((e) => `- ${e}`).join('\n')}\n\nReturn the complete corrected JSON, same shape, nothing else.`;
+  return `Your JSON failed validation:\n${errors
+    .slice(0, 25)
+    .map((error) => `- ${error}`)
+    .join('\n')}\n\nReturn the complete corrected JSON, same shape, nothing else.`;
 }

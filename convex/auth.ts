@@ -6,13 +6,10 @@ import type { DataModel } from './_generated/dataModel';
 import { query } from './_generated/server';
 import authConfig from './auth.config';
 
-// The SPA is served from a different origin than the Convex site URL, so we
-// use the crossDomain plugin (session token kept by the client, not a cookie).
 const siteUrl = process.env.SITE_URL ?? 'http://localhost:9000';
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
-/** Only enable a social provider when its credentials are configured. */
 function socialProviders(): BetterAuthOptions['socialProviders'] {
   const providers: NonNullable<BetterAuthOptions['socialProviders']> = {};
   if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
@@ -24,27 +21,24 @@ function socialProviders(): BetterAuthOptions['socialProviders'] {
   return providers;
 }
 
-export const createAuth = (ctx: GenericCtx<DataModel>) =>
+export const createAuth = (context: GenericCtx<DataModel>) =>
   betterAuth({
     baseURL: process.env.CONVEX_SITE_URL,
     trustedOrigins: [siteUrl],
-    database: authComponent.adapter(ctx),
+    database: authComponent.adapter(context),
     socialProviders: socialProviders(),
-    // Local testing only: set AUTH_DEV_PASSWORD=1 on a dev deployment to allow email+password.
     emailAndPassword: { enabled: process.env.AUTH_DEV_PASSWORD === '1', requireEmailVerification: false },
-    plugins: [crossDomain({ siteUrl }), convex({ authConfig })],
+    plugins: [crossDomain({ siteUrl }), convex({ authConfig })]
   });
 
-/** The signed-in Better Auth user, or null. Works in queries, mutations and actions. */
-export async function currentUser(ctx: GenericCtx<DataModel>) {
-  return (await authComponent.safeGetAuthUser(ctx)) ?? null;
+export async function currentUser(context: GenericCtx<DataModel>) {
+  return (await authComponent.safeGetAuthUser(context)) ?? null;
 }
 
-/** Which sign-in methods are configured, so the UI only shows working buttons. */
 export const providers = query({
   args: {},
   handler: async () => ({
     github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
-    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-  }),
+    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
+  })
 });

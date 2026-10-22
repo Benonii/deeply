@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 import { getAuthClient } from '../lib/authClient';
@@ -6,34 +6,33 @@ import './account.css';
 
 const api = anyApi;
 
-/* openSignIn() can be called from anywhere; the host below listens. */
 type SignInRequest = { reason?: string };
-const listeners = new Set<(r: SignInRequest) => void>();
-export function requestSignIn(r: SignInRequest = {}) {
-  listeners.forEach((l) => l(r));
+const listeners = new Set<(request: SignInRequest) => void>();
+export function requestSignIn(request: SignInRequest = {}) {
+  listeners.forEach((listener) => listener(request));
 }
 
-/** Mounted once inside the Convex provider: sign-in dialog + first-sign-in wallet setup. */
 export function AccountHost() {
-  const [req, setReq] = useState<SignInRequest | null>(null);
+  const [request, setRequest] = useState<SignInRequest | null>(null);
   const { isAuthenticated } = useConvexAuth();
   const ensure = useMutation(api.wallet.ensure);
 
   useEffect(() => {
-    const l = (r: SignInRequest) => setReq(r);
-    listeners.add(l);
-    return () => { listeners.delete(l); };
+    const listener = (nextRequest: SignInRequest) => setRequest(nextRequest);
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
   }, []);
-  // Create the wallet (signup grant) as soon as the user is signed in.
   useEffect(() => {
     if (isAuthenticated) {
       ensure({}).catch(() => {});
-      setReq(null);
+      setRequest(null);
     }
   }, [isAuthenticated, ensure]);
 
-  if (!req) return null;
-  return <SignInDialog reason={req.reason} onClose={() => setReq(null)} />;
+  if (!request) return null;
+  return <SignInDialog reason={request.reason} onClose={() => setRequest(null)} />;
 }
 
 function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => void }) {
@@ -42,7 +41,9 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -53,11 +54,10 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
     setBusy(provider);
     setError(null);
     try {
-      // Come back to the exact page (hash route included) after the provider redirect.
-      const res = await auth.signIn.social({ provider, callbackURL: window.location.href });
-      if (res?.error) throw new Error(res.error.message || 'Sign-in failed');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Sign-in failed');
+      const response = await auth.signIn.social({ provider, callbackURL: window.location.href });
+      if (response?.error) throw new Error(response.error.message || 'Sign-in failed');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Sign-in failed');
       setBusy(null);
     }
   };
@@ -65,10 +65,20 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
   const none = providers && !providers.github && !providers.google;
   return (
     <div className="acc-scrim" onClick={onClose}>
-      <div className="acc-dialog" role="dialog" aria-modal="true" aria-labelledby="acc-title" onClick={(e) => e.stopPropagation()}>
-        <button className="acc-x" onClick={onClose} aria-label="Close">✕</button>
+      <div
+        className="acc-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="acc-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="acc-x" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
         <h2 id="acc-title">Sign in</h2>
-        <p className="acc-sub">{reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get free credits.</p>
+        <p className="acc-sub">
+          {reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get free credits.
+        </p>
         <div className="acc-providers">
           {providers?.github && (
             <button className="acc-provider" disabled={!!busy} onClick={() => signIn('github')}>
@@ -99,7 +109,10 @@ function GitHubIcon() {
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.1 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.2-.2-1.7H12Z" />
+      <path
+        fill="#EA4335"
+        d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.1 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.2-.2-1.7H12Z"
+      />
     </svg>
   );
 }

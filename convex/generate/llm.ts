@@ -7,18 +7,17 @@ export const MODEL = 'claude-opus-5-5';
 export class GenerationError extends Error {}
 
 function extractJson(text: string): unknown {
-  const t = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
-  const start = t.indexOf('{');
-  const end = t.lastIndexOf('}');
+  const cleaned = text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/, '');
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
   if (start < 0 || end <= start) throw new SyntaxError('No JSON object in response');
-  return JSON.parse(t.slice(start, end + 1));
+  return JSON.parse(cleaned.slice(start, end + 1));
 }
 
-/**
- * Ask Claude for JSON, validate it with zod (+ an optional extra lint), and
- * give it one chance to repair. Streams so long outputs don't time out.
- */
-export async function generateJson<S extends z.ZodTypeAny>(opts: {
+export async function generateJson<S extends z.ZodTypeAny>(options: {
   prompt: string;
   schema: S;
   lint?: (value: z.infer<S>) => string[];
@@ -27,48 +26,49 @@ export async function generateJson<S extends z.ZodTypeAny>(opts: {
 }): Promise<{ value: z.infer<S>; usage: { input: number; output: number } }> {
   if (!process.env.ANTHROPIC_API_KEY) throw new GenerationError('ANTHROPIC_API_KEY is not set on this deployment.');
   const client = new Anthropic({ maxRetries: 3 });
-  const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: 'user', content: opts.prompt }];
+  const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: 'user', content: options.prompt }];
   const usage = { input: 0, output: 0 };
 
   for (let attempt = 0; attempt < 2; attempt++) {
     const params = {
       model: MODEL,
-      max_tokens: opts.maxTokens ?? 64000,
+      max_tokens: options.maxTokens ?? 64000,
       system: SYSTEM,
       thinking: { type: 'adaptive' },
-      output_config: { effort: opts.effort ?? 'high' },
+      output_config: { effort: options.effort ?? 'high' },
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      messages,
+      messages
     };
-    // `fallbacks: "default"` is newer than the SDK's request types.
-    const stream = client.beta.messages.stream(params as unknown as Anthropic.Beta.Messages.MessageCreateParamsStreaming);
-    const msg = await stream.finalMessage();
-    usage.input += msg.usage.input_tokens;
-    usage.output += msg.usage.output_tokens;
+    const stream = client.beta.messages.stream(
+      params as unknown as Anthropic.Beta.Messages.MessageCreateParamsStreaming
+    );
+    const message = await stream.finalMessage();
+    usage.input += message.usage.input_tokens;
+    usage.output += message.usage.output_tokens;
 
-    if (msg.stop_reason === 'refusal') {
+    if (message.stop_reason === 'refusal') {
       throw new GenerationError('The model declined to write this course. Try rephrasing the topic.');
     }
-    const text = msg.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
+    const text = message.content.map((block) => (block.type === 'text' ? block.text : '')).join('');
     let errors: string[] = [];
-    if (msg.stop_reason === 'max_tokens') errors = ['Output was cut off by the token limit; write it more compactly.'];
+    if (message.stop_reason === 'max_tokens')
+      errors = ['Output was cut off by the token limit; write it more compactly.'];
     else {
       try {
-        const parsed = opts.schema.safeParse(extractJson(text));
+        const parsed = options.schema.safeParse(extractJson(text));
         if (parsed.success) {
-          errors = opts.lint ? opts.lint(parsed.data) : [];
+          errors = options.lint ? options.lint(parsed.data) : [];
           if (!errors.length) return { value: parsed.data, usage };
         } else {
-          errors = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+          errors = parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`);
         }
-      } catch (e) {
-        errors = [`Invalid JSON: ${(e as Error).message}`];
+      } catch (error) {
+        errors = [`Invalid JSON: ${(error as Error).message}`];
       }
     }
     if (attempt === 1) throw new GenerationError(`Output failed validation: ${errors.slice(0, 5).join('; ')}`);
-    // Append the full assistant turn (thinking blocks included) and ask for a fix.
-    messages.push({ role: 'assistant', content: msg.content as Anthropic.Beta.BetaContentBlockParam[] });
+    messages.push({ role: 'assistant', content: message.content as Anthropic.Beta.BetaContentBlockParam[] });
     messages.push({ role: 'user', content: repairPrompt(errors) });
   }
   throw new GenerationError('unreachable');

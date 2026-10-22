@@ -17,14 +17,14 @@ export const m02: ModulePack = {
         'The tempting way to order updates is to stamp each with `Date.now()` and keep the newest. It fails in three ways:'
       ),
       ul(
-        '**Skew**: two machines\' clocks disagree. NTP typically keeps them within a few milliseconds on a good network, but phones and laptops can be off by seconds or minutes, and a user can set their clock to anything.',
+        "**Skew**: two machines' clocks disagree. NTP typically keeps them within a few milliseconds on a good network, but phones and laptops can be off by seconds or minutes, and a user can set their clock to anything.",
         '**Jumps**: NTP corrections and leap-second smearing can move a clock backwards, so a later event on the same machine can get an earlier timestamp.',
         '**No notion of concurrency**: even perfect clocks only give a total order. They cannot tell "B saw A and then wrote" apart from "A and B wrote at nearly the same moment without seeing each other". Those two cases need different merges.'
       ),
       callout(
         'warn',
         'A clock skew bug in one line',
-        'Bob\'s phone is 3 minutes slow. He fixes a typo Alice made a minute earlier. With timestamp LWW, Alice\'s older version wins because her clock reads later, and Bob\'s fix vanishes. Nothing errors; the data is just wrong.'
+        "Bob's phone is 3 minutes slow. He fixes a typo Alice made a minute earlier. With timestamp LWW, Alice's older version wins because her clock reads later, and Bob's fix vanishes. Nothing errors; the data is just wrong."
       )
     ),
     section(
@@ -48,7 +48,12 @@ export const m02: ModulePack = {
       ),
       check(
         'Alice writes x=1 at 09:00 on her laptop, offline. Bob writes x=2 at 17:00 on his phone, also offline and without ever having synced with Alice. How are these writes related?',
-        ['Alice\'s write happened before Bob\'s', 'Bob\'s write happened before Alice\'s', 'They are concurrent', 'It depends on clock skew'],
+        [
+          "Alice's write happened before Bob's",
+          "Bob's write happened before Alice's",
+          'They are concurrent',
+          'It depends on clock skew'
+        ],
         2,
         'No message path connects them, so neither happened before the other. Eight hours of wall-clock difference is irrelevant to causality.'
       )
@@ -97,7 +102,7 @@ export const compareStamps = (a: Stamp, b: Stamp) =>
           { id: 'b2', label: 'B: receive', sub: 'max(1,2)+1 = 3', col: 2, row: 1, tone: 'purple' },
           { id: 'b3', label: 'B: send', sub: 'L = 4', col: 3, row: 1, tone: 'purple' },
           { id: 'c1', label: 'C: write', sub: 'L = 1', col: 2, row: 2, tone: 'red' },
-          { id: 'c2', label: 'C: receive', sub: 'max(1,4)+1 = 5', col: 4, row: 2, tone: 'red' },
+          { id: 'c2', label: 'C: receive', sub: 'max(1,4)+1 = 5', col: 4, row: 2, tone: 'red' }
         ],
         edges: [
           { id: 'ab', from: 'a2', to: 'b2', label: 'msg L=2' },
@@ -105,15 +110,38 @@ export const compareStamps = (a: Stamp, b: Stamp) =>
           { id: 'aa', from: 'a1', to: 'a2' },
           { id: 'bb', from: 'b1', to: 'b2' },
           { id: 'bb2', from: 'b2', to: 'b3' },
-          { id: 'cc', from: 'c1', to: 'c2' },
+          { id: 'cc', from: 'c1', to: 'c2' }
         ],
         steps: [
-          { title: 'Local events tick', text: 'Each replica starts at 0 and increments before every event. A, B and C each make a first write stamped 1. Equal numbers say nothing about order between replicas.', nodes: ['a1', 'b1', 'c1'] },
-          { title: 'Send carries the clock', text: 'A ticks to 2 and sends a message stamped 2 to B.', nodes: ['a2'], edges: ['aa', 'ab'] },
-          { title: 'Receive jumps forward', text: 'B\'s clock is 1. On receiving 2 it sets max(1, 2) + 1 = 3. Now anything B does next is stamped higher than A\'s send, preserving a → b ⇒ L(a) < L(b).', nodes: ['b2'], edges: ['bb', 'ab'] },
-          { title: 'Causality propagates transitively', text: 'B sends at 4. C, at 1, receives and jumps to 5. A\'s write (1) → A\'s send (2) → B\'s receive (3) → B\'s send (4) → C\'s receive (5): every step increases.', nodes: ['b3', 'c2'], edges: ['bb2', 'bc', 'cc'] },
-          { title: 'The blind spot', text: 'C\'s first write (L=1) and A\'s send (L=2) are concurrent, yet 1 < 2. Looking only at the numbers you would wrongly conclude C\'s write came first. Lamport clocks order; they do not detect concurrency.', nodes: ['c1', 'a2'] },
-        ],
+          {
+            title: 'Local events tick',
+            text: 'Each replica starts at 0 and increments before every event. A, B and C each make a first write stamped 1. Equal numbers say nothing about order between replicas.',
+            nodes: ['a1', 'b1', 'c1']
+          },
+          {
+            title: 'Send carries the clock',
+            text: 'A ticks to 2 and sends a message stamped 2 to B.',
+            nodes: ['a2'],
+            edges: ['aa', 'ab']
+          },
+          {
+            title: 'Receive jumps forward',
+            text: "B's clock is 1. On receiving 2 it sets max(1, 2) + 1 = 3. Now anything B does next is stamped higher than A's send, preserving a → b ⇒ L(a) < L(b).",
+            nodes: ['b2'],
+            edges: ['bb', 'ab']
+          },
+          {
+            title: 'Causality propagates transitively',
+            text: "B sends at 4. C, at 1, receives and jumps to 5. A's write (1) → A's send (2) → B's receive (3) → B's send (4) → C's receive (5): every step increases.",
+            nodes: ['b3', 'c2'],
+            edges: ['bb2', 'bc', 'cc']
+          },
+          {
+            title: 'The blind spot',
+            text: "C's first write (L=1) and A's send (L=2) are concurrent, yet 1 < 2. Looking only at the numbers you would wrongly conclude C's write came first. Lamport clocks order; they do not detect concurrency.",
+            nodes: ['c1', 'a2']
+          }
+        ]
       })
     ),
     section(
@@ -171,7 +199,7 @@ compare({ A: 1, C: 2 }, { A: 2, B: 2 }); // 'concurrent'
           { id: 'b1', label: 'B: receive', sub: '{A:2, B:1}', col: 2, row: 1, tone: 'purple' },
           { id: 'b2', label: 'B: edit', sub: '{A:2, B:2}', col: 3, row: 1, tone: 'purple' },
           { id: 'c0', label: 'C: edit', sub: '{A:1, C:2}', col: 1, row: 2, tone: 'red' },
-          { id: 'cmp', label: 'Compare', sub: 'C edit vs B edit', col: 4, row: 2, tone: 'plain' },
+          { id: 'cmp', label: 'Compare', sub: 'C edit vs B edit', col: 4, row: 2, tone: 'plain' }
         ],
         edges: [
           { id: 'aa', from: 'a1', to: 'a2' },
@@ -179,16 +207,44 @@ compare({ A: 1, C: 2 }, { A: 2, B: 2 }); // 'concurrent'
           { id: 'ac', from: 'a1', to: 'c0', label: 'sync' },
           { id: 'bb', from: 'b1', to: 'b2' },
           { id: 'bx', from: 'b2', to: 'cmp' },
-          { id: 'cx', from: 'c0', to: 'cmp' },
+          { id: 'cx', from: 'c0', to: 'cmp' }
         ],
         steps: [
-          { title: 'A makes two edits', text: 'A increments its own entry for each edit: {A:1}, then {A:2}.', nodes: ['a1', 'a2'], edges: ['aa'] },
-          { title: 'C learns of the first edit only', text: 'C syncs early and receives {A:1}. Merging and ticking for the receive gives {A:1, C:1}; C then edits, ticking again: {A:1, C:2}.', nodes: ['c0'], edges: ['ac'] },
-          { title: 'B learns of both edits', text: 'B receives {A:2}. Merge gives {A:2}; B ticks for the receive event: {A:2, B:1}. Then B edits: {A:2, B:2}.', nodes: ['b1', 'b2'], edges: ['ab', 'bb'] },
-          { title: 'Compare B\'s edit with A\'s', text: '{A:2} ≤ {A:2, B:2} entry by entry and they differ, so A\'s second edit happened before B\'s edit. B\'s edit may safely override it.', nodes: ['a2', 'b2'] },
-          { title: 'Compare C\'s edit with B\'s', text: 'C has A=1 < 2 and B=0 < 2, but C=2 > 0. Neither vector dominates: the edits are concurrent. A register must now keep both values or apply a tie rule.', nodes: ['cmp', 'c0', 'b2'], edges: ['bx', 'cx'] },
-          { title: 'The cost', text: 'A vector has one entry per replica that ever wrote. With thousands of devices, metadata grows. Real systems compress, prune retired replicas, or switch to techniques that avoid full vectors per value.', nodes: ['cmp'] },
-        ],
+          {
+            title: 'A makes two edits',
+            text: 'A increments its own entry for each edit: {A:1}, then {A:2}.',
+            nodes: ['a1', 'a2'],
+            edges: ['aa']
+          },
+          {
+            title: 'C learns of the first edit only',
+            text: 'C syncs early and receives {A:1}. Merging and ticking for the receive gives {A:1, C:1}; C then edits, ticking again: {A:1, C:2}.',
+            nodes: ['c0'],
+            edges: ['ac']
+          },
+          {
+            title: 'B learns of both edits',
+            text: 'B receives {A:2}. Merge gives {A:2}; B ticks for the receive event: {A:2, B:1}. Then B edits: {A:2, B:2}.',
+            nodes: ['b1', 'b2'],
+            edges: ['ab', 'bb']
+          },
+          {
+            title: "Compare B's edit with A's",
+            text: "{A:2} ≤ {A:2, B:2} entry by entry and they differ, so A's second edit happened before B's edit. B's edit may safely override it.",
+            nodes: ['a2', 'b2']
+          },
+          {
+            title: "Compare C's edit with B's",
+            text: 'C has A=1 < 2 and B=0 < 2, but C=2 > 0. Neither vector dominates: the edits are concurrent. A register must now keep both values or apply a tie rule.',
+            nodes: ['cmp', 'c0', 'b2'],
+            edges: ['bx', 'cx']
+          },
+          {
+            title: 'The cost',
+            text: 'A vector has one entry per replica that ever wrote. With thousands of devices, metadata grows. Real systems compress, prune retired replicas, or switch to techniques that avoid full vectors per value.',
+            nodes: ['cmp']
+          }
+        ]
       }),
       check(
         'Event X has vector {A:3, B:1}. Event Y has vector {A:2, B:4}. What is their relationship?',
@@ -219,9 +275,24 @@ compare({ A: 1, C: 2 }, { A: 2, B: 2 }); // 'concurrent'
         ['Tool', 'Size', 'Detects concurrency?', 'Used for'],
         ['Lamport clock', '1 integer', 'No', 'Total order for tie-breaking (LWW, RGA, YATA)'],
         ['Vector clock', 'One entry per process', 'Yes, for events', 'Causal broadcast, debugging, causal delivery'],
-        ['Version vector', 'One entry per writing replica', 'Yes, for versions of data', 'Dynamo-style stores, sync "what am I missing"'],
-        ['Dotted version vector', 'Vector + one dot per sibling', 'Yes, without false siblings', 'Riak 2.0+, causal-context CRDTs'],
-        ['Hybrid logical clock', '64 bits (physical + logical)', 'No (like Lamport)', 'Human-meaningful, causally consistent timestamps']
+        [
+          'Version vector',
+          'One entry per writing replica',
+          'Yes, for versions of data',
+          'Dynamo-style stores, sync "what am I missing"'
+        ],
+        [
+          'Dotted version vector',
+          'Vector + one dot per sibling',
+          'Yes, without false siblings',
+          'Riak 2.0+, causal-context CRDTs'
+        ],
+        [
+          'Hybrid logical clock',
+          '64 bits (physical + logical)',
+          'No (like Lamport)',
+          'Human-meaningful, causally consistent timestamps'
+        ]
       )
     ),
     section(
@@ -267,7 +338,7 @@ mine = receive(mine, { l: 5000, c: 3 }, /* now */ 1200); // { l: 5000, c: 4 }
           'HLCs detect concurrent writes',
           'HLC timestamps stay close to real time, so "last" roughly matches what users saw, while still respecting causality',
           'HLCs need no per-replica state',
-          'HLCs remove the need for replica ids in tie-breaks',
+          'HLCs remove the need for replica ids in tie-breaks'
         ],
         1,
         'An HLC behaves like a Lamport clock (causal, monotonic) but tracks physical time, so a value edited "later" in the real world usually wins. Ties still need a replica id, and concurrency still isn\'t detected.'
@@ -287,12 +358,19 @@ mine = receive(mine, { l: 5000, c: 3 }, /* now */ 1200); // { l: 5000, c: 4 }
       ),
       check(
         'A sequence CRDT needs to order two concurrent inserts at the same position identically on every replica. What is the minimum it needs?',
-        ['A vector clock per insert', 'A deterministic tiebreak such as (Lamport time, replica id)', 'Synchronized wall clocks', 'A central server'],
+        [
+          'A vector clock per insert',
+          'A deterministic tiebreak such as (Lamport time, replica id)',
+          'Synchronized wall clocks',
+          'A central server'
+        ],
         1,
         'Concurrent inserts just need *some* order that every replica computes the same way. A Lamport timestamp plus replica id is unique and deterministic, which is what RGA and YATA use.'
       ),
       h3('Next'),
-      p('With causality in hand, module 3 builds the first family of CRDTs: state-based types whose merge is a mathematical join.')
-    ),
-  ],
+      p(
+        'With causality in hand, module 3 builds the first family of CRDTs: state-based types whose merge is a mathematical join.'
+      )
+    )
+  ]
 };

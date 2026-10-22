@@ -18,5 +18,5 @@ export const crdtsPack: CoursePack = {
   kind: 'concept',
   brand: crdtsBrand,
   challenges: crdtsChallenges,
-  modules: [m01, m02, m03, m04, m05, m06, m07, m08],
+  modules: [m01, m02, m03, m04, m05, m06, m07, m08]
 };

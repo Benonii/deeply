@@ -8,31 +8,32 @@ import './account.css';
 
 const api = anyApi;
 
-type Me = { userId: string; name: string; email: string; image: string | null; credits: number; costs: Record<string, number> };
+type Me = {
+  userId: string;
+  name: string;
+  email: string;
+  image: string | null;
+  credits: number;
+  costs: Record<string, number>;
+};
 type Pack = { key: 'small' | 'large'; name: string; credits: number; priceCents: number | null; currency: string };
 type LedgerRow = { id: string; at: number; delta: number; reason: string };
 
-/** Wraps the app with Convex + Better Auth providers (no-op when no Convex URL is configured). */
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return <ConvexClientProvider>{children}</ConvexClientProvider>;
 }
 
-/** Opens the sign-in dialog from anywhere (e.g. when Simplify needs auth). */
 export function openSignIn(reason?: string) {
   requestSignIn({ reason });
 }
 
-/** Current user's credits; undefined while loading, null when signed out or no backend. */
 export function useCredits(): number | null | undefined {
   const client = useConvexClient();
-  // `client` never changes for the life of the app, so the branch is stable.
   if (!client) return null;
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const me = useQuery(api.wallet.me) as Me | null | undefined;
   return me === undefined ? undefined : me ? me.credits : null;
 }
 
-/** Sidebar widget: "Sign in" or avatar · name · credits. */
 export function AccountButton() {
   const client = useConvexClient();
   if (!client) return null;
@@ -42,7 +43,12 @@ export function AccountButton() {
 function AccountButtonInner() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const me = useQuery(api.wallet.me) as Me | null | undefined;
-  if (isLoading) return <div className="acc-btn acc-btn-ghost" aria-busy="true">…</div>;
+  if (isLoading)
+    return (
+      <div className="acc-btn acc-btn-ghost" aria-busy="true">
+        …
+      </div>
+    );
   if (!isAuthenticated || !me) {
     return (
       <button className="acc-btn" onClick={() => openSignIn()}>
@@ -64,17 +70,20 @@ function Avatar({ me, size = 24 }: { me: Pick<Me, 'image' | 'name' | 'email'>; s
   return me.image ? (
     <img className="acc-avatar" src={me.image} alt="" width={size} height={size} referrerPolicy="no-referrer" />
   ) : (
-    <span className="acc-avatar acc-avatar-initial" style={{ width: size, height: size }}>{initial}</span>
+    <span className="acc-avatar acc-avatar-initial" style={{ width: size, height: size }}>
+      {initial}
+    </span>
   );
 }
 
-/** #/account: credits balance, buy packs, usage history, sign out. */
 export function AccountPage() {
   const client = useConvexClient();
   if (!client) {
     return (
       <div className="acc-page">
-        <header className="acc-head"><h1>Account</h1></header>
+        <header className="acc-head">
+          <h1>Account</h1>
+        </header>
         <p className="acc-muted">Accounts need a Convex backend. This build isn't connected to one.</p>
       </div>
     );
@@ -88,7 +97,7 @@ const REASON_LABEL: Record<string, string> = {
   simplify: 'Simplify',
   generateCourse: 'Course generated',
   refund: 'Refund',
-  admin: 'Adjustment',
+  admin: 'Adjustment'
 };
 
 function AccountPageInner() {
@@ -101,26 +110,41 @@ function AccountPageInner() {
   const [error, setError] = useState<string | null>(null);
   const purchased = /purchase=success/.test(location.hash);
 
-  if (isLoading || me === undefined) return <div className="acc-page"><p className="acc-muted">Loading your account…</p></div>;
+  if (isLoading || me === undefined)
+    return (
+      <div className="acc-page">
+        <p className="acc-muted">Loading your account…</p>
+      </div>
+    );
   if (!isAuthenticated || !me) {
     return (
       <div className="acc-page">
         <header className="acc-head">
           <h1>Account</h1>
-          <p className="acc-lede">Sign in to keep your progress across devices, simplify explanations and generate your own courses.</p>
+          <p className="acc-lede">
+            Sign in to keep your progress across devices, simplify explanations and generate your own courses.
+          </p>
         </header>
-        <button className="acc-primary" onClick={() => openSignIn()}>Sign in</button>
+        <button className="acc-primary" onClick={() => openSignIn()}>
+          Sign in
+        </button>
       </div>
     );
   }
 
-  const buy = async (pack: Pack['key']) => {
+  const buyPack = async (pack: Pack['key']) => {
     setBuying(pack);
     setError(null);
     try {
-      const res = (await checkout({ pack, returnUrl: `${location.origin}${location.pathname}#/account?purchase=success` })) as { url: string } | { error: string };
-      if ('url' in res) location.href = res.url;
-      else { setError(res.error); setBuying(null); }
+      const response = (await checkout({
+        pack,
+        returnUrl: `${location.origin}${location.pathname}#/account?purchase=success`
+      })) as { url: string } | { error: string };
+      if ('url' in response) location.href = response.url;
+      else {
+        setError(response.error);
+        setBuying(null);
+      }
     } catch {
       setError('Checkout failed to start. Try again.');
       setBuying(null);
@@ -137,10 +161,16 @@ function AccountPageInner() {
             <p className="acc-muted">{me.email}</p>
           </div>
         </div>
-        <button className="acc-secondary" onClick={() => getAuthClient()?.signOut()}>Sign out</button>
+        <button className="acc-secondary" onClick={() => getAuthClient()?.signOut()}>
+          Sign out
+        </button>
       </header>
 
-      {purchased && <div className="acc-notice">Payment received. Credits appear here within a few seconds of Polar confirming the order.</div>}
+      {purchased && (
+        <div className="acc-notice">
+          Payment received. Credits appear here within a few seconds of Polar confirming the order.
+        </div>
+      )}
 
       <section className="acc-balance">
         <div>
@@ -148,9 +178,18 @@ function AccountPageInner() {
           <div className="acc-big">{me.credits}</div>
         </div>
         <dl className="acc-costs">
-          <div><dt>Simplify a block</dt><dd>{me.costs.simplify} credit</dd></div>
-          <div><dt>Generate a course</dt><dd>{me.costs.generateCourse} credits</dd></div>
-          <div><dt>Re-reading a simplification</dt><dd>free</dd></div>
+          <div>
+            <dt>Simplify a block</dt>
+            <dd>{me.costs.simplify} credit</dd>
+          </div>
+          <div>
+            <dt>Generate a course</dt>
+            <dd>{me.costs.generateCourse} credits</dd>
+          </div>
+          <div>
+            <dt>Re-reading a simplification</dt>
+            <dd>free</dd>
+          </div>
         </dl>
       </section>
 
@@ -160,13 +199,13 @@ function AccountPageInner() {
         {packs && packs.length === 0 && <p className="acc-muted">Credit packs aren't on sale yet.</p>}
         {packs && packs.length > 0 && (
           <div className="acc-packs">
-            {packs.map((p) => (
-              <div key={p.key} className="acc-pack">
-                <div className="acc-pack-credits">{p.credits.toLocaleString()} credits</div>
-                <div className="acc-pack-name">{p.name}</div>
-                <div className="acc-pack-price">{formatPrice(p.priceCents, p.currency)}</div>
-                <button className="acc-primary" disabled={!!buying} onClick={() => buy(p.key)}>
-                  {buying === p.key ? 'Opening checkout…' : 'Buy'}
+            {packs.map((pack) => (
+              <div key={pack.key} className="acc-pack">
+                <div className="acc-pack-credits">{pack.credits.toLocaleString()} credits</div>
+                <div className="acc-pack-name">{pack.name}</div>
+                <div className="acc-pack-price">{formatPrice(pack.priceCents, pack.currency)}</div>
+                <button className="acc-primary" disabled={!!buying} onClick={() => buyPack(pack.key)}>
+                  {buying === pack.key ? 'Opening checkout…' : 'Buy'}
                 </button>
               </div>
             ))}
@@ -182,11 +221,13 @@ function AccountPageInner() {
         {history && history.length > 0 && (
           <table className="acc-table">
             <tbody>
-              {history.map((r) => (
-                <tr key={r.id}>
-                  <td>{REASON_LABEL[r.reason] ?? r.reason}</td>
-                  <td className="acc-when">{new Date(r.at).toLocaleString()}</td>
-                  <td className={`acc-delta ${r.delta > 0 ? 'plus' : 'minus'}`}>{r.delta > 0 ? `+${r.delta}` : r.delta}</td>
+              {history.map((entry) => (
+                <tr key={entry.id}>
+                  <td>{REASON_LABEL[entry.reason] ?? entry.reason}</td>
+                  <td className="acc-when">{new Date(entry.at).toLocaleString()}</td>
+                  <td className={`acc-delta ${entry.delta > 0 ? 'plus' : 'minus'}`}>
+                    {entry.delta > 0 ? `+${entry.delta}` : entry.delta}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -200,7 +241,9 @@ function AccountPageInner() {
 function formatPrice(cents: number | null, currency: string) {
   if (cents === null) return 'Pay what you want';
   try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.toUpperCase() }).format(
+      cents / 100
+    );
   } catch {
     return `${(cents / 100).toFixed(2)} ${currency.toUpperCase()}`;
   }

@@ -6,10 +6,12 @@ import fs from 'node:fs';
 function readEnvFile(file: string): Record<string, string> {
   if (!fs.existsSync(file)) return {};
   return Object.fromEntries(
-    fs.readFileSync(file, 'utf8').split('\n')
+    fs
+      .readFileSync(file, 'utf8')
+      .split('\n')
       .map((l) => l.match(/^\s*([A-Z0-9_]+)\s*=\s*"?([^"#\n]*)"?/))
       .filter((m): m is RegExpMatchArray => !!m)
-      .map((m) => [m[1], m[2].trim()]),
+      .map((m) => [m[1], m[2].trim()])
   );
 }
 const env = { ...readEnvFile('.env.local'), ...process.env };
@@ -20,7 +22,7 @@ export default defineConfig({
     input: { index: './index.html' },
     output: { path: 'dist', publicPath: '/' },
     sourcemap: false,
-    define: { 'process.env.FARM_CONVEX_URL': JSON.stringify(convexUrl) },
+    define: { 'process.env.FARM_CONVEX_URL': JSON.stringify(convexUrl) }
   },
-  plugins: ['@farmfe/plugin-react'],
+  plugins: ['@farmfe/plugin-react']
 });

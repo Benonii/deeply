@@ -3,7 +3,12 @@ import { demoCourse } from '../engine/__fixtures__/demoPack';
 import { convexCourse } from './convex';
 import { crdtsCourse } from './crdts';
 
-const fixtures = (() => { try { return localStorage.getItem('deeply-fixtures') === '1'; } catch { return false; } })();
+const fixtures = (() => {
+  try {
+    return localStorage.getItem('deeply-fixtures') === '1';
+  } catch {
+    return false;
+  }
+})();
 
-/** Courses compiled into the app, in catalog order. */
 export const builtinCourses: BuiltinCourse[] = [convexCourse, crdtsCourse, ...(fixtures ? [demoCourse] : [])];

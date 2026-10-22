@@ -21,7 +21,7 @@ export const m03: ModulePack = {
       ),
       ul(
         '**Idempotent**: x ⊔ x = x. Duplicated messages are harmless.',
-        '**Commutative**: x ⊔ y = y ⊔ x. Order of arrival doesn\'t matter.',
+        "**Commutative**: x ⊔ y = y ⊔ x. Order of arrival doesn't matter.",
         '**Associative**: (x ⊔ y) ⊔ z = x ⊔ (y ⊔ z). Merging via an intermediary gives the same result as merging directly.'
       ),
       p(
@@ -81,7 +81,7 @@ value(merge(merge(alice, bob), bob)); // still 7: idempotent
           { id: 'b', label: 'Bob +1', sub: '{A:3, B:3} = 6', col: 1, row: 2, tone: 'purple' },
           { id: 'm1', label: 'Alice merges', sub: 'max per entry', col: 3, row: 0, tone: 'yellow' },
           { id: 'm2', label: 'Bob merges', sub: 'max per entry', col: 3, row: 2, tone: 'purple' },
-          { id: 'eq', label: 'Both', sub: '{A:4, B:3} = 7', col: 4, row: 1, tone: 'red' },
+          { id: 'eq', label: 'Both', sub: '{A:4, B:3} = 7', col: 4, row: 1, tone: 'red' }
         ],
         edges: [
           { id: 'sa', from: 's', to: 'a' },
@@ -91,15 +91,38 @@ value(merge(merge(alice, bob), bob)); // still 7: idempotent
           { id: 'aa', from: 'a', to: 'm1' },
           { id: 'bb', from: 'b', to: 'm2' },
           { id: 'x1', from: 'm1', to: 'eq' },
-          { id: 'x2', from: 'm2', to: 'eq' },
+          { id: 'x2', from: 'm2', to: 'eq' }
         ],
         steps: [
-          { title: 'Per-replica entries', text: 'The counter is a map {A:3, B:2}. Entry A counts increments made on Alice\'s replica, entry B those made on Bob\'s. The value is the sum, 5.', nodes: ['s'] },
-          { title: 'Concurrent increments touch different entries', text: 'Alice increments only her own entry (A: 3 → 4). Bob increments only his (B: 2 → 3). Because no two replicas write the same entry, there is nothing to conflict on.', nodes: ['a', 'b'], edges: ['sa', 'sb'] },
-          { title: 'Ship the whole state', text: 'Each replica sends its full map. The messages can arrive in any order, be duplicated, or travel through a third replica first.', edges: ['ab', 'ba'] },
-          { title: 'Merge with per-entry max', text: 'max(4, 3) = 4 for A, max(2, 3) = 3 for B. Max is the join for each entry, so the merge of maps is the join of the product lattice.', nodes: ['m1', 'm2'], edges: ['aa', 'bb'] },
-          { title: 'Converged and correct', text: 'Both hold {A:4, B:3} with value 7, which counts both increments. Merging Bob\'s old state again changes nothing.', nodes: ['eq'], edges: ['x1', 'x2'] },
-        ],
+          {
+            title: 'Per-replica entries',
+            text: "The counter is a map {A:3, B:2}. Entry A counts increments made on Alice's replica, entry B those made on Bob's. The value is the sum, 5.",
+            nodes: ['s']
+          },
+          {
+            title: 'Concurrent increments touch different entries',
+            text: 'Alice increments only her own entry (A: 3 → 4). Bob increments only his (B: 2 → 3). Because no two replicas write the same entry, there is nothing to conflict on.',
+            nodes: ['a', 'b'],
+            edges: ['sa', 'sb']
+          },
+          {
+            title: 'Ship the whole state',
+            text: 'Each replica sends its full map. The messages can arrive in any order, be duplicated, or travel through a third replica first.',
+            edges: ['ab', 'ba']
+          },
+          {
+            title: 'Merge with per-entry max',
+            text: 'max(4, 3) = 4 for A, max(2, 3) = 3 for B. Max is the join for each entry, so the merge of maps is the join of the product lattice.',
+            nodes: ['m1', 'm2'],
+            edges: ['aa', 'bb']
+          },
+          {
+            title: 'Converged and correct',
+            text: "Both hold {A:4, B:3} with value 7, which counts both increments. Merging Bob's old state again changes nothing.",
+            nodes: ['eq'],
+            edges: ['x1', 'x2']
+          }
+        ]
       }),
       callout(
         'rule',
@@ -130,7 +153,7 @@ export const value = (c: PNCounter) => G.value(c.p) - G.value(c.n);
       callout(
         'warn',
         'A PN-Counter cannot stay non-negative',
-        'Stock = 1. Two offline replicas each sell the last item: each decrements, each sees 0, both orders succeed. After merge the stock is −1. No merge rule can prevent this, because neither replica knew about the other\'s sale. Keeping a counter above zero needs coordination, or a design like escrow (module 8).'
+        "Stock = 1. Two offline replicas each sell the last item: each decrements, each sees 0, both orders succeed. After merge the stock is −1. No merge rule can prevent this, because neither replica knew about the other's sale. Keeping a counter above zero needs coordination, or a design like escrow (module 8)."
       )
     ),
     section(
@@ -147,7 +170,12 @@ export const value = (c: PNCounter) => G.value(c.p) - G.value(c.n);
         ['Type', 'Operations', 'Concurrent add + remove of x', 'Re-add after remove'],
         ['G-Set', 'add', 'n/a', 'n/a'],
         ['2P-Set', 'add, remove', 'Removed (remove wins forever)', 'Impossible'],
-        ['LWW-Element-Set', 'add, remove with timestamps', 'Whichever has the later timestamp', 'Yes, with a later timestamp'],
+        [
+          'LWW-Element-Set',
+          'add, remove with timestamps',
+          'Whichever has the later timestamp',
+          'Yes, with a later timestamp'
+        ],
         ['OR-Set (add-wins)', 'add, remove', 'Present (add wins)', 'Yes'],
         ['Remove-wins set', 'add, remove', 'Absent', 'Yes']
       )
@@ -205,7 +233,12 @@ export const read = <T>(r: MVReg<T>) => r.entries.map((e) => e.value);
       ),
       check(
         'Alice sets title = "Plan" and Bob concurrently sets title = "Roadmap". After merge, what does an MV-Register return?',
-        ['"Plan" or "Roadmap", whichever has the later timestamp', 'Both values', 'Neither; the register is cleared', 'An error'],
+        [
+          '"Plan" or "Roadmap", whichever has the later timestamp',
+          'Both values',
+          'Neither; the register is cleared',
+          'An error'
+        ],
         1,
         'Neither write dominates the other, so both are kept as siblings. The application (or user) chooses, and that choice becomes a new write that supersedes both.'
       )
@@ -260,7 +293,7 @@ export const has = <T>(s: ORSet<T>, x: T) => [...(s.adds.get(x) ?? [])].some((t)
           { id: 'bo', label: 'Bob: add milk', sub: 'new tag B:4', col: 1, row: 2, tone: 'purple' },
           { id: 'ma', label: 'Alice merges', sub: 'tags {A:1, B:4}', col: 3, row: 0, tone: 'yellow' },
           { id: 'mb', label: 'Bob merges', sub: 'removed {A:1}', col: 3, row: 2, tone: 'purple' },
-          { id: 'r', label: 'Result', sub: 'milk present via B:4', col: 4, row: 1, tone: 'red' },
+          { id: 'r', label: 'Result', sub: 'milk present via B:4', col: 4, row: 1, tone: 'red' }
         ],
         edges: [
           { id: 'sa', from: 's', to: 'al' },
@@ -268,22 +301,55 @@ export const has = <T>(s: ORSet<T>, x: T) => [...(s.adds.get(x) ?? [])].some((t)
           { id: 'ab', from: 'al', to: 'mb', label: 'state' },
           { id: 'ba', from: 'bo', to: 'ma', label: 'state' },
           { id: 'ar', from: 'ma', to: 'r' },
-          { id: 'br', from: 'mb', to: 'r' },
+          { id: 'br', from: 'mb', to: 'r' }
         ],
         steps: [
-          { title: 'Elements carry tags', text: 'Milk was added once by Alice, creating tag A:1. Both replicas know milk ↦ {A:1}.', nodes: ['s'] },
-          { title: 'Alice removes milk', text: 'Alice removes the tags she has observed: she tombstones A:1. Locally milk is gone.', nodes: ['al'], edges: ['sa'] },
-          { title: 'Bob concurrently adds milk', text: 'Bob, not having seen the remove, adds milk again. That creates a fresh tag B:4, so milk ↦ {A:1, B:4} on his side.', nodes: ['bo'], edges: ['sb'] },
-          { title: 'Merge unions tags and tombstones', text: 'After exchanging states, both replicas hold tags {A:1, B:4} and tombstones {A:1}.', nodes: ['ma', 'mb'], edges: ['ab', 'ba'] },
-          { title: 'Add wins', text: 'Tag B:4 is not tombstoned, so milk is present. Alice\'s remove only ever applied to the add she saw. That matches intuition: Bob wanted milk on the list after Alice\'s removal, from his point of view.', nodes: ['r'], edges: ['ar', 'br'] },
-          { title: 'Alternative policies', text: 'A remove-wins set would make milk absent. Neither is "correct" in general: add-wins fits shopping lists and tags; remove-wins fits "kick user from room". Pick per use case.', nodes: ['r'] },
-        ],
+          {
+            title: 'Elements carry tags',
+            text: 'Milk was added once by Alice, creating tag A:1. Both replicas know milk ↦ {A:1}.',
+            nodes: ['s']
+          },
+          {
+            title: 'Alice removes milk',
+            text: 'Alice removes the tags she has observed: she tombstones A:1. Locally milk is gone.',
+            nodes: ['al'],
+            edges: ['sa']
+          },
+          {
+            title: 'Bob concurrently adds milk',
+            text: 'Bob, not having seen the remove, adds milk again. That creates a fresh tag B:4, so milk ↦ {A:1, B:4} on his side.',
+            nodes: ['bo'],
+            edges: ['sb']
+          },
+          {
+            title: 'Merge unions tags and tombstones',
+            text: 'After exchanging states, both replicas hold tags {A:1, B:4} and tombstones {A:1}.',
+            nodes: ['ma', 'mb'],
+            edges: ['ab', 'ba']
+          },
+          {
+            title: 'Add wins',
+            text: "Tag B:4 is not tombstoned, so milk is present. Alice's remove only ever applied to the add she saw. That matches intuition: Bob wanted milk on the list after Alice's removal, from his point of view.",
+            nodes: ['r'],
+            edges: ['ar', 'br']
+          },
+          {
+            title: 'Alternative policies',
+            text: 'A remove-wins set would make milk absent. Neither is "correct" in general: add-wins fits shopping lists and tags; remove-wins fits "kick user from room". Pick per use case.',
+            nodes: ['r']
+          }
+        ]
       }),
       check(
         'In an add-wins OR-Set, Alice removes "x" after observing tags {A:1, A:3}. Concurrently Bob, who had only seen A:1, also removes "x". No one adds. After merge, is "x" present?',
-        ['Yes, because A:3 was not removed by Bob', 'No, all observed tags were removed by someone', 'Yes, adds always win', 'It depends on timestamps'],
+        [
+          'Yes, because A:3 was not removed by Bob',
+          'No, all observed tags were removed by someone',
+          'Yes, adds always win',
+          'It depends on timestamps'
+        ],
         1,
-        'Tombstones union: Alice removed A:1 and A:3, Bob removed A:1. Every tag is tombstoned, so x is absent. Add-wins only matters when there is an add the removers didn\'t observe.'
+        "Tombstones union: Alice removed A:1 and A:3, Bob removed A:1. Every tag is tombstoned, so x is absent. Add-wins only matters when there is an add the removers didn't observe."
       )
     ),
     section(
@@ -302,7 +368,12 @@ export const has = <T>(s: ORSet<T>, x: T) => [...(s.adds.get(x) ?? [])].some((t)
       ),
       check(
         'Why is it safe to join two pending deltas into one before sending?',
-        ['Deltas are operations that commute', 'Deltas are lattice states, and join is associative and idempotent', 'The receiver deduplicates by message id', 'It is only safe over TCP'],
+        [
+          'Deltas are operations that commute',
+          'Deltas are lattice states, and join is associative and idempotent',
+          'The receiver deduplicates by message id',
+          'It is only safe over TCP'
+        ],
         1,
         'A delta is just a (small) state. Joining d1 ⊔ d2 and sending once has the same effect as sending both, by associativity; resending is harmless by idempotence.'
       )
@@ -321,7 +392,9 @@ export const has = <T>(s: ORSet<T>, x: T) => [...(s.adds.get(x) ?? [])].some((t)
         ['Delta-state CRDT', 'Updates produce small lattice states (deltas) that are joined like full states.']
       ),
       h3('Next'),
-      p('State-based CRDTs tolerate any network but can be heavy. Module 4 flips the approach: send small operations, and make the delivery layer do more work.')
-    ),
-  ],
+      p(
+        'State-based CRDTs tolerate any network but can be heavy. Module 4 flips the approach: send small operations, and make the delivery layer do more work.'
+      )
+    )
+  ]
 };
