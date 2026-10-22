@@ -22,7 +22,10 @@ export default defineConfig({
     input: { index: './index.html' },
     output: { path: 'dist', publicPath: '/' },
     sourcemap: false,
-    define: { 'process.env.FARM_CONVEX_URL': JSON.stringify(convexUrl) }
+    define: {
+      'process.env.FARM_CONVEX_URL': JSON.stringify(convexUrl),
+      'process.env.FARM_GA_MEASUREMENT_ID': JSON.stringify(env.FARM_GA_MEASUREMENT_ID ?? '')
+    }
   },
   plugins: ['@farmfe/plugin-react']
 });

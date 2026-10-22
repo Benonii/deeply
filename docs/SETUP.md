@@ -37,7 +37,7 @@ Each sign-in button only appears when its keys are set.
 Never set `GENERATOR_FAKE` or `AUTH_DEV_PASSWORD` in production.
 
 ## 5. Vercel
-Import the repo; `vercel.json` sets the build. Add `CONVEX_DEPLOY_KEY` (Production). Each deploy pushes `convex/` and builds the site against that deployment.
+Import the repo; `vercel.json` sets the build. Add `CONVEX_DEPLOY_KEY` (Production) and, optionally, `FARM_GA_MEASUREMENT_ID` (a GA4 id like `G-XXXXXXX`) to turn on Google Analytics page views. Each deploy pushes `convex/` and builds the site against that deployment.
 
 ## Limits and pricing
 Defined in `convex/lib/pricing.ts` and `convex/rateLimits.ts`: 40 free credits on signup, Simplify 1 credit (cached rewrites free), a course 30 credits (refunded if planning fails). Per-user and global rate limits apply to Simplify, course generation and checkout.

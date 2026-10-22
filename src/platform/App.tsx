@@ -10,6 +10,7 @@ import { Toaster } from '../engine/kit';
 import { setProgressNamespace } from '../engine/progress';
 import { registerSimplifier, type SimplifyResult } from '../engine/simplify';
 import { brandVars, DEEPLY_BRAND, isLight, useBrandFonts } from '../engine/theme';
+import { trackPageView } from '../lib/analytics';
 import { useConvexClient } from './convexClient';
 import { CourseHome, CourseNav, ModulePage, NotFound, PageView } from './CoursePages';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -41,6 +42,7 @@ function useRoute() {
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
+  useEffect(() => trackPageView(path), [path]);
   return path;
 }
 

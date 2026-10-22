@@ -26,5 +26,11 @@
   "linter": {
     "rules": { "recommended": true }
   },
+  "overrides": [
+    {
+      "includes": ["src/lib/analytics.ts"],
+      "linter": { "rules": { "complexity": { "noArguments": "off" } } }
+    }
+  ],
   "assist": { "enabled": false }
 }
