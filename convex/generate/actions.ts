@@ -3,7 +3,9 @@ import { internalAction, type ActionCtx } from '../_generated/server';
 import { internal } from '../_generated/api';
 import type { Id } from '../_generated/dataModel';
 import { lintModule, type CodeRefPack, type ModulePack } from '../lib/courseSchema';
-import { fetchRepoContext, numbered, RepoError, resolveRef, type RepoContext, type RepoFile } from './github';
+import { makeBrandMonochrome } from '../lib/brandContrast';
+import { fetchRepoContext, MONOCHROME_HINT, numbered, RepoError } from './github';
+import { resolveRef, type RepoContext, type RepoFile } from './github';
 import { GenerationError, generateJson } from './llm';
 import { fakeChallenges, fakeModule, fakePlan, isFake } from './fake';
 import { challengesPrompt, modulePrompt, planPrompt } from './prompts';
@@ -81,7 +83,7 @@ export const plan = internalAction({
         tagline: planOut.meta.tagline,
         summary: planOut.meta.summary,
         kind: course.kind,
-        brand: planOut.brand,
+        brand: repo?.brandDigest.includes(MONOCHROME_HINT) ? makeBrandMonochrome(planOut.brand) : planOut.brand,
         challenges: [],
         codeRefs: {}
       };

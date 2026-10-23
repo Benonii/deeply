@@ -16,7 +16,7 @@ const BRAND_SHAPE = `Brand = {
   shader?: { kind: "mesh" | "grain" | "dither", colors: string[] }, // 2-5 "#rrggbb", decorative header art
   source?: string                    // URL the brand came from, or "designed"
 }
-Brand rules: dark theme. bg must be pure black "#000000" unless the real brand's own dark theme uses another near-black. surface/surface2/line are neutral greys (no colour tint). fg ≈ "#f5f5f5", fg2 ≈ "#d4d4d4", muted ≈ "#8f8f8f". accent/accent2/accent3 carry the identity and must read well on black. onAccent is the text colour placed on accent (usually "#000000" or "#ffffff").`;
+Brand rules: dark theme. bg must be pure black "#000000" unless the real brand's own dark theme uses another near-black. surface/surface2/line are neutral greys (no colour tint). fg ≈ "#f5f5f5", fg2 ≈ "#d4d4d4", muted ≈ "#8f8f8f". accent/accent2/accent3 carry the identity and must read well on black. Match the real brand: never invent a hue it does not use; if the brand hints say the palette is monochrome, accents are white or light greys and shader colours are dark greys. Shader colours sit behind white text, so keep them dark. onAccent is the text colour placed on accent (usually "#000000" or "#ffffff").`;
 
 export const PLAN_SHAPE = `{
   "meta": { "title": "<Subject>, Deeply", "tagline": string (<= 90 chars), "summary": string (2-3 sentences) },
