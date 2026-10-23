@@ -3,6 +3,7 @@ import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { action, internalMutation, internalQuery } from './_generated/server';
 import { currentUser } from './auth';
+import { isAdminEmail } from './lib/admin';
 import { selectModel } from './lib/model';
 import { rateLimiter } from './rateLimits';
 
@@ -77,8 +78,10 @@ export const simplify = action({
     const user = await currentUser(actionContext);
     if (!user) return { status: 'auth' };
 
-    const mine = await rateLimiter.limit(actionContext, 'simplify', { key: user._id });
-    if (!mine.ok) return { status: 'rate', retryAfterMs: mine.retryAfter };
+    if (!isAdminEmail(user.email)) {
+      const mine = await rateLimiter.limit(actionContext, 'simplify', { key: user._id });
+      if (!mine.ok) return { status: 'rate', retryAfterMs: mine.retryAfter };
+    }
     const global = await rateLimiter.limit(actionContext, 'simplifyGlobal');
     if (!global.ok) return { status: 'rate', retryAfterMs: global.retryAfter };
 

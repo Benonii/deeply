@@ -15,6 +15,7 @@ type Me = {
   email: string;
   image: string | null;
   credits: number;
+  isUnlimited: boolean;
   costs: Record<string, number>;
 };
 type Pack = { key: 'small' | 'large'; name: string; credits: number; priceCents: number | null; currency: string };
@@ -32,7 +33,15 @@ export function useCredits(): number | null | undefined {
   const client = useConvexClient();
   if (!client) return null;
   const me = useQuery(api.wallet.me) as Me | null | undefined;
-  return me === undefined ? undefined : me ? me.credits : null;
+  return me === undefined ? undefined : me ? readCredits(me) : null;
+}
+
+function readCredits(me: Me): number {
+  return me.isUnlimited ? Number.POSITIVE_INFINITY : me.credits;
+}
+
+export function formatCredits(credits: number): string {
+  return Number.isFinite(credits) ? String(credits) : 'Unlimited';
 }
 
 export function AccountButton() {
@@ -61,7 +70,7 @@ function AccountButtonInner() {
     <a className="acc-btn acc-btn-user" href="#/account" title="Account and credits">
       <Avatar me={me} />
       <span className="acc-btn-name">{me.name || me.email}</span>
-      <span className={`acc-pill ${me.credits <= 5 ? 'low' : ''}`}>{me.credits} cr</span>
+      <span className={`acc-pill ${readCredits(me) <= 5 ? 'low' : ''}`}>{formatCredits(readCredits(me))} cr</span>
     </a>
   );
 }
@@ -176,8 +185,8 @@ function AccountPageInner() {
       <section className="acc-balance">
         <div>
           <div className="acc-label">Credits</div>
-          <div className="acc-big">{me.credits}</div>
-          <div className="acc-muted">Enough for {countCourses(me.credits)} courses</div>
+          <div className="acc-big">{formatCredits(readCredits(me))}</div>
+          {!me.isUnlimited && <div className="acc-muted">Enough for {countCourses(me.credits)} courses</div>}
         </div>
         <dl className="acc-costs">
           <div>

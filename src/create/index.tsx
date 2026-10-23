@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
-import { openSignIn, useCredits } from '../account';
+import { formatCredits, openSignIn, useCredits } from '../account';
 import { useConvexClient } from '../platform/convexClient';
 import { COST, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
 import { LoadingState } from '../components/ai/LoadingState';
@@ -211,7 +211,7 @@ function Form() {
         <span className="muted small">
           {typeof credits === 'number' ? (
             <>
-              You have {credits} credits
+              You have {formatCredits(credits)} credits
               {short && (
                 <>
                   {' '}
