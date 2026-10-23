@@ -6,7 +6,7 @@ import { action, internalAction, query } from './_generated/server';
 import { authComponent, currentUser } from './auth';
 import { rateLimiter } from './rateLimits';
 
-export const DEFAULT_PACK_CREDITS = { small: 200, large: 1000 } as const;
+export const DEFAULT_PACK_CREDITS = { small: 300, large: 1500 } as const;
 type PackKey = keyof typeof DEFAULT_PACK_CREDITS;
 
 const productIds = {
