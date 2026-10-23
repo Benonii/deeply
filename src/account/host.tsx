@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
+import { FREE_COURSES_TEXT } from '../../convex/lib/pricing';
 import { getAuthClient } from '../lib/authClient';
 import './account.css';
 
@@ -77,7 +78,7 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
         </button>
         <h2 id="acc-title">Sign in</h2>
         <p className="acc-sub">
-          {reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get free credits.
+          {reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get {FREE_COURSES_TEXT}.
         </p>
         <div className="acc-providers">
           {providers?.github && (

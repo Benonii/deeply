@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LoadingState } from '../components/ai/LoadingState';
 import { StreamingText } from '../components/ai/StreamingText';
+import { FREE_COURSES_TEXT } from '../../convex/lib/pricing';
 
 export type SimplifyLevel = 1 | 2 | 3;
 export type SimplifyResult =
@@ -64,7 +65,11 @@ export function useSimplify(getText: () => string, context: () => string) {
       const result = await simplifier({ text, level, context: context() });
       if (result.status === 'ok') setState({ kind: 'done', level, text: result.text, cached: result.cached });
       else if (result.status === 'auth') {
-        setState({ kind: 'msg', level, msg: 'Sign in to simplify explanations. New accounts get free credits.' });
+        setState({
+          kind: 'msg',
+          level,
+          msg: `Sign in to simplify explanations. New accounts get ${FREE_COURSES_TEXT}.`
+        });
         handlers.onAuth();
       } else if (result.status === 'credits')
         setState({

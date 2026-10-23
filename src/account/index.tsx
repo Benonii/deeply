@@ -3,6 +3,7 @@ import { useAction, useConvexAuth, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 import { ConvexClientProvider, useConvexClient } from '../platform/convexClient';
 import { getAuthClient } from '../lib/authClient';
+import { countCourses, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
 import { requestSignIn } from './host';
 import './account.css';
 
@@ -52,7 +53,7 @@ function AccountButtonInner() {
   if (!isAuthenticated || !me) {
     return (
       <button className="acc-btn" onClick={() => openSignIn()}>
-        Sign in <span className="acc-btn-hint">free credits</span>
+        Sign in <span className="acc-btn-hint">{FREE_COURSES_TEXT}</span>
       </button>
     );
   }
@@ -176,6 +177,7 @@ function AccountPageInner() {
         <div>
           <div className="acc-label">Credits</div>
           <div className="acc-big">{me.credits}</div>
+          <div className="acc-muted">Enough for {countCourses(me.credits)} courses</div>
         </div>
         <dl className="acc-costs">
           <div>
@@ -201,9 +203,14 @@ function AccountPageInner() {
           <div className="acc-packs">
             {packs.map((pack) => (
               <div key={pack.key} className="acc-pack">
-                <div className="acc-pack-credits">{pack.credits.toLocaleString()} credits</div>
-                <div className="acc-pack-name">{pack.name}</div>
-                <div className="acc-pack-price">{formatPrice(pack.priceCents, pack.currency)}</div>
+                <div className="acc-pack-credits">{countCourses(pack.credits)} courses</div>
+                <div className="acc-pack-name">
+                  {pack.name} · {pack.credits.toLocaleString()} credits, Simplify included
+                </div>
+                <div className="acc-pack-price">
+                  {formatPrice(pack.priceCents, pack.currency)}{' '}
+                  <span className="acc-pack-per">{formatPricePerCourse(pack)}</span>
+                </div>
                 <button className="acc-primary" disabled={!!buying} onClick={() => buyPack(pack.key)}>
                   {buying === pack.key ? 'Opening checkout…' : 'Buy'}
                 </button>
@@ -236,6 +243,12 @@ function AccountPageInner() {
       </section>
     </div>
   );
+}
+
+function formatPricePerCourse(pack: Pack) {
+  const courses = countCourses(pack.credits);
+  if (pack.priceCents === null || courses === 0) return '';
+  return `${formatPrice(Math.round(pack.priceCents / courses), pack.currency)} per course`;
 }
 
 function formatPrice(cents: number | null, currency: string) {

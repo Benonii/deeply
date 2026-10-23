@@ -3,7 +3,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 import { openSignIn, useCredits } from '../account';
 import { useConvexClient } from '../platform/convexClient';
-import { COST } from '../../convex/lib/pricing';
+import { COST, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
 import { LoadingState } from '../components/ai/LoadingState';
 import { ThinkingTrace } from '../components/ai/ThinkingTrace';
 import './create.css';
@@ -220,7 +220,7 @@ function Form() {
               )}
             </>
           ) : credits === null ? (
-            'New accounts get free credits.'
+            `New accounts get ${FREE_COURSES_TEXT}.`
           ) : (
             ''
           )}{' '}
