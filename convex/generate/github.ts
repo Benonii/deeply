@@ -1,6 +1,11 @@
+import { isNeutralColor } from '../lib/brandContrast';
+
 export const REPO_BYTES_CAP = 400_000;
 const FILE_BYTES_CAP = 60_000;
 const HOMEPAGE_BYTES_CAP = 200_000;
+const STYLESHEET_LIMIT = 2;
+const MONOCHROME_SHARE = 0.8;
+export const MONOCHROME_HINT = 'palette: monochrome';
 
 export type RepoFile = { path: string; text: string };
 export type RepoContext = {
@@ -159,6 +164,23 @@ export async function fetchRepoContext(
   };
 }
 
+async function fetchStylesheets(html: string, pageURL: string): Promise<string> {
+  const origin = new URL(pageURL).origin;
+  const hrefs = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi)]
+    .map((match) => match[0].match(/href=["']([^"']+)/i)?.[1])
+    .flatMap((href) => (href ? [new URL(href, pageURL)] : []))
+    .filter((stylesheetURL) => stylesheetURL.origin === origin)
+    .slice(0, STYLESHEET_LIMIT);
+  const sheets = await Promise.all(
+    hrefs.map((stylesheetURL) =>
+      fetch(stylesheetURL, { headers: { 'User-Agent': 'Mozilla/5.0 (deeply-course-generator)' } })
+        .then((response) => (response.ok ? response.text() : ''))
+        .catch(() => '')
+    )
+  );
+  return sheets.map((sheet) => sheet.slice(0, HOMEPAGE_BYTES_CAP)).join('\n');
+}
+
 export async function fetchBrandDigest(url: string): Promise<string> {
   const absoluteURL = /^https?:\/\//.test(url) ? url : `https://${url}`;
   const response = await fetch(absoluteURL, {
@@ -167,16 +189,20 @@ export async function fetchBrandDigest(url: string): Promise<string> {
   });
   if (!response.ok) return '';
   const html = (await response.text()).slice(0, HOMEPAGE_BYTES_CAP);
+  const stylesheets = await fetchStylesheets(html, response.url || absoluteURL);
+  const source = `${html}\n${stylesheets}`;
   const count = (pattern: RegExp) => {
     const counts = new Map<string, number>();
-    for (const match of html.matchAll(pattern))
+    for (const match of source.matchAll(pattern))
       counts.set(match[1].toLowerCase(), (counts.get(match[1].toLowerCase()) ?? 0) + 1);
     return [...counts.entries()].sort((first, second) => second[1] - first[1]);
   };
-  const hexes = count(/(#[0-9a-fA-F]{6})\b/g)
-    .slice(0, 16)
-    .map(([color, occurrences]) => `${color}×${occurrences}`);
-  const vars = [...html.matchAll(/(--[\w-]*(?:color|brand|primary|accent|bg|background)[\w-]*)\s*:\s*([^;}{]{3,40})/gi)]
+  const rankedColors = count(/(#[0-9a-fA-F]{6})\b/g);
+  const hexes = rankedColors.slice(0, 16).map(([color, occurrences]) => `${color}×${occurrences}`);
+  const vars = [
+    ...source.matchAll(/(--[\w-]*(?:color|brand|primary|accent|bg|background)[\w-]*)\s*:\s*([^;}{]{3,40})/gi)
+  ]
+    .filter((match) => !match[1].startsWith('--tw-'))
     .slice(0, 20)
     .map((match) => `${match[1]}: ${match[2].trim()}`);
   const fonts = count(/font-family\s*:\s*([^;}"]{3,80})/gi)
@@ -185,6 +211,12 @@ export async function fetchBrandDigest(url: string): Promise<string> {
   const gfonts = [...html.matchAll(/fonts\.googleapis\.com\/css2?\?family=([^"'&]+)/g)]
     .map((match) => decodeURIComponent(match[1]).replace(/\+/g, ' '))
     .slice(0, 4);
+  const topColors = rankedColors.slice(0, 16);
+  const totalOccurrences = topColors.reduce((sum, [, occurrences]) => sum + occurrences, 0);
+  const neutralOccurrences = topColors
+    .filter(([color]) => isNeutralColor(color))
+    .reduce((sum, [, occurrences]) => sum + occurrences, 0);
+  const isMonochrome = totalOccurrences > 0 && neutralOccurrences / totalOccurrences >= MONOCHROME_SHARE;
   const theme = html.match(/<meta[^>]+name=["']theme-color["'][^>]+content=["']([^"']+)/i)?.[1];
   const title = html.match(/<title>([^<]{0,120})/i)?.[1];
   const logo = html.match(/<link[^>]+rel=["'][^"']*icon[^"']*["'][^>]+href=["']([^"']+\.svg)/i)?.[1];
@@ -193,6 +225,8 @@ export async function fetchBrandDigest(url: string): Promise<string> {
     title && `title: ${title}`,
     theme && `theme-color: ${theme}`,
     hexes.length && `most used hex colours: ${hexes.join(', ')}`,
+    isMonochrome &&
+      `${MONOCHROME_HINT} (mostly blacks, whites and greys); keep the course monochrome with white or grey accents`,
     vars.length && `css colour variables:\n  ${vars.join('\n  ')}`,
     fonts.length && `font-family declarations: ${fonts.join(' | ')}`,
     gfonts.length && `google fonts loaded: ${gfonts.join(', ')}`,

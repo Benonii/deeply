@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type React from 'react';
+import { listShaderColors, makeBrandReadable } from '../../convex/lib/brandContrast';
 import type { Brand } from '../../convex/lib/courseSchema';
 import type { UntrustedBrand } from '../types';
 
@@ -72,15 +73,7 @@ export function useBrandFonts(brand: Brand) {
 }
 
 export function shaderColors(brand: Brand) {
-  return (
-    brand.shader?.colors ?? [
-      brand.colors.bg,
-      brand.colors.accent3,
-      brand.colors.accent2,
-      brand.colors.accent,
-      brand.colors.bg
-    ]
-  );
+  return listShaderColors(brand);
 }
 
 const COLOR = /^(#[0-9a-fA-F]{3,8}|(rgb|hsl|oklch|oklab)a?\([0-9.,%\s/-]+\))$/;
@@ -102,7 +95,7 @@ export function sanitizeBrand(input: unknown, fallback: Brand = DEEPLY_BRAND): B
     ? brand.shader.colors.filter((color: unknown): color is string => typeof color === 'string' && COLOR.test(color))
     : [];
   const shaderKind = brand.shader?.kind;
-  return {
+  return makeBrandReadable({
     name: typeof brand.name === 'string' ? brand.name.slice(0, 60) : fallback.name,
     colors,
     fonts: { display: font('display'), body: font('body'), mono: font('mono') },
@@ -111,7 +104,7 @@ export function sanitizeBrand(input: unknown, fallback: Brand = DEEPLY_BRAND): B
         ? { kind: shaderKind, colors: shaderColors.slice(0, 5) }
         : undefined,
     source: typeof brand.source === 'string' ? brand.source.slice(0, 200) : undefined
-  };
+  });
 }
 
 export function isLight(hex: string) {
