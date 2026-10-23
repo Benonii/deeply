@@ -65,7 +65,11 @@ export function useSimplify(getText: () => string, context: () => string) {
       const result = await simplifier({ text, level, context: context() });
       if (result.status === 'ok') setState({ kind: 'done', level, text: result.text, cached: result.cached });
       else if (result.status === 'auth') {
-        setState({ kind: 'msg', level, msg: `Sign in to simplify explanations. New accounts get ${FREE_COURSES_TEXT}.` });
+        setState({
+          kind: 'msg',
+          level,
+          msg: `Sign in to simplify explanations. New accounts get ${FREE_COURSES_TEXT}.`
+        });
         handlers.onAuth();
       } else if (result.status === 'credits')
         setState({
