@@ -3,6 +3,7 @@ import { internalMutation, mutation, query, type QueryCtx, type MutationCtx } fr
 import { internal } from './_generated/api';
 import { currentUser } from './auth';
 import { rateLimiter } from './rateLimits';
+import { isAdminUser } from './lib/admin';
 import { COST } from './lib/pricing';
 import { parseRepoUrl } from './generate/github';
 import { WATCHDOG_MS } from './generate/state';
@@ -185,10 +186,13 @@ async function startCourse(
   if (topic.length < 3 || topic.length > 200)
     return { status: 'invalid', message: 'The topic must be 3 to 200 characters.' };
 
-  const perUser = await rateLimiter.check(context, 'generateCourse', { key: me });
-  if (!perUser.ok) return { status: 'rate', retryAfterMs: perUser.retryAfter ?? 60_000 };
-  const daily = await rateLimiter.check(context, 'generateCourseDaily', { key: me });
-  if (!daily.ok) return { status: 'rate', retryAfterMs: daily.retryAfter ?? 3_600_000 };
+  const isAdmin = await isAdminUser(context, me);
+  if (!isAdmin) {
+    const perUser = await rateLimiter.check(context, 'generateCourse', { key: me });
+    if (!perUser.ok) return { status: 'rate', retryAfterMs: perUser.retryAfter ?? 60_000 };
+    const daily = await rateLimiter.check(context, 'generateCourseDaily', { key: me });
+    if (!daily.ok) return { status: 'rate', retryAfterMs: daily.retryAfter ?? 3_600_000 };
+  }
   const global = await rateLimiter.check(context, 'generateCourseGlobal');
   if (!global.ok) return { status: 'rate', retryAfterMs: global.retryAfter ?? 60_000 };
 
@@ -209,8 +213,10 @@ async function startCourse(
     ref: chargeRef
   });
   if (!chargeOk(charged)) return { status: 'credits', needed: COST.generateCourse };
-  await rateLimiter.limit(context, 'generateCourse', { key: me });
-  await rateLimiter.limit(context, 'generateCourseDaily', { key: me });
+  if (!isAdmin) {
+    await rateLimiter.limit(context, 'generateCourse', { key: me });
+    await rateLimiter.limit(context, 'generateCourseDaily', { key: me });
+  }
   await rateLimiter.limit(context, 'generateCourseGlobal');
 
   const courseId = await context.db.insert('courses', {

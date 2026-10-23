@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { internalMutation, mutation, query, type MutationCtx } from './_generated/server';
 import { currentUser } from './auth';
+import { isAdminEmail, isAdminUser } from './lib/admin';
 import { COST, FREE_CREDITS_ON_SIGNUP } from './lib/pricing';
 import { rateLimiter } from './rateLimits';
 
@@ -37,6 +38,7 @@ export const me = query({
       email: user.email,
       image: user.image ?? null,
       credits: wallet ? wallet.credits : FREE_CREDITS_ON_SIGNUP,
+      isUnlimited: isAdminEmail(user.email),
       costs: COST
     };
   }
@@ -70,6 +72,10 @@ export const charge = internalMutation({
   args: { userId: v.string(), kind: usageKind, ref: v.string() },
   handler: async (context, { userId, kind, ref }) => {
     const wallet = await ensureWallet(context, userId);
+    if (await isAdminUser(context, userId)) {
+      await context.db.insert('ledger', { userId, delta: 0, reason: kind, ref });
+      return { ok: true as const, credits: wallet.credits };
+    }
     const cost = COST[kind];
     if (wallet.credits < cost) return { ok: false as const, credits: wallet.credits };
     await context.db.patch(wallet._id, { credits: wallet.credits - cost });
