@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { readableText, SimplifiedView, SimplifyMenu, useSimplify } from './simplify';
+import { FlowEdgeLabel } from './FlowEdgeLabel';
+import { measureNode } from './flowGeometry';
+import { routeFlowEdges } from './flowRouting';
 import { Inline } from './md';
+
+import type { FlowEdge, FlowNode, FlowStep } from '../types';
 
 export const ModuleCtx = createContext<{ title: string; course?: string }>({ title: 'Deeply' });
 
@@ -317,38 +322,12 @@ export function Code({
   );
 }
 
-export type FlowNode = {
-  id: string;
-  label: string;
-  sub?: string;
-  x: number;
-  y: number;
-  w?: number;
-  h?: number;
-  tone?: 'yellow' | 'red' | 'purple' | 'plain';
-  code?: string[];
-};
-export type FlowEdge = { id: string; from: string; to: string; label?: string; curve?: number; code?: string[] };
-export type FlowStep = { title: string; text: string; nodes?: string[]; edges?: string[] };
-
-function center(node: FlowNode) {
-  const width = node.w ?? 170,
-    height = node.h ?? 64;
-  return { centerX: node.x + width / 2, centerY: node.y + height / 2, width, height };
-}
-function edgePoint(node: FlowNode, targetX: number, targetY: number) {
-  const { centerX, centerY, width, height } = center(node);
-  const deltaX = targetX - centerX,
-    deltaY = targetY - centerY;
-  const scale = Math.min(Math.abs((width / 2 + 6) / (deltaX || 1e-6)), Math.abs((height / 2 + 6) / (deltaY || 1e-6)));
-  return { x: centerX + deltaX * scale, y: centerY + deltaY * scale };
-}
-
 export function Flow({
   title,
   nodes,
   edges,
   steps,
+  width = 1000,
   height = 420,
   caption
 }: {
@@ -356,6 +335,7 @@ export function Flow({
   nodes: FlowNode[];
   edges: FlowEdge[];
   steps: FlowStep[];
+  width?: number;
   height?: number;
   caption?: string;
 }) {
@@ -363,7 +343,6 @@ export function Flow({
   const [playing, setPlaying] = useState(false);
   const courseModule = useContext(ModuleCtx);
   const step = steps[stepIndex];
-  const byId = useMemo(() => Object.fromEntries(nodes.map((node) => [node.id, node])), [nodes]);
   useEffect(() => {
     if (!playing) return;
     const timer = setTimeout(() => {
@@ -373,97 +352,9 @@ export function Flow({
     return () => clearTimeout(timer);
   }, [playing, stepIndex, steps.length]);
 
-  const paths = useMemo(() => {
-    type Box = { x0: number; y0: number; x1: number; y1: number };
-    const overlaps = (first: Box, second: Box) =>
-      first.x0 < second.x1 && second.x0 < first.x1 && first.y0 < second.y1 && second.y0 < first.y1;
-    const nodeBoxes: Box[] = nodes.map((node) => {
-      const { width, height } = center(node);
-      return { x0: node.x - 3, y0: node.y - 3, x1: node.x + width + 3, y1: node.y + height + 3 };
-    });
-    const placed: Box[] = [];
-    const LABEL_CH = 6.9;
-    return edges.map((edge) => {
-      const fromNode = byId[edge.from],
-        toNode = byId[edge.to];
-      const fromCenter = center(fromNode),
-        toCenter = center(toNode);
-      const startPoint = edgePoint(fromNode, toCenter.centerX, toCenter.centerY),
-        endPoint = edgePoint(toNode, fromCenter.centerX, fromCenter.centerY);
-      const reverse = edges.some((otherEdge) => otherEdge.from === edge.to && otherEdge.to === edge.from);
-      const curve = edge.curve ?? (reverse ? 0.14 : 0);
-      const controlX = (startPoint.x + endPoint.x) / 2 - (endPoint.y - startPoint.y) * curve,
-        controlY = (startPoint.y + endPoint.y) / 2 + (endPoint.x - startPoint.x) * curve;
-      const pointAt = (fraction: number) => ({
-        x:
-          (1 - fraction) * (1 - fraction) * startPoint.x +
-          2 * (1 - fraction) * fraction * controlX +
-          fraction * fraction * endPoint.x,
-        y:
-          (1 - fraction) * (1 - fraction) * startPoint.y +
-          2 * (1 - fraction) * fraction * controlY +
-          fraction * fraction * endPoint.y
-      });
-      const deltaX = endPoint.x - startPoint.x,
-        deltaY = endPoint.y - startPoint.y,
-        len = Math.hypot(deltaX, deltaY) || 1;
-      let normalX = -deltaY / len,
-        normalY = deltaX / len;
-      if (curve < 0 || (curve === 0 && normalY > 0)) {
-        normalX = -normalX;
-        normalY = -normalY;
-      }
-      const text = (edge.label ?? '') + (edge.code?.length ? (edge.label ? ' </>' : '</>') : '');
-      const textWidth = text.length * LABEL_CH,
-        textHeight = 15;
-      let best: { lx: number; ly: number; anchor: 'start' | 'middle' | 'end'; score: number } | null = null;
-      for (const labelFraction of [0.5, 0.38, 0.62, 0.28, 0.72]) {
-        for (const side of [1, -1]) {
-          for (const off of [12, 22, 34, 46, 58]) {
-            const point = pointAt(labelFraction);
-            const sideX = normalX * side,
-              sideY = normalY * side;
-            const labelX = point.x + sideX * off,
-              labelY = point.y + sideY * off;
-            const anchor = sideX > 0.35 ? 'start' : sideX < -0.35 ? 'end' : 'middle';
-            const labelLeft =
-              anchor === 'start' ? labelX : anchor === 'end' ? labelX - textWidth : labelX - textWidth / 2;
-            const box = {
-              x0: labelLeft - 3,
-              y0: labelY - textHeight / 2,
-              x1: labelLeft + textWidth + 3,
-              y1: labelY + textHeight / 2
-            };
-            const score =
-              nodeBoxes.filter((nodeBox) => overlaps(box, nodeBox)).length * 10 +
-              placed.filter((placedBox) => overlaps(box, placedBox)).length * 10 +
-              (box.x0 < 0 || box.x1 > 1000 || box.y0 < 0 || box.y1 > height ? 5 : 0) +
-              Math.abs(labelFraction - 0.5) +
-              (side < 0 ? 0.3 : 0) +
-              off / 60;
-            if (!best || score < best.score) best = { lx: labelX, ly: labelY, anchor, score };
-          }
-        }
-      }
-      const { lx, ly, anchor } = best!;
-      if (text) {
-        const chosenLabelLeft = anchor === 'start' ? lx : anchor === 'end' ? lx - textWidth : lx - textWidth / 2;
-        placed.push({
-          x0: chosenLabelLeft - 3,
-          y0: ly - textHeight / 2,
-          x1: chosenLabelLeft + textWidth + 3,
-          y1: ly + textHeight / 2
-        });
-      }
-      return {
-        e: edge,
-        d: `M${startPoint.x},${startPoint.y} Q${controlX},${controlY} ${endPoint.x},${endPoint.y}`,
-        lx,
-        ly,
-        anchor
-      };
-    });
-  }, [edges, nodes, byId, height]);
+  const openEdgeCode = (edge: FlowEdge) =>
+    openCode(edge.code ?? [], `${title}: ${edge.label ?? `${edge.from} → ${edge.to}`}`);
+  const paths = useMemo(() => routeFlowEdges(nodes, edges, { width, height }), [nodes, edges, width, height]);
 
   const simp = useBlockSimplify(title, () => describe());
   const describe = () =>
@@ -485,7 +376,7 @@ export function Flow({
       </figcaption>
       <SimplifiedView state={simp.state} onClose={simp.clear} onLevel={simp.run} />
       <div className="flow-canvas">
-        <svg viewBox={`0 0 1000 ${height}`} role="img" aria-label={title}>
+        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={title}>
           <defs>
             <marker
               id="arrow"
@@ -510,14 +401,14 @@ export function Flow({
               <path d="M0,0 L10,5 L0,10 z" className="arrow-head on" />
             </marker>
           </defs>
-          {paths.map(({ e, d, lx, ly, anchor }) => {
+          {paths.map(({ edge: e, path: d }) => {
             const on = step.edges?.includes(e.id);
             const hasCode = !!e.code?.length;
             return (
               <g
                 key={e.id}
                 className={`edge ${on ? 'on' : ''} ${hasCode ? 'has-code' : ''}`}
-                onClick={hasCode ? () => openCode(e.code!, `${title}: ${e.label ?? `${e.from} → ${e.to}`}`) : undefined}
+                onClick={hasCode ? () => openEdgeCode(e) : undefined}
               >
                 {hasCode && (
                   <path d={d} className="edge-hit">
@@ -534,22 +425,13 @@ export function Flow({
                     <animateMotion dur="1.6s" repeatCount="indefinite" path={d} />
                   </circle>
                 )}
-                {(e.label || hasCode) && (
-                  <text x={lx} y={ly} className="edge-label" textAnchor={anchor} dominantBaseline="middle">
-                    {e.label}
-                    {hasCode && (
-                      <tspan className="code-mark">
-                        {e.label ? ' ' : ''}
-                        {'</>'}
-                      </tspan>
-                    )}
-                  </text>
-                )}
               </g>
             );
           })}
           {nodes.map((node) => {
-            const { width: nodeWidth, height: nodeHeight } = center(node);
+            const box = measureNode(node);
+            const nodeWidth = box.right - box.left;
+            const nodeHeight = box.bottom - box.top;
             const on = step.nodes?.includes(node.id);
             const hasCode = !!node.code?.length;
             return (
@@ -604,6 +486,16 @@ export function Flow({
               </g>
             );
           })}
+          {paths.map(({ edge, label }) =>
+            label ? (
+              <FlowEdgeLabel
+                key={edge.id}
+                label={label}
+                isActive={!!step.edges?.includes(edge.id)}
+                onOpenCode={edge.code?.length ? () => openEdgeCode(edge) : undefined}
+              />
+            ) : null
+          )}
         </svg>
       </div>
       <div className="flow-steps">

@@ -505,7 +505,6 @@ await ctx.db.delete(id);
             id: 'idx-1',
             from: 'idx',
             to: 'p1',
-            curve: 0.25,
             label: 'invalidate',
             code: ['db.subscriptionMatch', 'db.readSet']
           }

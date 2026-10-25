@@ -287,7 +287,6 @@ export const expire = internalMutation({
             from: 'db',
             to: 'client',
             label: 'subscription push',
-            curve: -0.25,
             code: ['db.subscriptions', 'sync.transition', 'client.remoteQuerySet']
           }
         ]}
@@ -853,7 +852,7 @@ export default http;
           { id: 'h-m', from: 'ha', to: 'mut', label: 'runMutation', code: ['server.runUdf', 'application.mutation'] },
           { id: 'm-t', from: 'mut', to: 'tbl', label: 'commit', code: ['db.committer', 'db.publish'] },
           { id: 't-u', from: 'tbl', to: 'ui', label: 'push', code: ['db.subscriptions', 'sync.transition'] },
-          { id: 'h-e', from: 'ha', to: 'ext', label: '200 OK', curve: 0.3, code: ['http.actions'] }
+          { id: 'h-e', from: 'ha', to: 'ext', label: '200 OK', code: ['http.actions'] }
         ]}
         steps={[
           {

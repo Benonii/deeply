@@ -159,7 +159,6 @@ const Component = () => (
             from: 'sync',
             to: 'runner',
             label: 'run fn',
-            curve: -0.15,
             code: ['sync.runQuery', 'application.query', 'runner.functionRunner']
           },
           {
@@ -170,7 +169,7 @@ const Component = () => (
             code: ['isolate.syscalls', 'server.syscall', 'server.dbReader']
           },
           { id: 'd-p', from: 'db', to: 'persist', label: 'commit', code: ['db.committer', 'persistence.sqliteWrite'] },
-          { id: 'd-sub', from: 'db', to: 'subs', label: 'write log', curve: 0.15, code: ['db.writeLog', 'db.publish'] },
+          { id: 'd-sub', from: 'db', to: 'subs', label: 'write log', code: ['db.writeLog', 'db.publish'] },
           {
             id: 'sub-s',
             from: 'subs',
@@ -183,7 +182,6 @@ const Component = () => (
             from: 'sync',
             to: 'client',
             label: 'Transition',
-            curve: 0.2,
             code: ['sync.transition', 'client.protocolServer', 'client.remoteQuerySet']
           },
           {
@@ -191,7 +189,6 @@ const Component = () => (
             from: 'client',
             to: 'app',
             label: 're-render',
-            curve: 0.2,
             code: ['client.notifyQueryResults', 'client.reactClient', 'client.useSubscription']
           }
         ]}
@@ -526,7 +523,6 @@ export function Chat({ channel }: { channel: Id<"channels"> }) {
             from: 'commit',
             to: 'iso',
             label: 'conflict → retry',
-            curve: 0.35,
             code: ['application.mutation', 'db.occ', 'db.commitConflict']
           },
           { id: 'c-l', from: 'commit', to: 'log', label: 'append', code: ['db.committer', 'persistence.sqliteWrite'] },
@@ -535,7 +531,6 @@ export function Chat({ channel }: { channel: Id<"channels"> }) {
             from: 'commit',
             to: 'ws',
             label: 'ok @ T1',
-            curve: -0.2,
             code: ['sync.mutation', 'client.requestManager']
           }
         ]}

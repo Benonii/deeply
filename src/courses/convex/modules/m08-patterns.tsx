@@ -349,9 +349,9 @@ const { results, status, loadMore } = usePaginatedQuery(
           { id: 'a', from: 'm1', to: 'hot', code: ['db.commitConflict', 'application.mutation'] },
           { id: 'b', from: 'm2', to: 'hot', code: ['db.commitConflict', 'application.mutation'] },
           { id: 'c', from: 'm3', to: 'hot', code: ['db.commitConflict', 'application.mutation'] },
-          { id: 'd', from: 'm1', to: 's1', curve: -0.05, code: ['server.dbWriter', 'db.writes'] },
-          { id: 'e', from: 'm2', to: 's3', curve: 0.1, code: ['server.dbWriter', 'db.writes'] },
-          { id: 'f', from: 'm3', to: 's2', curve: 0.1, code: ['server.dbWriter', 'db.writes'] },
+          { id: 'd', from: 'm1', to: 's1', code: ['server.dbWriter', 'db.writes'] },
+          { id: 'e', from: 'm2', to: 's3', code: ['server.dbWriter', 'db.writes'] },
+          { id: 'f', from: 'm3', to: 's2', code: ['server.dbWriter', 'db.writes'] },
           { id: 'g', from: 's1', to: 'read', code: ['server.dbReader', 'db.indexRange'] },
           { id: 'h', from: 's2', to: 'read', code: ['server.dbReader', 'db.indexRange'] },
           { id: 'i', from: 's3', to: 'read', code: ['server.dbReader', 'db.indexRange'] }
