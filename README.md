@@ -8,15 +8,16 @@ Open-source deep-dive courses on how things really work. Each course has animate
 - **Create your own:** sign in, name a concept or paste a public GitHub repo, and Deeply researches it, takes its visual identity from the project's own brand, and writes a full course with an LLM (OpenAI or Claude, via the Vercel AI SDK). Code excerpts are copied verbatim from the repo, never written by the model.
 - **Simplify:** rewrites any block at three levels (Plainer, Like I'm new, Like I'm 12). Rewrites are cached and shared, so each one is only paid for once.
 
-Stack: [Farm.js](https://farmjs.dev) + React 18, Convex (database, functions, scheduling), Better Auth, Polar (credits), Vercel AI SDK with OpenAI or Claude (generation and Simplify), shaders from paper.design.
+Stack: [Farm.js](https://farmjs.dev) + React 18, Convex (through `@farm.js/convex`) (database, functions, scheduling), Better Auth, Polar (credits), Vercel AI SDK with OpenAI or Claude (generation and Simplify), shaders from paper.design.
 
 [![CI](https://github.com/Benonii/deeply/actions/workflows/ci.yml/badge.svg)](https://github.com/Benonii/deeply/actions/workflows/ci.yml) · MIT licensed · course content about third-party projects is unofficial and not affiliated with them.
 
 ## Local development
 ```bash
 npm install
-npx convex dev   # creates a dev deployment, writes CONVEX_URL to .env.local, pushes convex/
-npm run dev      # http://localhost:3000
+npx convex dev --once   # first time only: creates a dev deployment and writes CONVEX_URL to .env.local
+npx convex env set SITE_URL http://localhost:3000
+npm run dev             # http://localhost:3000, also runs `convex dev`
 ```
 The built-in courses work without a backend. Sign-in, Simplify, community courses and the Convex Live Lab need one. To try the generator without an API key, set `GENERATOR_FAKE=1` on a **dev** deployment and it writes a small fixture course.
 

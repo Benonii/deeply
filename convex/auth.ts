@@ -1,5 +1,5 @@
 import { createClient, type GenericCtx } from '@convex-dev/better-auth';
-import { convex, crossDomain } from '@convex-dev/better-auth/plugins';
+import { convex } from '@convex-dev/better-auth/plugins';
 import { betterAuth, type BetterAuthOptions } from 'better-auth/minimal';
 import { components } from './_generated/api';
 import type { DataModel } from './_generated/dataModel';
@@ -23,12 +23,12 @@ function socialProviders(): BetterAuthOptions['socialProviders'] {
 
 export const createAuth = (context: GenericCtx<DataModel>) =>
   betterAuth({
-    baseURL: process.env.CONVEX_SITE_URL,
+    baseURL: siteUrl,
     trustedOrigins: [siteUrl],
     database: authComponent.adapter(context),
     socialProviders: socialProviders(),
     emailAndPassword: { enabled: process.env.AUTH_DEV_PASSWORD === '1', requireEmailVerification: false },
-    plugins: [crossDomain({ siteUrl }), convex({ authConfig })]
+    plugins: [convex({ authConfig })]
   });
 
 export async function currentUser(context: GenericCtx<DataModel>) {

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAction, useConvexAuth, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 import { Link } from '@farm.js/core/client';
-import { ConvexClientProvider, useConvexClient } from '../platform/convexClient';
+import { useConvexClient } from '../platform/convexClient';
 import { getAuthClient } from '../lib/authClient';
 import { countCourses, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
 import { requestSignIn } from './host';
@@ -21,10 +21,6 @@ type Me = {
 };
 type Pack = { key: 'small' | 'large'; name: string; credits: number; priceCents: number | null; currency: string };
 type LedgerRow = { id: string; at: number; delta: number; reason: string };
-
-export function AppProviders({ children }: { children: React.ReactNode }) {
-  return <ConvexClientProvider>{children}</ConvexClientProvider>;
-}
 
 export function openSignIn(reason?: string) {
   requestSignIn({ reason });

@@ -1,17 +1,9 @@
 import { createAuthClient } from 'better-auth/react';
-import { convexClient, crossDomainClient } from '@convex-dev/better-auth/client/plugins';
+import { convexClient } from '@convex-dev/better-auth/client/plugins';
 
-export function convexSiteUrl(convexUrl: string) {
-  if (convexUrl.includes('.convex.cloud')) return convexUrl.replace('.convex.cloud', '.convex.site');
-  const parsedURL = new URL(convexUrl);
-  if (parsedURL.port) parsedURL.port = String(Number(parsedURL.port) + 1);
-  return parsedURL.toString().replace(/\/$/, '');
-}
-
-export function makeAuthClient(convexUrl: string) {
+export function makeAuthClient() {
   return createAuthClient({
-    baseURL: convexSiteUrl(convexUrl),
-    plugins: [convexClient(), crossDomainClient()]
+    plugins: [convexClient()]
   });
 }
 export type AuthClient = ReturnType<typeof makeAuthClient>;
