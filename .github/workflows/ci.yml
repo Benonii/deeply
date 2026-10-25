@@ -7,6 +7,9 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # convex() needs a deployment URL to load farm.config.ts; CI never calls it.
+      CONVEX_URL: https://deeply-ci.convex.cloud
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
