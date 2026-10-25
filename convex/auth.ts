@@ -6,7 +6,7 @@ import type { DataModel } from './_generated/dataModel';
 import { query } from './_generated/server';
 import authConfig from './auth.config';
 
-const siteUrl = process.env.SITE_URL ?? 'http://localhost:9000';
+const siteUrl = process.env.SITE_URL ?? 'http://localhost:3000';
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 

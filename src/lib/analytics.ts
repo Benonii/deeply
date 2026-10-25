@@ -1,4 +1,6 @@
-const measurementID = process.env.FARM_GA_MEASUREMENT_ID ?? '';
+import { getPublicEnv } from '@farm.js/core/env';
+
+const measurementID = getPublicEnv('FARM_GA_MEASUREMENT_ID') ?? '';
 
 function pushToDataLayer() {
   window.dataLayer?.push(arguments);

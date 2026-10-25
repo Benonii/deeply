@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ConvexReactClient, useMutation, useQuery } from 'convex/react';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
+import { getPublicEnv } from '@farm.js/core/env';
 import { makeAuthClient, setAuthClient } from '../lib/authClient';
 import { AccountHost } from '../account/host';
 import { anyApi } from 'convex/server';
@@ -11,7 +12,7 @@ export const api = anyApi;
 
 const URL_KEY = 'convex-academy-url';
 export function getConvexUrl(): string | undefined {
-  const env = process.env.FARM_CONVEX_URL;
+  const env = getPublicEnv('CONVEX_URL');
   let stored: string | null = null;
   try {
     stored = localStorage.getItem(URL_KEY);

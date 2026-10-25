@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAction, useConvexAuth, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
+import { Link } from '@farm.js/core/client';
 import { ConvexClientProvider, useConvexClient } from '../platform/convexClient';
 import { getAuthClient } from '../lib/authClient';
 import { countCourses, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
@@ -67,11 +68,11 @@ function AccountButtonInner() {
     );
   }
   return (
-    <a className="acc-btn acc-btn-user" href="#/account" title="Account and credits">
+    <Link className="acc-btn acc-btn-user" href="/account" title="Account and credits">
       <Avatar me={me} />
       <span className="acc-btn-name">{me.name || me.email}</span>
       <span className={`acc-pill ${readCredits(me) <= 5 ? 'low' : ''}`}>{formatCredits(readCredits(me))} cr</span>
-    </a>
+    </Link>
   );
 }
 
@@ -118,7 +119,7 @@ function AccountPageInner() {
   const checkout = useAction(api.billing.checkout);
   const [buying, setBuying] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const purchased = /purchase=success/.test(location.hash);
+  const purchased = /purchase=success/.test(location.search);
 
   if (isLoading || me === undefined)
     return (
@@ -148,7 +149,7 @@ function AccountPageInner() {
     try {
       const response = (await checkout({
         pack,
-        returnUrl: `${location.origin}${location.pathname}#/account?purchase=success`
+        returnUrl: `${location.origin}/account?purchase=success`
       })) as { url: string } | { error: string };
       if ('url' in response) location.href = response.url;
       else {

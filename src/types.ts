@@ -47,3 +47,16 @@ export interface TraceStep {
   label: string;
   state: TraceStepState;
 }
+
+export type CourseSource = 'c' | 'g';
+
+export interface CourseSection {
+  kind: 'm' | 'p';
+  id: string;
+}
+
+export interface CourseRouteParams {
+  course: string;
+  module?: string;
+  page?: string;
+}

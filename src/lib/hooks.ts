@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 const TICK_MILLISECONDS = 100;
 const WORD_MILLISECONDS = 55;
@@ -42,4 +42,14 @@ export function useWordReveal(text: string) {
     return () => clearInterval(timer);
   }, [isRevealing, wordsPerTick]);
   return { visibleText: words.slice(0, visibleCount).join(''), isRevealing };
+}
+
+const subscribeToNothing = () => () => {};
+
+export function useIsMounted() {
+  return useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false
+  );
 }

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
+import { Link, navigateTo } from '@farm.js/core/client';
+import { usePathname } from '@farm.js/core/navigation';
 import { formatCredits, openSignIn, useCredits } from '../account';
 import { useConvexClient } from '../platform/convexClient';
 import { COST, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
@@ -12,15 +14,9 @@ import type { TraceStep } from '../types';
 
 const api = anyApi;
 
-function useSlugFromHash() {
-  const read = () => location.hash.match(/^#\/create\/([\w-]+)/)?.[1] ?? null;
-  const [slug, setSlug] = useState(read);
-  useEffect(() => {
-    const on = () => setSlug(read());
-    window.addEventListener('hashchange', on);
-    return () => window.removeEventListener('hashchange', on);
-  }, []);
-  return slug;
+function useSlugFromPath() {
+  const pathname = usePathname();
+  return pathname.match(/^\/create\/([\w-]+)/)?.[1] ?? null;
 }
 
 export function CreatePage() {
@@ -53,7 +49,7 @@ function Head() {
 }
 
 function CreateConnected() {
-  const slug = useSlugFromHash();
+  const slug = useSlugFromPath();
   return (
     <div className="cr">
       <Head />
@@ -99,12 +95,12 @@ function Form() {
         repoUrl: kind === 'repo' ? repoUrl : undefined,
         visibility
       })) as CreateResult;
-      if (result.status === 'ok') location.hash = `#/create/${result.slug}`;
+      if (result.status === 'ok') navigateTo(`/create/${result.slug}`);
       else if (result.status === 'auth') openSignIn('Sign in to create a course.');
       else if (result.status === 'credits')
         setProblem(
           <>
-            You need {result.needed} credits to create a course. <a href="#/account">Get more credits</a>
+            You need {result.needed} credits to create a course. <Link href="/account">Get more credits</Link>
           </>
         );
       else if (result.status === 'rate')
@@ -215,7 +211,7 @@ function Form() {
               {short && (
                 <>
                   {' '}
-                  · <a href="#/account">get more</a>
+                  · <Link href="/account">get more</Link>
                 </>
               )}
             </>
@@ -264,7 +260,7 @@ function Progress({ slug }: { slug: string }) {
   if (data === null)
     return (
       <p className="cr-note">
-        No course at this address. <a href="#/create">Create one</a>
+        No course at this address. <Link href="/create">Create one</Link>
       </p>
     );
   const { course, modules } = data;
@@ -323,13 +319,13 @@ function Progress({ slug }: { slug: string }) {
         </div>
         <div className="cr-actions">
           {ready > 0 && (
-            <a className="btn primary" href={`#/g/${slug}`}>
+            <Link className="btn primary" href={`/g/${slug}`}>
               {status === 'ready' ? 'Open course' : 'Start reading'} →
-            </a>
+            </Link>
           )}
-          <a className="btn ghost" href="#/create">
+          <Link className="btn ghost" href="/create">
             New course
-          </a>
+          </Link>
         </div>
       </div>
       {course.error && <p className="cr-problem">{course.error}</p>}
@@ -360,7 +356,7 @@ function Progress({ slug }: { slug: string }) {
                 </span>
                 <span className="cr-mod-state">
                   {courseModule.status === 'ready' ? (
-                    <a href={`#/g/${slug}/m/${moduleId(courseModule)}`}>Read</a>
+                    <Link href={`/g/${slug}/m/${moduleId(courseModule)}`}>Read</Link>
                   ) : courseModule.status === 'writing' ? (
                     'Writing…'
                   ) : courseModule.status === 'failed' ? (
@@ -411,17 +407,17 @@ function MyCourses({ current }: { current: string | null }) {
             visibility: string;
           }) => (
             <li key={course.slug} className={course.slug === current ? 'on' : ''}>
-              <a href={course.status === 'ready' ? `#/g/${course.slug}` : `#/create/${course.slug}`}>
+              <Link href={course.status === 'ready' ? `/g/${course.slug}` : `/create/${course.slug}`}>
                 <span className="cr-mine-title">{course.title}</span>
                 <span className="muted small">
                   {STATUS_LABEL[course.status]} · {course.readyModules}/{course.moduleCount} modules ·{' '}
                   {course.visibility}
                 </span>
-              </a>
+              </Link>
               {course.status !== 'ready' && course.status !== 'failed' && (
-                <a className="small" href={`#/create/${course.slug}`}>
+                <Link className="small" href={`/create/${course.slug}`}>
                   Progress
-                </a>
+                </Link>
               )}
             </li>
           )

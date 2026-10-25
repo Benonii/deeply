@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from '@farm.js/core/client';
 import { LoadingState } from '../components/ai/LoadingState';
 import { StreamingText } from '../components/ai/StreamingText';
 import { FREE_COURSES_TEXT } from '../../convex/lib/pricing';
@@ -77,7 +78,7 @@ export function useSimplify(getText: () => string, context: () => string) {
           level,
           msg: (
             <>
-              You're out of credits. <a href="#/account">Get more credits</a>
+              You're out of credits. <Link href="/account">Get more credits</Link>
             </>
           )
         });

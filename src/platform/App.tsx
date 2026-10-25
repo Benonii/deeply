@@ -1,72 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
+import { Link } from '@farm.js/core/client';
+import { usePathname } from '@farm.js/core/navigation';
 import type { Brand } from '../../convex/lib/courseSchema';
-import { AccountButton, AccountPage, openSignIn } from '../account';
+import { AccountButton, openSignIn } from '../account';
 import { builtinCourses } from '../courses';
-import { CreatePage } from '../create';
 import { CodeDrawer } from '../engine/CodeDrawer';
 import { Toaster } from '../engine/kit';
 import { setProgressNamespace } from '../engine/progress';
 import { registerSimplifier, type SimplifyResult } from '../engine/simplify';
 import { brandVars, DEEPLY_BRAND, isLight, useBrandFonts } from '../engine/theme';
 import { trackPageView } from '../lib/analytics';
+import { redirectLegacyHashURL } from './legacyRedirect';
 import { useConvexClient } from './convexClient';
 import { CourseHome, CourseNav, ModulePage, NotFound, PageView } from './CoursePages';
 import { ErrorBoundary } from './ErrorBoundary';
-import { PlatformHome } from './Home';
 import { fromBuiltin, fromGenerated, type GeneratedCourseDoc, type ShellCourse } from './model';
 
-function legacyRedirect(path: string): string | null {
-  const match = path.match(/^\/(m\/[\w-]+|playground|lab|source)$/);
-  if (!match) return null;
-  return match[1].startsWith('m/') ? `/c/convex/${match[1]}` : `/c/convex/p/${match[1]}`;
-}
-
-function useRoute() {
-  const read = () => {
-    const path = (location.hash || '#/').slice(1) || '/';
-    const legacy = legacyRedirect(path);
-    if (legacy) {
-      history.replaceState(null, '', `#${legacy}`);
-      return legacy;
-    }
-    return path;
-  };
-  const [path, setPath] = useState(read);
-  useEffect(() => {
-    const on = () => {
-      setPath(read());
-      window.scrollTo({ top: 0 });
-    };
-    window.addEventListener('hashchange', on);
-    return () => window.removeEventListener('hashchange', on);
-  }, []);
-  useEffect(() => trackPageView(path), [path]);
-  return path;
-}
-
-type Route =
-  | { page: 'home' }
-  | { page: 'create' }
-  | { page: 'account' }
-  | { page: 'course'; source: 'c' | 'g'; id: string; sub?: { kind: 'm' | 'p'; id: string } }
-  | { page: 'notfound' };
-
-function parse(path: string): Route {
-  if (path === '/' || path === '') return { page: 'home' };
-  if (path.startsWith('/create')) return { page: 'create' };
-  if (path.startsWith('/account')) return { page: 'account' };
-  const match = path.match(/^\/(c|g)\/([\w-]+)(?:\/(m|p)\/([\w-]+))?\/?$/);
-  if (match)
-    return {
-      page: 'course',
-      source: match[1] as 'c' | 'g',
-      id: match[2],
-      sub: match[3] ? { kind: match[3] as 'm' | 'p', id: match[4] } : undefined
-    };
-  return { page: 'notfound' };
-}
+import type { CourseSection, CourseSource } from '../types';
 
 function useReveal(dependency: unknown) {
   useEffect(() => {
@@ -100,13 +52,13 @@ function useReveal(dependency: unknown) {
 
 function Wordmark() {
   return (
-    <a href="#/" className="brand" aria-label="Deeply home">
+    <Link href="/" className="brand" aria-label="Deeply home">
       <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden>
         <rect x="1" y="1" width="30" height="30" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
         <path d="M9 9h6a7 7 0 0 1 0 14H9z" fill="var(--accent)" />
       </svg>
       <span>Deeply</span>
-    </a>
+    </Link>
   );
 }
 
@@ -127,17 +79,8 @@ function Themed({ brand, children }: { brand: Brand; children: React.ReactNode }
   );
 }
 
-function Shell({
-  brand,
-  nav,
-  children,
-  route
-}: {
-  brand: Brand;
-  nav: React.ReactNode;
-  children: React.ReactNode;
-  route: string;
-}) {
+function Shell({ brand, nav, children }: { brand: Brand; nav: React.ReactNode; children: React.ReactNode }) {
+  const route = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [route]);
   return (
@@ -172,12 +115,13 @@ function Shell({
   );
 }
 
-function PlatformNav({ route }: { route: string }) {
+function PlatformNav() {
+  const route = usePathname();
   const item = (href: string, label: string, icon: string, on: boolean) => (
-    <a href={`#${href}`} className={`nav-item ${on ? 'on' : ''}`}>
+    <Link key={href} href={href} className={`nav-item ${on ? 'on' : ''}`}>
       <span className="nav-n">{icon}</span>
       <span className="nav-t">{label}</span>
-    </a>
+    </Link>
   );
   return (
     <nav aria-label="Deeply">
@@ -191,37 +135,29 @@ function PlatformNav({ route }: { route: string }) {
   );
 }
 
-function CourseRoutes({
-  course,
-  route,
-  sub
-}: {
-  course: ShellCourse;
-  route: string;
-  sub?: { kind: 'm' | 'p'; id: string };
-}) {
+function CourseRoutes({ course, section }: { course: ShellCourse; section?: CourseSection }) {
+  const route = usePathname();
   setProgressNamespace(course.id);
   let body: React.ReactNode;
-  if (!sub) body = <CourseHome course={course} />;
-  else if (sub.kind === 'm') body = <ModulePage course={course} moduleId={sub.id} />;
-  else body = <PageView course={course} pageId={sub.id} />;
+  if (!section) body = <CourseHome course={course} />;
+  else if (section.kind === 'm') body = <ModulePage course={course} moduleId={section.id} />;
+  else body = <PageView course={course} pageId={section.id} />;
   return (
     <Shell
       brand={course.brand}
-      route={route}
       nav={
         <>
           <CourseNav course={course} route={route} />
           <nav aria-label="Deeply">
             <div className="nav-label">Deeply</div>
-            <a href="#/" className="nav-item">
+            <Link href="/" className="nav-item">
               <span className="nav-n">◇</span>
               <span className="nav-t">All courses</span>
-            </a>
-            <a href="#/create" className="nav-item">
+            </Link>
+            <Link href="/create" className="nav-item">
               <span className="nav-n">+</span>
               <span className="nav-t">Create a course</span>
-            </a>
+            </Link>
           </nav>
         </>
       }
@@ -231,89 +167,119 @@ function CourseRoutes({
   );
 }
 
-function GeneratedCourse({ slug, route, sub }: { slug: string; route: string; sub?: { kind: 'm' | 'p'; id: string } }) {
+function PlatformMessage({ title, lede }: { title: string; lede: string }) {
+  return (
+    <PlatformScreen>
+      <div className="page-head">
+        <h1>{title}</h1>
+        <p className="lede">{lede}</p>
+      </div>
+    </PlatformScreen>
+  );
+}
+
+function GeneratedCourse({ slug, section }: { slug: string; section?: CourseSection }) {
   const doc = useQuery(anyApi.courses.getBySlug, { slug }) as GeneratedCourseDoc | null | undefined;
   if (doc === undefined)
     return (
-      <Shell brand={DEEPLY_BRAND} route={route} nav={<PlatformNav route={route} />}>
+      <PlatformScreen>
         <div className="page-head">
           <span className="spinner" /> <p className="lede">Loading course…</p>
         </div>
-      </Shell>
+      </PlatformScreen>
     );
   if (doc === null)
     return (
-      <Shell brand={DEEPLY_BRAND} route={route} nav={<PlatformNav route={route} />}>
-        <NotFound what="course" back="#/" />
-      </Shell>
+      <PlatformScreen>
+        <NotFound what="course" back="/" />
+      </PlatformScreen>
     );
   const course = fromGenerated(doc, DEEPLY_BRAND);
   if (doc.course.status === 'failed' && !course.modules.some((courseModule) => courseModule.status === 'ready')) {
     return (
-      <Shell brand={DEEPLY_BRAND} route={route} nav={<PlatformNav route={route} />}>
+      <PlatformScreen>
         <div className="page-head">
           <div className="eyebrow">Generation failed</div>
           <h1>{course.title}</h1>
           <p className="lede">{doc.course.error ?? 'Something went wrong while writing this course.'}</p>
         </div>
-      </Shell>
+      </PlatformScreen>
     );
   }
-  return <CourseRoutes course={course} route={route} sub={sub} />;
+  return <CourseRoutes course={course} section={section} />;
 }
 
-export function App() {
-  const path = useRoute();
-  const route = parse(path);
+function GeneratedCourseScreen({ slug, section }: { slug: string; section?: CourseSection }) {
   const client = useConvexClient();
-  useReveal(path);
+  const route = usePathname();
+  if (!client)
+    return (
+      <PlatformMessage
+        title="Community courses need the Deeply backend."
+        lede="This copy of the app isn't connected to one."
+      />
+    );
+  return (
+    <ErrorBoundary
+      resetKey={route}
+      fallback={
+        <PlatformMessage
+          title="Couldn't load this course."
+          lede="The course service isn't available right now. Try again in a minute."
+        />
+      }
+    >
+      <GeneratedCourse slug={slug} section={section} />
+    </ErrorBoundary>
+  );
+}
 
+function BuiltinCourseScreen({ courseID, section }: { courseID: string; section?: CourseSection }) {
+  const course = builtinCourses.find((candidate) => candidate.id === courseID);
+  if (!course) return <NotFoundScreen />;
+  return <CourseRoutes course={fromBuiltin(course)} section={section} />;
+}
+
+export function PlatformScreen({ children }: { children: React.ReactNode }) {
+  return (
+    <Shell brand={DEEPLY_BRAND} nav={<PlatformNav />}>
+      {children}
+    </Shell>
+  );
+}
+
+export function NotFoundScreen() {
+  return (
+    <PlatformScreen>
+      <NotFound what="page" back="/" />
+    </PlatformScreen>
+  );
+}
+
+export function CourseScreen({
+  source,
+  courseID,
+  section
+}: {
+  source: CourseSource;
+  courseID: string;
+  section?: CourseSection;
+}) {
+  if (source === 'g') return <GeneratedCourseScreen slug={courseID} section={section} />;
+  return <BuiltinCourseScreen courseID={courseID} section={section} />;
+}
+
+export function AppEffects() {
+  const route = usePathname();
+  const client = useConvexClient();
+  useReveal(route);
+  useEffect(() => redirectLegacyHashURL(), []);
+  useEffect(() => trackPageView(route), [route]);
   useEffect(() => {
     registerSimplifier(
       client ? (args) => client.action(anyApi.simplify.simplify, args) as Promise<SimplifyResult> : null,
       { onAuth: () => openSignIn('Sign in to simplify explanations.') }
     );
   }, [client]);
-
-  if (route.page === 'course' && route.source === 'c') {
-    const course = builtinCourses.find((candidate) => candidate.id === route.id);
-    if (course) return <CourseRoutes course={fromBuiltin(course)} route={path} sub={route.sub} />;
-  }
-  if (route.page === 'course' && route.source === 'g') {
-    if (!client) {
-      return (
-        <Shell brand={DEEPLY_BRAND} route={path} nav={<PlatformNav route={path} />}>
-          <div className="page-head">
-            <h1>Community courses need the Deeply backend.</h1>
-            <p className="lede">This copy of the app isn't connected to one.</p>
-          </div>
-        </Shell>
-      );
-    }
-    return (
-      <ErrorBoundary
-        resetKey={path}
-        fallback={
-          <Shell brand={DEEPLY_BRAND} route={path} nav={<PlatformNav route={path} />}>
-            <div className="page-head">
-              <h1>Couldn't load this course.</h1>
-              <p className="lede">The course service isn't available right now. Try again in a minute.</p>
-            </div>
-          </Shell>
-        }
-      >
-        <GeneratedCourse slug={route.id} route={path} sub={route.sub} />
-      </ErrorBoundary>
-    );
-  }
-  let page: React.ReactNode;
-  if (route.page === 'home') page = <PlatformHome />;
-  else if (route.page === 'create') page = <CreatePage />;
-  else if (route.page === 'account') page = <AccountPage />;
-  else page = <NotFound what="page" back="#/" />;
-  return (
-    <Shell brand={DEEPLY_BRAND} route={path} nav={<PlatformNav route={path} />}>
-      {page}
-    </Shell>
-  );
+  return null;
 }

@@ -4,3 +4,4 @@ dist
 .farm
 .convex
 *.log
+.vercel
