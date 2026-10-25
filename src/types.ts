@@ -60,3 +60,97 @@ export interface CourseRouteParams {
   module?: string;
   page?: string;
 }
+
+export interface FlowNode {
+  id: string;
+  label: string;
+  sub?: string;
+  x: number;
+  y: number;
+  w?: number;
+  h?: number;
+  tone?: 'yellow' | 'red' | 'purple' | 'plain';
+  code?: string[];
+}
+
+export interface FlowEdge {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+  code?: string[];
+}
+
+export interface FlowStep {
+  title: string;
+  text: string;
+  nodes?: string[];
+  edges?: string[];
+}
+
+export type FlowSide = 'left' | 'right' | 'top' | 'bottom';
+
+export type FlowLabelAnchor = 'start' | 'middle' | 'end';
+
+export interface FlowPoint {
+  x: number;
+  y: number;
+}
+
+export interface FlowSegment {
+  start: FlowPoint;
+  end: FlowPoint;
+}
+
+export interface FlowBox {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+export interface FlowNodeBox extends FlowBox {
+  centerX: number;
+  centerY: number;
+}
+
+export interface FlowBounds {
+  width: number;
+  height: number;
+}
+
+export interface FlowRouteCandidate {
+  startSide: FlowSide;
+  endSide: FlowSide;
+  shape: 'elbow' | 'channel';
+  channel: number;
+  startOffset: number;
+  endOffset: number;
+}
+
+export interface FlowPortRequest {
+  key: string;
+  side: FlowSide;
+  farBox: FlowNodeBox;
+  baseOffset: number;
+  order: number;
+}
+
+export interface FlowLabelPlacement {
+  x: number;
+  y: number;
+  anchor: FlowLabelAnchor;
+  lines: string[];
+}
+
+export interface FlowLabelCandidate {
+  placement: FlowLabelPlacement;
+  box: FlowBox;
+  baseCost: number;
+}
+
+export interface RoutedFlowEdge {
+  edge: FlowEdge;
+  path: string;
+  label: FlowLabelPlacement | null;
+}

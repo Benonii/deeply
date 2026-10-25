@@ -269,7 +269,7 @@ export const sendAndCount = mutation({
         edges={[
           { id: 'a-snap', from: 'a', to: 'snap', label: 'read event', code: ['db.readSet', 'db.indexRange'] },
           { id: 'b-snap', from: 'b', to: 'snap', label: 'read event', code: ['db.readSet', 'db.indexRange'] },
-          { id: 'a-com', from: 'a', to: 'com', label: 'commit', curve: -0.15, code: ['db.committer', 'db.writes'] },
+          { id: 'a-com', from: 'a', to: 'com', label: 'commit', code: ['db.committer', 'db.writes'] },
           {
             id: 'com-log',
             from: 'com',
@@ -277,7 +277,7 @@ export const sendAndCount = mutation({
             label: 'apply ts=510',
             code: ['db.publish', 'persistence.sqliteWrite']
           },
-          { id: 'b-com', from: 'b', to: 'com', label: 'commit', curve: 0.15, code: ['db.committer', 'db.occ'] },
+          { id: 'b-com', from: 'b', to: 'com', label: 'commit', code: ['db.committer', 'db.occ'] },
           {
             id: 'com-retry',
             from: 'com',

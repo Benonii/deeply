@@ -21,7 +21,6 @@ export const FlowEdge = z.object({
   from: z.string(),
   to: z.string(),
   label: z.string().optional().describe('<= 3 words'),
-  curve: z.number().optional(),
   code: z.array(z.string()).optional()
 });
 

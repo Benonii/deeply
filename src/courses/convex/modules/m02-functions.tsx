@@ -383,7 +383,6 @@ export const summarize = action({
             from: 'm2',
             to: 'q',
             label: 'invalidate',
-            curve: -0.15,
             code: ['db.subscriptionMatch', 'sync.transition']
           },
           {
@@ -391,7 +390,6 @@ export const summarize = action({
             from: 'm1',
             to: 'q',
             label: 'pending',
-            curve: 0.15,
             code: ['db.subscriptionMatch', 'sync.transition']
           }
         ]}

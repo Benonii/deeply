@@ -290,7 +290,7 @@ export class OpORSet<T> {
           { id: 'e2', from: 'op', to: 'r2' },
           { id: 'e3', from: 'r3', to: 'sv', label: 'what I have' },
           { id: 'e4', from: 'sv', to: 'diff' },
-          { id: 'e5', from: 'diff', to: 'r3', label: 'catch up', curve: 0.2 }
+          { id: 'e5', from: 'diff', to: 'r3', label: 'catch up' }
         ],
         steps: [
           {

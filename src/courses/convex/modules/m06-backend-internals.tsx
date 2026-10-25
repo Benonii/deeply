@@ -275,7 +275,6 @@ export const summarize = action({
             from: 'sub',
             to: 'ws',
             label: 'Response + Transitions',
-            curve: -0.15,
             code: ['sync.transition', 'sync.mutation']
           }
         ]}

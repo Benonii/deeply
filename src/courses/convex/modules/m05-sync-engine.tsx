@@ -332,7 +332,6 @@ function Channel({ id }: { id: Id<"channels"> }) {
             from: 'sw',
             to: 'sub',
             label: 'subscribe(read set)',
-            curve: -0.1,
             code: ['db.subscriptions', 'db.readSet']
           },
           {
@@ -340,7 +339,6 @@ function Channel({ id }: { id: Id<"channels"> }) {
             from: 'sw',
             to: 'cli',
             label: 'Transition v7→v8',
-            curve: 0.25,
             code: ['sync.transition', 'client.protocolServer', 'client.remoteQuerySet']
           },
           {
@@ -348,7 +346,6 @@ function Channel({ id }: { id: Id<"channels"> }) {
             from: 'cli',
             to: 'cmp',
             label: 're-render',
-            curve: 0.25,
             code: ['client.notifyQueryResults', 'client.useSubscription']
           }
         ]}
@@ -492,7 +489,6 @@ function Channel({ id }: { id: Id<"channels"> }) {
             from: 'fr',
             to: 'a',
             label: 'Transition (QueryUpdated)',
-            curve: 0,
             code: ['sync.transition', 'client.remoteQuerySet']
           },
           {
@@ -500,7 +496,6 @@ function Channel({ id }: { id: Id<"channels"> }) {
             from: 'com',
             to: 'b',
             label: 'MutationResponse ts=900',
-            curve: 0.3,
             code: ['sync.mutation', 'client.requestManager', 'client.protocolServer']
           }
         ]}
@@ -734,7 +729,6 @@ const send = useMutation(api.messages.send).withOptimisticUpdate(
             from: 'opt',
             to: 'ui',
             label: 'instant render',
-            curve: 0.2,
             code: ['client.notifyQueryResults', 'client.optimistic']
           },
           { id: 'ui-ws', from: 'opt', to: 'ws', label: 'send', code: ['client.enqueueMutation', 'client.protocol'] },
@@ -744,7 +738,6 @@ const send = useMutation(api.messages.send).withOptimisticUpdate(
             from: 'be',
             to: 'ws',
             label: 'Response + Transition',
-            curve: 0.25,
             code: ['client.requestManager', 'sync.transition', 'client.protocolServer']
           },
           {
@@ -759,7 +752,6 @@ const send = useMutation(api.messages.send).withOptimisticUpdate(
             from: 'srv',
             to: 'ui',
             label: 'authoritative',
-            curve: -0.2,
             code: ['client.notifyQueryResults', 'client.optimistic']
           }
         ]}
