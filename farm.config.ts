@@ -1,31 +1,24 @@
-import { defineConfig } from '@farmfe/core';
-import fs from 'node:fs';
+import { betterAuth } from '@farm.js/better-auth';
+import { convex } from '@farm.js/convex';
+import { convexBetterAuth } from '@farm.js/convex/better-auth';
+import { defineConfig } from '@farm.js/core';
 
-// Read .env.local (written by `npx convex dev`) so CONVEX_URL works locally;
-// in CI the variable comes from the environment (`npx convex deploy --cmd`).
-function readEnvFile(file: string): Record<string, string> {
-  if (!fs.existsSync(file)) return {};
-  return Object.fromEntries(
-    fs
-      .readFileSync(file, 'utf8')
-      .split('\n')
-      .map((l) => l.match(/^\s*([A-Z0-9_]+)\s*=\s*"?([^"#\n]*)"?/))
-      .filter((m): m is RegExpMatchArray => !!m)
-      .map((m) => [m[1], m[2].trim()])
-  );
-}
-const env = { ...readEnvFile('.env.local'), ...process.env };
-const convexUrl = env.FARM_CONVEX_URL || env.CONVEX_URL || env.VITE_CONVEX_URL || '';
+const readOptionalValue = (value: string | undefined) => value ?? '';
+
+const auth = convexBetterAuth();
 
 export default defineConfig({
-  compilation: {
-    input: { index: './index.html' },
-    output: { path: 'dist', publicPath: '/' },
-    sourcemap: false,
-    define: {
-      'process.env.FARM_CONVEX_URL': JSON.stringify(convexUrl),
-      'process.env.FARM_GA_MEASUREMENT_ID': JSON.stringify(env.FARM_GA_MEASUREMENT_ID ?? '')
+  env: {
+    public: {
+      CONVEX_URL: readOptionalValue,
+      FARM_GA_MEASUREMENT_ID: readOptionalValue
     }
   },
-  plugins: ['@farmfe/plugin-react']
+  integrations: {
+    convex: convex({
+      token: auth.token,
+      provider: { module: '@/platform/convexClient', export: 'ConvexClientProvider' }
+    }),
+    auth: betterAuth({ instance: auth })
+  }
 });

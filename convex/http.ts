@@ -9,7 +9,7 @@ import type { HttpActionInternals } from './lib/types';
 
 const http = httpRouter();
 
-authComponent.registerRoutes(http, createAuth, { cors: true });
+authComponent.registerRoutes(http, createAuth);
 
 let polarHandler: PublicHttpAction | undefined;
 const capturePolarRoute = {

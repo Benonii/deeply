@@ -1,3 +1,4 @@
+import { Link } from '@farm.js/core/client';
 import { buildPrompt, CopyBtn, ModuleCtx } from '../engine/kit';
 import { PackChallenges } from '../engine/PackChallenges';
 import { PackModule } from '../engine/PackModule';
@@ -24,10 +25,10 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
   const pages = coursePages(course);
   return (
     <>
-      <a href={`#${course.base}`} className="side-course">
+      <Link href={course.base} className="side-course">
         <span className="side-course-kicker">Course</span>
         <span className="side-course-title">{course.title}</span>
-      </a>
+      </Link>
       <div className="side-progress">
         <div className="bar">
           <span style={{ width: `${(done / Math.max(1, course.modules.length)) * 100}%` }} />
@@ -42,9 +43,9 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
           const href = `${course.base}/m/${courseModule.id}`;
           const ready = courseModule.status === 'ready';
           return (
-            <a
+            <Link
               key={courseModule.id}
-              href={`#${href}`}
+              href={href}
               className={`nav-item ${route === href ? 'on' : ''} ${progress.done[courseModule.id] ? 'done' : ''} ${ready ? '' : 'pending'}`}
               aria-disabled={!ready}
             >
@@ -53,18 +54,18 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
               <span className="nav-min">
                 {ready ? `${courseModule.minutes}m` : courseModule.status === 'failed' ? 'failed' : 'writing'}
               </span>
-            </a>
+            </Link>
           );
         })}
         {pages.length > 0 && <div className="nav-label">Practice</div>}
         {pages.map((page) => {
           const href = `${course.base}/p/${page.id}`;
           return (
-            <a key={page.id} href={`#${href}`} className={`nav-item ${route.startsWith(href) ? 'on' : ''}`}>
+            <Link key={page.id} href={href} className={`nav-item ${route.startsWith(href) ? 'on' : ''}`}>
               <span className="nav-n">▸</span>
               <span className="nav-t">{page.label}</span>
               {page.badge && <span className="nav-min">{page.badge}</span>}
-            </a>
+            </Link>
           );
         })}
       </nav>
@@ -103,14 +104,14 @@ export function CourseHome({ course }: { course: ShellCourse }) {
           {course.summary && <p className="lede">{course.summary}</p>}
           <div className="hero-cta">
             {next && (
-              <a className="btn primary" href={`#${course.base}/m/${next.id}`}>
+              <Link className="btn primary" href={`${course.base}/m/${next.id}`}>
                 {Object.keys(progress.done).length ? 'Continue' : 'Start'}: {next.title} →
-              </a>
+              </Link>
             )}
             {pages[0] && (
-              <a className="btn ghost" href={`#${course.base}/p/${pages[0].id}`}>
+              <Link className="btn ghost" href={`${course.base}/p/${pages[0].id}`}>
                 {pages[0].label}
-              </a>
+              </Link>
             )}
           </div>
           {course.generating && (
@@ -159,7 +160,7 @@ export function CourseHome({ course }: { course: ShellCourse }) {
           return (
             <Tag
               key={courseModule.id}
-              {...(ok ? { href: `#${course.base}/m/${courseModule.id}` } : {})}
+              {...(ok ? { href: `${course.base}/m/${courseModule.id}` } : {})}
               className={`mod-card reveal ${progress.done[courseModule.id] ? 'done' : ''} ${ok ? '' : 'pending'}`}
               style={{ transitionDelay: `${index * 40}ms` }}
             >
@@ -192,14 +193,14 @@ export function CourseHome({ course }: { course: ShellCourse }) {
           );
         })}
         {pages.map((page) => (
-          <a key={page.id} href={`#${course.base}/p/${page.id}`} className="mod-card reveal">
+          <Link key={page.id} href={`${course.base}/p/${page.id}`} className="mod-card reveal">
             <div className="mod-n">▸</div>
             <div className="mod-body">
               <div className="mod-kicker">Practice</div>
               <div className="mod-title">{page.label}</div>
             </div>
             <div className="mod-state">→</div>
-          </a>
+          </Link>
         ))}
       </section>
     </div>
@@ -260,21 +261,21 @@ export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId
               {progress.done[courseModule.id] ? '✓ Completed' : 'Mark module complete'}
             </button>
             {next ? (
-              <a
+              <Link
                 className="btn ghost"
-                href={`#${course.base}/m/${next.id}`}
+                href={`${course.base}/m/${next.id}`}
                 onClick={() => markModule(courseModule.id, true)}
               >
                 Next: {next.title} →
-              </a>
+              </Link>
             ) : pages[0] ? (
-              <a
+              <Link
                 className="btn ghost"
-                href={`#${course.base}/p/${pages[0].id}`}
+                href={`${course.base}/p/${pages[0].id}`}
                 onClick={() => markModule(courseModule.id, true)}
               >
                 Go to {pages[0].label.toLowerCase()} →
-              </a>
+              </Link>
             ) : null}
           </div>
         </footer>
@@ -299,7 +300,7 @@ export function NotFound({ what, back }: { what: string; back: string }) {
       <div className="eyebrow">Not found</div>
       <h1>That {what} doesn't exist.</h1>
       <p className="lede">
-        <a href={back}>Go back</a>
+        <Link href={back}>Go back</Link>
       </p>
     </div>
   );

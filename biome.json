@@ -1,7 +1,15 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["src/**", "convex/**", "scripts/**", "*.ts", "!convex/_generated", "!src/courses/convex/code"]
+    "includes": [
+      "src/**",
+      "convex/**",
+      "scripts/**",
+      "*.ts",
+      "!convex/_generated",
+      "!src/courses/convex/code",
+      "!src/farm.d.ts"
+    ]
   },
   "formatter": {
     "indentStyle": "space",

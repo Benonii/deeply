@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
+import { Link } from '@farm.js/core/client';
 import type { Brand } from '../../convex/lib/courseSchema';
 import { builtinCourses } from '../courses';
 import { useProgress } from '../engine/progress';
@@ -38,7 +39,7 @@ function CourseCard({ card: c }: { card: CardData }) {
   useBrandFonts(c.brand);
   const [head, ...rest] = c.title.split(', ');
   return (
-    <a className="cc reveal" href={c.href} style={{ '--cc-accent': c.brand.colors.accent } as React.CSSProperties}>
+    <Link className="cc reveal" href={c.href} style={{ '--cc-accent': c.brand.colors.accent } as React.CSSProperties}>
       <div className="cc-top">
         {c.logo ? (
           <span className="cc-logo" dangerouslySetInnerHTML={{ __html: c.logo }} />
@@ -70,7 +71,7 @@ function CourseCard({ card: c }: { card: CardData }) {
         )}
         <span className="cc-go">→</span>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -80,7 +81,7 @@ function CommunityCourses() {
   if (!list.length)
     return (
       <p className="muted">
-        No community courses yet. <a href="#/create">Create the first one.</a>
+        No community courses yet. <Link href="/create">Create the first one.</Link>
       </p>
     );
   return (
@@ -89,7 +90,7 @@ function CommunityCourses() {
         <CourseCard
           key={publicCourse.slug}
           card={{
-            href: `#/g/${publicCourse.slug}`,
+            href: `/g/${publicCourse.slug}`,
             title: publicCourse.title,
             tagline: publicCourse.tagline,
             brand: sanitizeBrand(publicCourse.brand),
@@ -109,7 +110,7 @@ export function PlatformHome() {
   const cards: CardData[] = builtinCourses.map((builtinCourse) => {
     const course = fromBuiltin(builtinCourse);
     return {
-      href: `#${course.base}`,
+      href: `${course.base}`,
       title: course.title,
       tagline: course.tagline,
       brand: course.brand,
@@ -136,9 +137,9 @@ export function PlatformHome() {
             behind them, challenges that test you, and a Simplify button for whenever the explanation gets too dense.
           </p>
           <div className="hero-cta">
-            <a className="btn primary" href="#/create">
+            <Link className="btn primary" href="/create">
               Create a course →
-            </a>
+            </Link>
             <a
               className="btn ghost"
               href="#catalog"

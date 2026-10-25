@@ -1,17 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ConvexReactClient, useMutation, useQuery } from 'convex/react';
+import { ConvexProvider, ConvexReactClient, useMutation, useQuery } from 'convex/react';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
+import { getPublicEnv } from '@farm.js/core/env';
+import { readConvexReactClient } from '@farm.js/convex/client';
 import { makeAuthClient, setAuthClient } from '../lib/authClient';
 import { AccountHost } from '../account/host';
 import { anyApi } from 'convex/server';
 import { getProgress, setProgress, useProgress } from '../engine/progress';
+import { useIsMounted } from '../lib/hooks';
 import type { WireTappedWebSocket } from '../types';
 
 export const api = anyApi;
 
 const URL_KEY = 'convex-academy-url';
 export function getConvexUrl(): string | undefined {
-  const env = process.env.FARM_CONVEX_URL;
+  const env = getPublicEnv('CONVEX_URL');
   let stored: string | null = null;
   try {
     stored = localStorage.getItem(URL_KEY);
@@ -120,28 +123,51 @@ function ProgressSync() {
   return null;
 }
 
-export function ConvexClientProvider({ children }: { children: React.ReactNode }) {
-  const url = getConvexUrl();
-  const setup = useMemo(() => {
-    if (!url) return null;
+function ConnectedProviders({ children }: { children?: React.ReactNode }) {
+  return (
+    <>
+      <ProgressSync />
+      <AccountHost />
+      {children}
+    </>
+  );
+}
+
+function LabConvexProvider({ url, children }: { url: string; children?: React.ReactNode }) {
+  const client = useMemo(() => {
     installWireTap();
-    try {
-      const client = new ConvexReactClient(url);
-      const authClient = makeAuthClient(url);
-      setAuthClient(authClient);
-      return { client, authClient };
-    } catch {
-      return null;
-    }
+    setAuthClient(null);
+    return new ConvexReactClient(url);
   }, [url]);
-  if (!setup) return <ConnectedCtx.Provider value={null}>{children}</ConnectedCtx.Provider>;
+  return (
+    <ConvexProvider client={client}>
+      <ConnectedCtx.Provider value={client}>
+        <ConnectedProviders>{children}</ConnectedProviders>
+      </ConnectedCtx.Provider>
+    </ConvexProvider>
+  );
+}
+
+function DeploymentConvexProvider({ url, children }: { url: string; children?: React.ReactNode }) {
+  const setup = useMemo(() => {
+    installWireTap();
+    const authClient = makeAuthClient();
+    setAuthClient(authClient);
+    return { client: readConvexReactClient(url), authClient };
+  }, [url]);
   return (
     <ConvexBetterAuthProvider client={setup.client} authClient={setup.authClient}>
       <ConnectedCtx.Provider value={setup.client}>
-        <ProgressSync />
-        <AccountHost />
-        {children}
+        <ConnectedProviders>{children}</ConnectedProviders>
       </ConnectedCtx.Provider>
     </ConvexBetterAuthProvider>
   );
+}
+
+export function ConvexClientProvider({ url, children }: { url: string; children?: React.ReactNode }) {
+  const isMounted = useIsMounted();
+  if (!isMounted) return <ConnectedCtx.Provider value={null}>{children}</ConnectedCtx.Provider>;
+  const activeURL = getConvexUrl() ?? url;
+  if (activeURL !== url) return <LabConvexProvider url={activeURL}>{children}</LabConvexProvider>;
+  return <DeploymentConvexProvider url={url}>{children}</DeploymentConvexProvider>;
 }

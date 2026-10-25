@@ -68,7 +68,7 @@ export const checkout = action({
     const limit = await rateLimiter.limit(context, 'checkout', { key: user._id });
     if (!limit.ok) return { error: 'Too many checkout attempts. Try again in a few minutes.' };
     const site = process.env.SITE_URL ?? new URL(returnUrl).origin;
-    const success = returnUrl.startsWith(site) ? returnUrl : `${site}/#/account?purchase=success`;
+    const success = returnUrl.startsWith(site) ? returnUrl : `${site}/account?purchase=success`;
     try {
       const session = await polar.createCheckoutSession(context, {
         productIds: [productId],
