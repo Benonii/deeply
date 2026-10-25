@@ -7,13 +7,15 @@ import '../engine/styles.css';
 
 import type { LayoutProps } from '@farm.js/core';
 
-export const RootLayout = ({ children }: LayoutProps) => {
+// Farm calls the root layout outside a render to see if it renders <html>, so it can't use hooks.
+function MountedAppEffects() {
   const isMounted = useIsMounted();
-  if (!isMounted) return children;
-  return (
-    <>
-      <AppEffects />
-      {children}
-    </>
-  );
-};
+  return isMounted ? <AppEffects /> : null;
+}
+
+export const RootLayout = ({ children }: LayoutProps) => (
+  <>
+    <MountedAppEffects />
+    {children}
+  </>
+);
