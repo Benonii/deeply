@@ -7,15 +7,18 @@ import { Inline } from './md';
 
 import type { FlowEdge, FlowNode, FlowStep } from '../types';
 
-export const ModuleCtx = createContext<{ title: string; course?: string }>({ title: 'Deeply' });
+export const ModuleCtx = createContext<{ title: string; course?: string; subject: string }>({
+  title: 'Deeply',
+  subject: 'this topic'
+});
 
 function useBlockSimplify(label: string, getText: () => string) {
   const courseModule = useContext(ModuleCtx);
   return useSimplify(getText, () => [courseModule.course, courseModule.title, label].filter(Boolean).join(' › '));
 }
 
-export function buildPrompt(path: string[], body: string) {
-  return `I'm studying Convex. Explain this part in more depth, check my understanding, and give me an example:\n\n[${path.join(' › ')}]\n\n${body.trim()}\n`;
+export function buildPrompt(subject: string, path: string[], body: string) {
+  return `I'm studying ${subject}. Explain this part in more depth, check my understanding, and give me an example:\n\n[${path.join(' › ')}]\n\n${body.trim()}\n`;
 }
 
 type CodeReq = { ids: string[]; context: string };
@@ -109,7 +112,11 @@ export function Copyable({
     <div className={`copyable ${className} ${simp.state.kind !== 'idle' ? 'is-simplified' : ''}`} ref={ref}>
       <div className="copyable-bar">
         <SimplifyMenu onPick={simp.run} busy={simp.state.kind === 'loading'} />
-        <CopyBtn get={() => buildPrompt([courseModule.title, label], body() + (extra ? `\n\n${extra}` : ''))} />
+        <CopyBtn
+          get={() =>
+            buildPrompt(courseModule.subject, [courseModule.title, label], body() + (extra ? `\n\n${extra}` : ''))
+          }
+        />
       </div>
       <div className="copyable-body">{children}</div>
       <SimplifiedView state={simp.state} onClose={simp.clear} onLevel={simp.run} />
@@ -128,7 +135,10 @@ export function Section({ id, title, children }: { id: string; title: string; ch
         <h2>{title}</h2>
         <span className="section-actions">
           <SimplifyMenu onPick={simp.run} busy={simp.state.kind === 'loading'} />
-          <CopyBtn label="Copy section" get={() => buildPrompt([courseModule.title, title], text())} />
+          <CopyBtn
+            label="Copy section"
+            get={() => buildPrompt(courseModule.subject, [courseModule.title, title], text())}
+          />
         </span>
       </header>
       <SimplifiedView state={simp.state} onClose={simp.clear} onLevel={simp.run} />
@@ -298,6 +308,7 @@ export function Code({
             label="Ask"
             get={() =>
               buildPrompt(
+                courseModule.subject,
                 [courseModule.title, title ?? 'code'],
                 'Walk me through this code line by line and what happens under the hood:\n\n```' +
                   lang +
@@ -371,7 +382,10 @@ export function Flow({
         </div>
         <span className="section-actions">
           <SimplifyMenu onPick={simp.run} busy={simp.state.kind === 'loading'} />
-          <CopyBtn label="Copy diagram" get={() => buildPrompt([courseModule.title, title], describe())} />
+          <CopyBtn
+            label="Copy diagram"
+            get={() => buildPrompt(courseModule.subject, [courseModule.title, title], describe())}
+          />
         </span>
       </figcaption>
       <SimplifiedView state={simp.state} onClose={simp.clear} onLevel={simp.run} />
@@ -555,8 +569,8 @@ export function Flow({
       </div>
       {(nodes.some((node) => node.code?.length) || edges.some((edge) => edge.code?.length)) && (
         <div className="flow-caption code-hint">
-          <span className="code-mark">{'</>'}</span> Click a marked box or arrow to read the real Convex source behind
-          it.
+          <span className="code-mark">{'</>'}</span> Click a marked box or arrow to read the real {courseModule.subject}{' '}
+          source behind it.
         </div>
       )}
       {caption && <div className="flow-caption">{caption}</div>}
@@ -594,7 +608,10 @@ export function Diagram({
         </div>
         <span className="section-actions">
           <SimplifyMenu onPick={simp.run} busy={simp.state.kind === 'loading'} />
-          <CopyBtn label="Copy diagram" get={() => buildPrompt([courseModule.title, title], describe)} />
+          <CopyBtn
+            label="Copy diagram"
+            get={() => buildPrompt(courseModule.subject, [courseModule.title, title], describe)}
+          />
         </span>
       </figcaption>
       <SimplifiedView state={simp.state} onClose={simp.clear} onLevel={simp.run} />
@@ -635,6 +652,7 @@ export function Check({
           <CopyBtn
             get={() =>
               buildPrompt(
+                courseModule.subject,
                 [courseModule.title, 'Quick check'],
                 `Question: ${q}\nOptions:\n${options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}\n${pick !== null ? `I picked ${String.fromCharCode(65 + pick)}. Correct is ${String.fromCharCode(65 + answer)}.` : ''}\nExplanation given: ${explain}\nWhy is that right, and why are the others wrong?`
               )

@@ -85,10 +85,12 @@ function RefView({ codeRef: r, context }: { codeRef: CodeRef; context: string })
     });
   }, [lines, r.startLine, r.endLine]);
   const notes = new Map((r.notes ?? []).map((note) => [note.line, note.text]));
+  const repoName = r.repo.includes('/') ? r.repo : `get-convex/${r.repo}`;
   const prompt = () =>
     buildPrompt(
-      ['Convex source', context, r.symbol],
-      `This is real code from ${r.repo.includes('/') ? r.repo : `get-convex/${r.repo}`} (${r.path}, lines ${r.startLine}-${r.endLine}). In the course it is: ${r.summary}\n\nWalk me through it line by line, explain how it connects to the rest of the system, and what would break if it were written differently.\n\n\`\`\`${r.lang}\n${r.code}\n\`\`\``
+      repoName,
+      [`${repoName} source`, context, r.symbol],
+      `This is real code from ${repoName} (${r.path}, lines ${r.startLine}-${r.endLine}). In the course it is: ${r.summary}\n\nWalk me through it line by line, explain how it connects to the rest of the system, and what would break if it were written differently.\n\n\`\`\`${r.lang}\n${r.code}\n\`\`\``
     );
   return (
     <>

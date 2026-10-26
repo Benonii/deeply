@@ -83,7 +83,7 @@ export function OptimisticSim() {
         </div>
         <CopyBtn
           label="Copy state"
-          get={() => buildPrompt(['Playground', 'Optimistic update simulator'], stateText())}
+          get={() => buildPrompt('Convex', ['Playground', 'Optimistic update simulator'], stateText())}
         />
       </div>
       <div className="pg-toolbar">

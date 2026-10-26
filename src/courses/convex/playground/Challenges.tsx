@@ -21,6 +21,7 @@ function ChoiceCard({ c, solved, onSolve }: { c: ChoiceChallenge; solved: boolea
   const [pick, setPick] = useState<number | null>(null);
   const copy = () =>
     buildPrompt(
+      'Convex',
       ['Playground', 'Challenge', c.title],
       `${c.q}\n${c.code ? `\n\`\`\`ts\n${c.code}\n\`\`\`\n` : ''}\nOptions:\n${c.options.map((o, k) => `${L(k)}. ${o}`).join('\n')}\n\n${pick !== null ? `My answer: ${L(pick)} (${pick === c.answer ? 'correct' : `wrong — correct is ${L(c.answer)}`}).` : 'I have not answered yet — give me a hint first, not the answer.'}\nExplanation shown: ${pick !== null ? c.explain : '(hidden)'}\n\nExplain the underlying Convex mechanism and why each wrong option is wrong.`
     );
@@ -72,6 +73,7 @@ function OrderCard({ c, solved, onSolve }: { c: OrderChallenge; solved: boolean;
   const correct = done && seq.every((v, k) => v === k);
   const copy = () =>
     buildPrompt(
+      'Convex',
       ['Playground', 'Ordering challenge', c.title],
       `${c.q}\nCorrect order:\n${c.items.map((x, k) => `${k + 1}. ${x}`).join('\n')}\n\nMy order:\n${seq.map((i, k) => `${k + 1}. ${c.items[i]}`).join('\n') || '(none yet)'}\n\nExplain why each step must happen in this order, and what component of Convex performs it.`
     );

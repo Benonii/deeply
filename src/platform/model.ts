@@ -22,6 +22,7 @@ export type ShellCourse = {
   base: string;
   id: string;
   title: string;
+  subject: string;
   tagline: string;
   summary: string;
   kind: 'concept' | 'repo';
@@ -40,12 +41,17 @@ function registerPackRefs(refs: Record<string, unknown> | undefined) {
   if (refs) registerRefs(refs as Record<string, CodeRef>);
 }
 
+function readCourseSubject(title: string): string {
+  return title.replace(/,\s*Deeply$/, '');
+}
+
 export function fromBuiltin(course: BuiltinCourse): ShellCourse {
   if (course.format === 'pack') registerPackRefs(course.pack.codeRefs);
   const base = {
     base: `/c/${course.id}`,
     id: course.id,
     title: course.title,
+    subject: readCourseSubject(course.title),
     tagline: course.tagline,
     summary: course.summary,
     kind: course.kind,
@@ -76,6 +82,7 @@ export type GeneratedCourseDoc = {
     status: string;
     topic: string;
     kind: 'concept' | 'repo';
+    repo?: { owner: string; name: string } | null;
     meta?: GeneratedCourseMeta;
     error?: string;
   };
@@ -95,6 +102,7 @@ export function fromGenerated(doc: GeneratedCourseDoc, fallbackBrand: Brand): Sh
     base: `/g/${doc.course.slug}`,
     id: `g-${doc.course.slug}`,
     title: meta.title ?? doc.course.topic,
+    subject: doc.course.repo?.name ?? readCourseSubject(meta.title ?? doc.course.topic),
     tagline: meta.tagline ?? '',
     summary: meta.summary ?? '',
     kind: doc.course.kind,
