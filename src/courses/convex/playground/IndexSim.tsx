@@ -154,7 +154,7 @@ export function IndexSim() {
             <i>after</i> reading them. The scanned range — not the returned rows — is the read set.
           </p>
         </div>
-        <CopyBtn label="Copy state" get={() => buildPrompt(['Playground', 'Index simulator'], stateText())} />
+        <CopyBtn label="Copy state" get={() => buildPrompt('Convex', ['Playground', 'Index simulator'], stateText())} />
       </div>
 
       <div className="pg-toolbar">

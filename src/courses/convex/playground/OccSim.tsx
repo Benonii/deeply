@@ -152,7 +152,7 @@ export function OccSim() {
             automatically.
           </p>
         </div>
-        <CopyBtn label="Copy state" get={() => buildPrompt(['Playground', 'OCC simulator'], stateText())} />
+        <CopyBtn label="Copy state" get={() => buildPrompt('Convex', ['Playground', 'OCC simulator'], stateText())} />
       </div>
 
       <div className="pg-toolbar">

@@ -247,6 +247,7 @@ function Wire() {
             label="Copy log"
             get={() =>
               buildPrompt(
+                'Convex',
                 ['Live Lab', 'Wire log'],
                 'Here are real Convex WebSocket frames from my session (newest first). Explain each message, what the versions/timestamps mean, and how they relate:\n\n' +
                   list
@@ -292,6 +293,7 @@ function FrameRow({ f }: { f: ReturnType<typeof useFrames>[number] }) {
             onClick={() =>
               copyText(
                 buildPrompt(
+                  'Convex',
                   ['Live Lab', `${f.type} frame`],
                   `Explain this ${f.dir === 'up' ? 'client→server' : 'server→client'} Convex sync protocol message field by field:\n\n${pretty}`
                 )

@@ -10,16 +10,19 @@ function Card({
   challenge: c,
   solved,
   onSolve,
-  course
+  course,
+  subject
 }: {
   challenge: Challenge;
   solved: boolean;
   onSolve: () => void;
   course: string;
+  subject: string;
 }) {
   const [pick, setPick] = useState<number | null>(null);
   const copy = () =>
     buildPrompt(
+      subject,
       [course, 'Challenge', c.id],
       `${c.q}\n${c.code ? `\n\`\`\`\n${c.code}\n\`\`\`\n` : ''}\nOptions:\n${c.options.map((option, index) => `${optionLetter(index)}. ${option}`).join('\n')}\n\n${pick !== null ? `My answer: ${optionLetter(pick)} (${pick === c.answer ? 'correct' : `wrong, correct is ${optionLetter(c.answer)}`}).\nExplanation shown: ${c.explain}` : 'I have not answered yet. Give me a hint first, not the answer.'}\n\nExplain the underlying idea and why each wrong option is wrong.`
     );
@@ -70,7 +73,15 @@ function Card({
   );
 }
 
-export function PackChallenges({ challenges, course }: { challenges: Challenge[]; course: string }) {
+export function PackChallenges({
+  challenges,
+  course,
+  subject
+}: {
+  challenges: Challenge[];
+  course: string;
+  subject: string;
+}) {
   const { progress, solve } = useProgress();
   const topics = useMemo(() => [...new Set(challenges.map((challenge) => challenge.topic))], [challenges]);
   const [topic, setTopic] = useState<string | null>(null);
@@ -127,6 +138,7 @@ export function PackChallenges({ challenges, course }: { challenges: Challenge[]
             key={challenge.id}
             challenge={challenge}
             course={course}
+            subject={subject}
             solved={!!progress.challenges[challenge.id]}
             onSolve={() => solve(challenge.id)}
           />

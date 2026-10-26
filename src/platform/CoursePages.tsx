@@ -14,7 +14,7 @@ export function coursePages(course: ShellCourse) {
     pages.push({
       id: 'challenges',
       label: 'Challenges',
-      Component: () => <PackChallenges challenges={course.challenges!} course={course.title} />
+      Component: () => <PackChallenges challenges={course.challenges!} course={course.title} subject={course.subject} />
     });
   return pages;
 }
@@ -140,6 +140,7 @@ export function CourseHome({ course }: { course: ShellCourse }) {
             label="Copy the course outline"
             get={() =>
               buildPrompt(
+                course.subject,
                 [course.title, 'Course outline'],
                 course.modules
                   .map(
@@ -231,7 +232,13 @@ export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId
   const next = course.modules.slice(index + 1).find((courseModule) => courseModule.status === 'ready');
   const pages = coursePages(course);
   return (
-    <ModuleCtx.Provider value={{ title: `Module ${courseModule.n}: ${courseModule.title}`, course: course.title }}>
+    <ModuleCtx.Provider
+      value={{
+        title: `Module ${courseModule.n}: ${courseModule.title}`,
+        course: course.title,
+        subject: course.subject
+      }}
+    >
       <article className="module">
         <header className="module-head">
           <div className="module-shader" aria-hidden>
@@ -288,7 +295,7 @@ export function PageView({ course, pageId }: { course: ShellCourse; pageId: stri
   const page = coursePages(course).find((candidate) => candidate.id === pageId);
   if (!page) return <NotFound what="page" back={`#${course.base}`} />;
   return (
-    <ModuleCtx.Provider value={{ title: page.label, course: course.title }}>
+    <ModuleCtx.Provider value={{ title: page.label, course: course.title, subject: course.subject }}>
       <page.Component />
     </ModuleCtx.Provider>
   );

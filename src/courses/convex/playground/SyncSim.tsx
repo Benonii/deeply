@@ -223,7 +223,7 @@ export function SyncSim() {
             every live read set. Only overlapping queries rerun; only their clients get a Transition.
           </p>
         </div>
-        <CopyBtn label="Copy state" get={() => buildPrompt(['Playground', 'Sync simulator'], stateText())} />
+        <CopyBtn label="Copy state" get={() => buildPrompt('Convex', ['Playground', 'Sync simulator'], stateText())} />
       </div>
 
       <div className="pg-pipeline">
