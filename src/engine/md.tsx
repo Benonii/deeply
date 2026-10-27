@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { MarkdownSegment } from '../types';
+
 const INLINE = /(`[^`\n]+`)|(\*\*[^*\n]+\*\*)|(\*[^*\n]+\*)|(\[[^\]\n]+\]\((https?:\/\/[^)\s]+)\))/g;
 
 export function Inline({ text }: { text: string }) {
@@ -31,8 +33,41 @@ export function Inline({ text }: { text: string }) {
   return <>{out}</>;
 }
 
+const FENCED_CODE = /```([\w-]*)[ \t]*\n?([\s\S]*?)(?:```|$)/g;
+
+function splitFencedCode(text: string): MarkdownSegment[] {
+  const segments: MarkdownSegment[] = [];
+  let last = 0;
+  for (const match of text.matchAll(FENCED_CODE)) {
+    if (match.index > last) segments.push({ kind: 'prose', text: text.slice(last, match.index) });
+    segments.push({ kind: 'code', text: match[2].replace(/\s+$/, '') });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) segments.push({ kind: 'prose', text: text.slice(last) });
+  return segments;
+}
+
 export function Markdown({ text }: { text: string }) {
-  const blocks = text.trim().split(/\n\s*\n/);
+  return (
+    <>
+      {splitFencedCode(text).map((segment, segmentIndex) =>
+        segment.kind === 'code' ? (
+          <pre key={segmentIndex} className="md-code">
+            <code>{segment.text}</code>
+          </pre>
+        ) : (
+          <Prose key={segmentIndex} text={segment.text} />
+        )
+      )}
+    </>
+  );
+}
+
+function Prose({ text }: { text: string }) {
+  const blocks = text
+    .trim()
+    .split(/\n\s*\n/)
+    .filter((block) => block.trim());
   return (
     <>
       {blocks.map((block, blockIndex) => {

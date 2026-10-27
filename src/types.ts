@@ -154,3 +154,8 @@ export interface RoutedFlowEdge {
   path: string;
   label: FlowLabelPlacement | null;
 }
+
+export interface MarkdownSegment {
+  kind: 'prose' | 'code';
+  text: string;
+}

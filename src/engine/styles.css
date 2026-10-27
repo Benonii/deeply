@@ -1896,8 +1896,20 @@ li {
   display: inline-flex;
   gap: 10px;
 }
+.md-code {
+  margin: 12px 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--code-bg);
+  font: var(--font-size-sm) / 1.6 var(--font-mono);
+  color: var(--code-fg);
+  white-space: pre;
+}
 .simplified-text p:last-child,
-.simplified-text ul:last-child {
+.simplified-text ul:last-child,
+.simplified-text .md-code:last-child {
   margin-bottom: 0;
 }
 .simplified-msg {
