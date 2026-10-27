@@ -14,7 +14,7 @@
   --line: #262626;
   --line2: #363636;
   --ok: #7fc98a;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Lexend', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-size-2xs: 11px;
   --font-size-xs: 12px;
@@ -71,7 +71,6 @@ body {
   background: var(--bg);
   color: var(--fg);
   font: var(--font-size-base) / 1.7 var(--font-sans);
-  font-feature-settings: 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
 }
 a {
