@@ -9,9 +9,9 @@
   padding-top: 64px;
 }
 .cr-head h1 {
-  font-size: clamp(36px, 5vw, 64px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 .cr-note {
@@ -44,8 +44,8 @@
   color: var(--muted);
   padding: 7px 16px;
   border-radius: 999px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   transition:
     background 0.15s,
     color 0.15s;
@@ -59,16 +59,16 @@
   gap: 6px;
 }
 .cr-field > span {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--fg2);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .cr-field input {
   background: var(--bg);
   border: 1px solid var(--line2);
   border-radius: 10px;
   padding: 12px 14px;
-  font-size: 16px;
+  font-size: var(--font-size-base);
   color: var(--fg);
   min-width: 0;
   transition: border-color 0.15s;
@@ -89,7 +89,7 @@
   color: var(--fg2);
   border-radius: 999px;
   padding: 4px 11px;
-  font-size: 12.5px;
+  font-size: var(--font-size-xs);
   font-family: var(--font-mono);
 }
 .cr-chip:hover {
@@ -103,12 +103,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px 22px;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   color: var(--fg2);
 }
 .cr-vis legend {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   margin-bottom: 6px;
   padding: 0;
   color: var(--fg2);
@@ -141,7 +141,7 @@
   border-radius: 10px;
   border: 1px solid color-mix(in oklab, var(--accent2) 45%, var(--line));
   color: var(--fg);
-  font-size: 14.5px;
+  font-size: var(--font-size-md);
 }
 
 /* progress */
@@ -164,8 +164,8 @@
   min-width: 0;
 }
 .cr-progress h2 {
-  font-size: clamp(26px, 3.4vw, 38px);
-  font-weight: 700;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: -0.02em;
   margin: 6px 0 4px;
   text-wrap: balance;
@@ -186,7 +186,7 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
@@ -217,9 +217,9 @@
   border-bottom: none;
 }
 .cr-mod-n {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 22px;
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xl);
   color: var(--line2);
 }
 .cr-mods .m-ready .cr-mod-n {
@@ -237,11 +237,11 @@
   min-width: 0;
 }
 .cr-mod-title {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--fg);
 }
 .cr-mod-state {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--muted);
   font-family: var(--font-mono);
 }
@@ -251,16 +251,16 @@
 
 .cr-log summary {
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--fg2);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .cr-log ul {
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--font-size-xs);
   max-height: 260px;
   overflow-y: auto;
   display: grid;
@@ -286,7 +286,7 @@
 
 /* my courses */
 .cr-mine h3 {
-  font-size: 20px;
+  font-size: var(--font-size-xl);
   margin-bottom: 10px;
 }
 .cr-mine ul {
@@ -318,7 +318,7 @@
   min-width: 0;
 }
 .cr-mine-title {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 @media (max-width: 600px) {

@@ -24,11 +24,7 @@ export const DEEPLY_BRAND: Brand = {
   source: 'designed'
 };
 
-const FALLBACK = {
-  display: 'ui-sans-serif, system-ui, sans-serif',
-  body: 'ui-sans-serif, system-ui, sans-serif',
-  mono: 'ui-monospace, SFMono-Regular, Menlo, monospace'
-};
+const MONO_FALLBACK = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 
 export function brandVars(brand: Brand): React.CSSProperties {
   const colors = brand.colors;
@@ -46,30 +42,27 @@ export function brandVars(brand: Brand): React.CSSProperties {
     '--accent2': colors.accent2,
     '--accent3': colors.accent3,
     '--on-accent': colors.onAccent,
-    '--font-display': `'${brand.fonts.display}', ${FALLBACK.display}`,
-    '--font-body': `'${brand.fonts.body}', ${FALLBACK.body}`,
-    '--font-mono': `'${brand.fonts.mono}', ${FALLBACK.mono}`
+    '--font-mono': `'${brand.fonts.mono}', ${MONO_FALLBACK}`
   } as React.CSSProperties;
 }
 
 const loaded = new Set<string>();
 export function useBrandFonts(brand: Brand) {
   useEffect(() => {
-    for (const family of [brand.fonts.display, brand.fonts.body, brand.fonts.mono]) {
-      if (!family || loaded.has(family)) continue;
-      loaded.add(family);
-      const name = encodeURIComponent(family).replace(/%20/g, '+');
-      for (const href of [
-        `https://fonts.googleapis.com/css2?family=${name}:wght@400;500;600;700;800&display=swap`,
-        `https://fonts.googleapis.com/css2?family=${name}&display=swap`
-      ]) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
-      }
+    const family = brand.fonts.mono;
+    if (!family || loaded.has(family)) return;
+    loaded.add(family);
+    const name = encodeURIComponent(family).replace(/%20/g, '+');
+    for (const href of [
+      `https://fonts.googleapis.com/css2?family=${name}:wght@400;500;600&display=swap`,
+      `https://fonts.googleapis.com/css2?family=${name}&display=swap`
+    ]) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      document.head.appendChild(link);
     }
-  }, [brand.fonts.display, brand.fonts.body, brand.fonts.mono]);
+  }, [brand.fonts.mono]);
 }
 
 export function shaderColors(brand: Brand) {
