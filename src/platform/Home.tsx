@@ -51,7 +51,7 @@ function CourseCard({ card: c }: { card: CardData }) {
           {c.kind === 'repo' ? 'Codebase' : 'Concept'}
         </span>
       </div>
-      <div className="cc-title" style={{ fontFamily: `'${c.brand.fonts.display}', var(--font-display)` }}>
+      <div className="cc-title">
         {head}
         {rest.length > 0 && (
           <>

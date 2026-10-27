@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   color: var(--fg);
 }
 .pg button {
@@ -22,10 +22,10 @@
   border-radius: 8px;
   padding: 6px 8px;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 .pg label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--muted);
   display: inline-flex;
   align-items: center;
@@ -33,23 +33,23 @@
 }
 .pg-mono {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--font-size-xs);
 }
 .pg-muted {
   color: var(--muted);
 }
 .pg-small {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 .pg-ts {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   color: var(--muted);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 .pg-kicker {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--yellow);
@@ -83,7 +83,7 @@
   color: var(--muted);
   padding: 8px 16px;
   border-radius: 9px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
   transition:
     background 0.2s,
@@ -104,7 +104,7 @@
   color: var(--fg);
   padding: 6px 12px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   transition:
     border-color 0.2s,
     background 0.2s;
@@ -145,8 +145,8 @@
   align-items: flex-start;
 }
 .pg-sim-head h3 {
-  font-family: var(--font-display);
-  font-size: 26px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-2xl);
   margin: 4px 0 6px;
   letter-spacing: -0.01em;
 }
@@ -170,8 +170,8 @@
   color: var(--fg);
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   transition:
     background 0.15s,
     transform 0.1s;
@@ -237,8 +237,8 @@
   margin-top: 12px;
 }
 .pg-panel-title {
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
@@ -261,7 +261,7 @@
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--muted);
   display: flex;
   gap: 8px;
@@ -279,7 +279,7 @@
   background: var(--line);
   color: var(--fg);
   flex: none;
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
 }
 .pg-stage.on {
   border-color: var(--yellow);
@@ -310,7 +310,7 @@
   margin-bottom: 10px;
 }
 .pg-hint {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--muted);
   line-height: 1.5;
   margin: 6px 0 10px;
@@ -320,7 +320,7 @@
   border-radius: 10px;
   overflow: hidden;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 .pg-tr {
   display: grid;
@@ -352,15 +352,15 @@
   background: var(--bg2);
 }
 .pg-sub-top {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 .pg-sub-read {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--muted);
   margin: 4px 0;
 }
 .pg-sub-status {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 .pg-sub.checking {
   border-color: var(--purple);
@@ -395,7 +395,7 @@
   flex-direction: column;
   gap: 2px;
   padding: 4px 0;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   border-radius: 6px;
 }
 .pg-result .pg-mono {
@@ -421,7 +421,7 @@
   overflow: auto;
 }
 .pg-log-line {
-  font-size: 12.5px;
+  font-size: var(--font-size-xs);
   line-height: 1.5;
   padding: 3px 0;
   margin-bottom: 4px;
@@ -468,7 +468,7 @@
   gap: 6px;
 }
 .pg-step {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px dashed var(--line);
@@ -486,7 +486,7 @@
 .pg-note {
   margin-top: 10px;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   min-height: 18px;
 }
 .pg-versions {
@@ -501,7 +501,7 @@
 }
 .pg-ver {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   padding: 2px 8px;
   border-radius: 6px;
   background: var(--bg2);
@@ -517,7 +517,7 @@
 }
 .pg-final {
   margin-top: 12px;
-  font-size: 14px;
+  font-size: var(--font-size-md);
 }
 .pg-events {
   max-height: 380px;
@@ -536,13 +536,13 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--muted);
 }
 .pg-stats span {
   display: block;
-  font-family: var(--font-display);
-  font-size: 28px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-2xl);
   color: var(--fg);
   font-variant-numeric: tabular-nums;
 }
@@ -551,7 +551,7 @@
   background: color-mix(in oklab, var(--red) 12%, transparent);
   border-radius: 12px;
   padding: 12px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   margin: 10px 0;
 }
@@ -559,7 +559,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--muted);
   margin-bottom: 8px;
 }
@@ -588,7 +588,7 @@
   gap: 8px;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   transition: background 0.25s;
 }
 .pg-idx-row.sc {
@@ -604,7 +604,7 @@
   margin-top: 8px;
   padding: 10px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
 }
 .pg-verdict.hit {
@@ -622,7 +622,7 @@
   border-radius: 8px;
   background: var(--bg2);
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   border: 1px solid var(--line);
   animation: pg-in 0.3s ease both;
 }
@@ -635,7 +635,7 @@
   padding: 7px 10px;
   border-radius: 8px;
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   border: 1px dashed var(--purple);
   display: flex;
   flex-direction: column;
@@ -659,12 +659,12 @@
   flex-wrap: wrap;
 }
 .pg-score {
-  font-family: var(--font-display);
-  font-size: 20px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xl);
 }
 .pg-score b {
   color: var(--yellow);
-  font-size: 28px;
+  font-size: var(--font-size-2xl);
 }
 .pg-meter {
   flex: 1;
@@ -709,13 +709,13 @@
   flex-wrap: wrap;
 }
 .pg-card h4 {
-  font-family: var(--font-display);
-  font-size: 19px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
   margin: 8px 0 6px;
 }
 .pg-tag {
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--font-size-2xs);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 2px 8px;
@@ -730,12 +730,12 @@
 .pg-diff {
   margin-left: auto;
   color: var(--red);
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   letter-spacing: 2px;
 }
 .pg-check {
   color: var(--yellow);
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
 }
 .pg-q {
   line-height: 1.55;
@@ -756,7 +756,7 @@
   border: 1px solid var(--line);
   background: var(--bg2);
   color: var(--fg);
-  font-size: 13.5px;
+  font-size: var(--font-size-sm);
   line-height: 1.45;
   transition:
     border-color 0.15s,
@@ -782,7 +782,7 @@
 }
 .pg-letter {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   width: 22px;
   height: 22px;
   border-radius: 6px;
@@ -795,7 +795,7 @@
   margin-top: 10px;
   padding: 12px;
   border-radius: 10px;
-  font-size: 13.5px;
+  font-size: var(--font-size-sm);
   line-height: 1.55;
   animation: pg-in 0.3s ease both;
 }
@@ -808,7 +808,7 @@
   border: 1px solid color-mix(in oklab, var(--red) 40%, transparent);
 }
 .pg-solved-tag {
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   color: var(--yellow);
   font-family: var(--font-mono);
 }
@@ -834,7 +834,7 @@
   border: 1px solid var(--line);
   background: var(--bg2);
   color: var(--fg);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.4;
 }
 .pg-order-pool button:hover:not(:disabled) {
@@ -849,7 +849,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.4;
 }
 .pg-order-seq li {
