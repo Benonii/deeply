@@ -23,6 +23,17 @@ The built-in courses work without a backend. Sign-in, Simplify, community course
 
 Full production setup (OAuth apps, Polar, environment variables, Vercel): [docs/SETUP.md](docs/SETUP.md).
 
+## Desktop app
+Deeply also builds as a native desktop app from the same source, using Farm.js's desktop target (an Electrobun window around the Farm server, running on `127.0.0.1`). It talks to the production Convex backend unless `CONVEX_URL` is set.
+
+```bash
+npm run dev:desktop     # the app in a window, with hot reload
+npm run build:desktop   # packaged app in .farm/output/desktop/dist
+```
+On Linux the window uses the system WebKitGTK, so install `libwebkit2gtk-4.1-0` and `libgtk-3-0` (Debian/Ubuntu names) first. The first run downloads the Electrobun runtime into `~/.hutch`.
+
+Sign-in on desktop goes through your browser: **Sign in with your browser** opens `/desktop/connect` on the website, you approve there, and the app picks up the session. The session cookie stays in the app's data folder on the local server and never reaches the window.
+
 ## How it's organized
 | Path | What |
 |---|---|
@@ -31,6 +42,7 @@ Full production setup (OAuth apps, Polar, environment variables, Vercel): [docs/
 | `src/pages/` | Page components and the root layout |
 | `src/platform/` | App shell, navigation, catalog |
 | `src/courses/` | Built-in courses: `convex/` (React modules, simulators, Live Lab, verified source map) and `crdts/` (a JSON course pack) |
+| `src/desktop/` | Desktop-only server code: forwards auth to Convex with the session kept on disk |
 | `src/create/`, `src/account/` | Course generator UI; sign-in, credits, buying credits |
 | `convex/lib/courseSchema.ts` | The course pack format (zod), shared by hand-written and generated courses |
 | `convex/generate/` | Generation pipeline: research → plan → modules in parallel → challenges, each step validated |

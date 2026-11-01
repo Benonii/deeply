@@ -1,3 +1,4 @@
+import type { convexBetterAuth } from '@farm.js/convex/better-auth';
 import type { Challenge } from '../convex/lib/courseSchema';
 
 export interface GeneratedCourseMeta {
@@ -158,4 +159,10 @@ export interface RoutedFlowEdge {
 export interface MarkdownSegment {
   kind: 'prose' | 'code';
   text: string;
+}
+
+export type ConvexBetterAuth = ReturnType<typeof convexBetterAuth>;
+
+export interface DesktopSessionBody {
+  oneTimeToken: string;
 }

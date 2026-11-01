@@ -8,7 +8,8 @@
       "*.ts",
       "!convex/_generated",
       "!src/courses/convex/code",
-      "!src/farm.d.ts"
+      "!src/farm.d.ts",
+      "!src/lib/api.generated.ts"
     ]
   },
   "formatter": {

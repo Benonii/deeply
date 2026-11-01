@@ -84,6 +84,14 @@ export default defineSchema({
     level: v.union(v.literal('info'), v.literal('warn'), v.literal('error'))
   }).index('by_course', ['courseId']),
 
+  desktopPairings: defineTable({
+    pairingHash: v.string(),
+    oneTimeToken: v.string(),
+    expiresAt: v.number()
+  })
+    .index('by_hash', ['pairingHash'])
+    .index('by_expiry', ['expiresAt']),
+
   messages: defineTable({ room: v.string(), author: v.string(), body: v.string() }).index('by_room', ['room']),
   counters: defineTable({ name: v.string(), value: v.number() }).index('by_name', ['name'])
 });

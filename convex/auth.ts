@@ -1,6 +1,7 @@
 import { createClient, type GenericCtx } from '@convex-dev/better-auth';
 import { convex } from '@convex-dev/better-auth/plugins';
 import { betterAuth, type BetterAuthOptions } from 'better-auth/minimal';
+import { oneTimeToken } from 'better-auth/plugins/one-time-token';
 import { components } from './_generated/api';
 import type { DataModel } from './_generated/dataModel';
 import { query } from './_generated/server';
@@ -28,7 +29,7 @@ export const createAuth = (context: GenericCtx<DataModel>) =>
     database: authComponent.adapter(context),
     socialProviders: socialProviders(),
     emailAndPassword: { enabled: process.env.AUTH_DEV_PASSWORD === '1', requireEmailVerification: false },
-    plugins: [convex({ authConfig })]
+    plugins: [convex({ authConfig }), oneTimeToken()]
   });
 
 export async function currentUser(context: GenericCtx<DataModel>) {
