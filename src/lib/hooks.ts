@@ -1,7 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
-import { postDesktopSession } from './api';
+import { postDesktopSession, postDesktopSignIn } from './api';
 import { buildConnectURL, createPairingCode, formatCheckCode } from './desktopPairing';
 
 const api = anyApi;
@@ -82,7 +82,17 @@ export function useDesktopPairing() {
     finishSignIn();
   }, [isApproved, claim, pairingCode]);
 
+  const openSignInPage = async () => {
+    setError(null);
+    try {
+      await postDesktopSignIn({ pairingCode });
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : String(caughtError));
+    }
+  };
+
   return {
+    openSignInPage,
     connectURL: buildConnectURL(pairingCode),
     checkCode: formatCheckCode(pairingCode),
     isFinishing: isApproved && !error,

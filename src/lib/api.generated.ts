@@ -6,12 +6,16 @@
  */
 
 import type { POST as POST_desktop_session } from "../app/api/desktop/session/route";
+import type { POST as POST_desktop_sign_in } from "../app/api/desktop/sign-in/route";
 
 // Type-only representation of your API routes
 export type APIRouter = {
   desktop: {
     session: {
       post: typeof POST_desktop_session;
+    };
+    "sign-in": {
+      post: typeof POST_desktop_sign_in;
     };
   };
 };
@@ -20,6 +24,10 @@ export type APIRouter = {
 export const apiRoutes = [
   {
     path: "/api/desktop/session",
+    methods: ["POST"],
+  },
+  {
+    path: "/api/desktop/sign-in",
     methods: ["POST"],
   },
 ] as const;
