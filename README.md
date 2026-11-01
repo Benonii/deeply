@@ -24,7 +24,7 @@ The built-in courses work without a backend. Sign-in, Simplify, community course
 Full production setup (OAuth apps, Polar, environment variables, Vercel): [docs/SETUP.md](docs/SETUP.md).
 
 ## Desktop app
-Deeply also builds as a native desktop app from the same source, using Farm.js's desktop target (an Electrobun window around the Farm server, running on `127.0.0.1`). It talks to the production Convex backend unless `CONVEX_URL` is set.
+Deeply also builds as a native desktop app from the same source, using Farm.js's desktop target (an Electrobun window around the Farm server, running on `127.0.0.1`). It always talks to the production Convex backend, because desktop sign-in pairs through the production website; `.env.local` is ignored for desktop runs. Set `DEEPLY_DESKTOP_CONVEX_URL` to point it elsewhere.
 
 ```bash
 npm run dev:desktop     # the app in a window, with hot reload

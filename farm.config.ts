@@ -3,7 +3,7 @@ import { convex } from '@farm.js/convex';
 import { convexBetterAuth } from '@farm.js/convex/better-auth';
 import { defineConfig } from '@farm.js/core';
 import { withDesktopSession } from './src/desktop/desktopAuth';
-import { deriveConvexSiteURL, readConvexURL } from './src/lib/deployment';
+import { deriveConvexSiteURL, isDesktopTarget, readConvexURL } from './src/lib/deployment';
 
 const readOptionalValue = (value: string | undefined) => value ?? '';
 
@@ -20,13 +20,14 @@ export default defineConfig({
   },
   env: {
     public: {
-      CONVEX_URL: (value: string | undefined) => value ?? convexURL,
+      CONVEX_URL: (value: string | undefined) => (isDesktopTarget() ? convexURL : (value ?? convexURL)),
       FARM_GA_MEASUREMENT_ID: readOptionalValue
     }
   },
   integrations: {
     convex: convex({
       url: convexURL,
+      dev: !isDesktopTarget(),
       token: auth.token,
       provider: { module: '@/platform/convexClient', export: 'ConvexClientProvider' }
     }),

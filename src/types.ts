@@ -166,3 +166,7 @@ export type ConvexBetterAuth = ReturnType<typeof convexBetterAuth>;
 export interface DesktopSessionBody {
   oneTimeToken: string;
 }
+
+export interface DesktopSignInBody {
+  pairingCode: string;
+}
