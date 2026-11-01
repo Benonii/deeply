@@ -1,4 +1,10 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { anyApi } from 'convex/server';
+import { postDesktopSession } from './api';
+import { buildConnectURL, createPairingCode, formatCheckCode } from './desktopPairing';
+
+const api = anyApi;
 
 const TICK_MILLISECONDS = 100;
 const WORD_MILLISECONDS = 55;
@@ -52,4 +58,34 @@ export function useIsMounted() {
     () => true,
     () => false
   );
+}
+
+export function useDesktopPairing() {
+  const [pairingCode] = useState(createPairingCode);
+  const status = useQuery(api.desktopSignIn.status, { pairingCode }) as { isApproved: boolean } | undefined;
+  const claim = useMutation(api.desktopSignIn.claim);
+  const [error, setError] = useState<string | null>(null);
+  const isApproved = status?.isApproved ?? false;
+
+  useEffect(() => {
+    if (!isApproved) return;
+    const finishSignIn = async () => {
+      try {
+        const oneTimeToken = (await claim({ pairingCode })) as string | null;
+        if (!oneTimeToken) throw new Error('That sign-in expired. Start again.');
+        await postDesktopSession({ oneTimeToken });
+        location.reload();
+      } catch (caughtError) {
+        setError(caughtError instanceof Error ? caughtError.message : String(caughtError));
+      }
+    };
+    finishSignIn();
+  }, [isApproved, claim, pairingCode]);
+
+  return {
+    connectURL: buildConnectURL(pairingCode),
+    checkCode: formatCheckCode(pairingCode),
+    isFinishing: isApproved && !error,
+    error
+  };
 }

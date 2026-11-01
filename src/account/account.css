@@ -322,3 +322,12 @@
     min-width: 0;
   }
 }
+.acc-code {
+  font: var(--font-weight-semibold) var(--font-size-md) var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--fg);
+  padding: 2px 6px;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  white-space: nowrap;
+}

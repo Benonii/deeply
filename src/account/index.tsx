@@ -3,7 +3,9 @@ import { useAction, useConvexAuth, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 import { Link } from '@farm.js/core/client';
 import { useConvexClient } from '../platform/convexClient';
+import { platform } from '@farm.js/core/platform';
 import { getAuthClient } from '../lib/authClient';
+import { PRODUCTION_WEB_URL } from '../lib/deployment';
 import { countCourses, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
 import { requestSignIn } from './host';
 import './account.css';
@@ -145,7 +147,7 @@ function AccountPageInner() {
     try {
       const response = (await checkout({
         pack,
-        returnUrl: `${location.origin}/account?purchase=success`
+        returnUrl: `${platform() === 'desktop' ? PRODUCTION_WEB_URL : location.origin}/account?purchase=success`
       })) as { url: string } | { error: string };
       if ('url' in response) location.href = response.url;
       else {

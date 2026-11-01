@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 import { FREE_COURSES_TEXT } from '../../convex/lib/pricing';
+import { platform } from '@farm.js/core/platform';
 import { getAuthClient } from '../lib/authClient';
+import { DesktopSignIn } from './DesktopSignIn';
 import './account.css';
 
 const api = anyApi;
@@ -80,20 +82,24 @@ function SignInDialog({ reason, onClose }: { reason?: string; onClose: () => voi
         <p className="acc-sub">
           {reason ?? 'Sign in to simplify explanations and generate courses.'} New accounts get {FREE_COURSES_TEXT}.
         </p>
-        <div className="acc-providers">
-          {providers?.github && (
-            <button className="acc-provider" disabled={!!busy} onClick={() => signIn('github')}>
-              <GitHubIcon /> {busy === 'github' ? 'Redirecting…' : 'Continue with GitHub'}
-            </button>
-          )}
-          {providers?.google && (
-            <button className="acc-provider" disabled={!!busy} onClick={() => signIn('google')}>
-              <GoogleIcon /> {busy === 'google' ? 'Redirecting…' : 'Continue with Google'}
-            </button>
-          )}
-          {providers === undefined && <p className="acc-muted">Loading sign-in options…</p>}
-          {none && <p className="acc-muted">Sign-in isn't configured on this deployment yet.</p>}
-        </div>
+        {platform() === 'desktop' ? (
+          <DesktopSignIn />
+        ) : (
+          <div className="acc-providers">
+            {providers?.github && (
+              <button className="acc-provider" disabled={!!busy} onClick={() => signIn('github')}>
+                <GitHubIcon /> {busy === 'github' ? 'Redirecting…' : 'Continue with GitHub'}
+              </button>
+            )}
+            {providers?.google && (
+              <button className="acc-provider" disabled={!!busy} onClick={() => signIn('google')}>
+                <GoogleIcon /> {busy === 'google' ? 'Redirecting…' : 'Continue with Google'}
+              </button>
+            )}
+            {providers === undefined && <p className="acc-muted">Loading sign-in options…</p>}
+            {none && <p className="acc-muted">Sign-in isn't configured on this deployment yet.</p>}
+          </div>
+        )}
         {error && <p className="acc-error">{error}</p>}
       </div>
     </div>
