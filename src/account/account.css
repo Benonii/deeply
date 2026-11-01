@@ -119,6 +119,7 @@
   background: var(--bg);
   color: var(--fg);
   font: var(--font-weight-semibold) var(--font-size-base) var(--font-sans);
+  text-decoration: none;
   cursor: pointer;
   transition: border-color 0.15s;
 }
