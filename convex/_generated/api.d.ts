@@ -32,10 +32,13 @@ import type * as lib_fixtures_pythonGenerators from "../lib/fixtures/pythonGener
 import type * as lib_fixtures_pythonGeneratorsMap from "../lib/fixtures/pythonGeneratorsMap.js";
 import type * as lib_fixtures_pythonGeneratorsModules from "../lib/fixtures/pythonGeneratorsModules.js";
 import type * as lib_lessonLint from "../lib/lessonLint.js";
+import type * as lib_mastery from "../lib/mastery.js";
 import type * as lib_model from "../lib/model.js";
 import type * as lib_polarWebhook from "../lib/polarWebhook.js";
 import type * as lib_pricing from "../lib/pricing.js";
 import type * as lib_types from "../lib/types.js";
+import type * as lib_validators from "../lib/validators.js";
+import type * as mastery from "../mastery.js";
 import type * as progress from "../progress.js";
 import type * as rateLimits from "../rateLimits.js";
 import type * as simplify from "../simplify.js";
@@ -72,10 +75,13 @@ declare const fullApi: ApiFromModules<{
   "lib/fixtures/pythonGeneratorsMap": typeof lib_fixtures_pythonGeneratorsMap;
   "lib/fixtures/pythonGeneratorsModules": typeof lib_fixtures_pythonGeneratorsModules;
   "lib/lessonLint": typeof lib_lessonLint;
+  "lib/mastery": typeof lib_mastery;
   "lib/model": typeof lib_model;
   "lib/polarWebhook": typeof lib_polarWebhook;
   "lib/pricing": typeof lib_pricing;
   "lib/types": typeof lib_types;
+  "lib/validators": typeof lib_validators;
+  mastery: typeof mastery;
   progress: typeof progress;
   rateLimits: typeof rateLimits;
   simplify: typeof simplify;

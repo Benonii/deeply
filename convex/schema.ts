@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { conceptActivityRow, masteryRow } from './lib/validators';
 
 export default defineSchema({
   progress: defineTable({
@@ -11,6 +12,14 @@ export default defineSchema({
   })
     .index('by_device', ['deviceId'])
     .index('by_user', ['userId']),
+
+  mastery: defineTable(masteryRow)
+    .index('by_device', ['deviceId', 'courseId', 'conceptId'])
+    .index('by_user', ['userId', 'courseId', 'conceptId']),
+
+  conceptActivity: defineTable(conceptActivityRow)
+    .index('by_device', ['deviceId', 'courseId', 'subjectId'])
+    .index('by_user', ['userId', 'courseId', 'subjectId']),
 
   wallets: defineTable({
     userId: v.string(),
