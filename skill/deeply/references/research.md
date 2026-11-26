@@ -25,7 +25,30 @@ Run the queries with your search tool and keep the strongest few results per que
 promising page and read the whole thing.
 
 A search snippet is never a source. It is truncated, often rewritten, and quoting it produces a
-quote that does not exist on the page. If a page will not load, drop it and note the host.
+quote that does not exist on the page.
+
+### When a page will not load
+
+A refused host is rarely the end of the road, because the same text usually lives somewhere else.
+Work down this list before you give up on a source:
+
+1. **The project's own repository.** Documentation sites are built from source files in a public
+   repo, and the raw file usually fetches when the rendered site does not. The language reference,
+   the tutorial, the specs and the change notes are all in there. It is the same text, so it is
+   still tier 1. Fetch the raw file over plain HTTPS; a repository API can be restricted while raw
+   file access is not.
+2. **What is installed on this machine.** The tool you are teaching often ships its own
+   documentation: a docs folder, a `--help`, a man page, built-in help, the package source under
+   the interpreter's library path. Read it with your shell. It is the maintainers' own text, so it
+   is tier 1 too.
+3. **Another page by the same author.** A maintainer's talk, release notes or mailing list post can
+   carry the same claim.
+
+Cite the URL you actually read, not the one you wish had loaded. Quoting the rendered page while
+reading the repo source is the same mistake as quoting a snippet.
+
+Only when none of that reaches a concept do you drop it. Note the host that refused, say so once at
+the end of research, and never route around the block.
 
 ## 3. Pull claims as you read
 

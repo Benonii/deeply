@@ -10,9 +10,10 @@ links and videos, and renders the course. You do the parts that need a reader wi
 shell: find the sources, shape the concept map, write the lessons, run the code, and answer the
 checks that no server can answer for you.
 
-Nothing you write is taken on trust except the checks you run yourself. A claim with no source, a
-code block whose output you did not run, a quiz whose key you never solved: each comes back as a fix
-note and costs you an attempt. Doing the work properly the first time is the fast route.
+Code validates everything you send, except the six checks you run yourself, which Deeply has to take
+on trust. A claim with no source, a code block whose output you did not run, a quiz whose key you
+never solved: each comes back as a fix note and costs you an attempt. Doing the work properly the
+first time is the fast route.
 
 ## The run
 
@@ -73,16 +74,19 @@ schema or lint rejection stores nothing and does not spend an attempt.
 
 Some environments block hosts, and some topics live behind logins or inside closed binaries.
 
-- Blocked host: try the next source. Tell the person which hosts refused, once, at the end of
-  research. Never route around a proxy or a block.
+- Blocked host: the same text is usually somewhere you can reach. Documentation sites are built
+  from source files in a public repository, and tools ship their own docs on the machine you are
+  already on. `references/research.md` has the order to try them in. Tell the person which hosts
+  refused, once, at the end of research, and never route around a proxy or a block.
 - Your own logins: pages you can already open are fair game. Nothing here is for getting past
   paywalls or bot walls.
 - Closed software, native binaries, or a protocol with no public spec: a reverse-engineering tool
   run locally can produce evidence you then treat as a tier 1 source for how that product behaves.
   Reach for it only when public sources fall short, and never let the course depend on it.
 
-If research cannot reach enough to teach the topic honestly, say so and stop. A thin course is worse
-than none.
+Stop and say so only when the course's own concepts cannot be grounded in anything you actually
+read, after working down that list. Fewer sources than you wanted is a course with a narrower scope
+and a note about what was missing, not a reason to abandon the build.
 
 ## Reference files
 
