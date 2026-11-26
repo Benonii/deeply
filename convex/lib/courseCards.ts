@@ -72,6 +72,11 @@ function readRequestStatus(request: Doc<'courseRequests'>): CourseCardStatus {
   return { kind: 'building', stage: request.status, stepsDone: request.stepsDone };
 }
 
+function readRequestTagline(request: Doc<'courseRequests'>): string {
+  if (request.goal) return request.goal;
+  return request.status === 'queued' ? WAITING_TAGLINE : '';
+}
+
 export function toRequestCard(
   request: Doc<'courseRequests'>,
   course: Doc<'courses'> | null,
@@ -81,7 +86,7 @@ export function toRequestCard(
   return {
     key: request._id,
     title: courseText?.title ?? request.topic,
-    tagline: courseText?.tagline || (request.goal ?? WAITING_TAGLINE),
+    tagline: courseText?.tagline || readRequestTagline(request),
     status: course ? readCourseStatus(course) : readRequestStatus(request),
     href: course && course.status !== 'failed' ? `/g/${course.slug}` : null,
     origin: request.origin,
