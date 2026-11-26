@@ -345,3 +345,66 @@
   overflow-wrap: anywhere;
   user-select: all;
 }
+
+.acc-keys-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.acc-keys-input {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line2);
+  background: var(--bg);
+  color: var(--fg);
+  font: var(--font-size-md) var(--font-sans);
+}
+.acc-keys-input:focus-visible {
+  outline: none;
+  border-color: var(--fg2);
+}
+.acc-keys-new {
+  display: grid;
+  gap: 10px;
+}
+.acc-keys-new-head {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+.acc-keys-reveal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.acc-keys-reveal .acc-url {
+  flex: 1 1 260px;
+  margin-top: 0;
+}
+.acc-keys-table td {
+  vertical-align: middle;
+}
+.acc-keys-prefix {
+  font: var(--font-size-xs) var(--font-mono);
+  color: var(--fg2);
+  white-space: nowrap;
+}
+.acc-keys-revoke {
+  text-align: right;
+}
+.acc-keys-revoke button {
+  background: none;
+  border: none;
+  padding: 4px;
+  color: var(--muted);
+  font: var(--font-size-md) var(--font-sans);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.acc-keys-revoke button:hover {
+  color: var(--fg);
+}

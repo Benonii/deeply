@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { courseRequestOrigin, courseRequestStage, courseRequestStatus } from './lib/courseRequests';
 
 export default defineSchema({
   progress: defineTable({
@@ -67,6 +68,29 @@ export default defineSchema({
     .index('by_slug', ['slug'])
     .index('by_owner', ['ownerId'])
     .index('by_status_visibility', ['status', 'visibility']),
+
+  courseRequests: defineTable({
+    ownerId: v.string(),
+    topic: v.string(),
+    goal: v.optional(v.string()),
+    status: courseRequestStatus,
+    stepsDone: v.array(courseRequestStage),
+    courseId: v.optional(v.id('courses')),
+    origin: courseRequestOrigin,
+    error: v.optional(v.string()),
+    updatedAt: v.number()
+  }).index('by_owner', ['ownerId']),
+
+  agentKeys: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    prefix: v.string(),
+    secretHash: v.string(),
+    lastUsedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number())
+  })
+    .index('by_hash', ['secretHash'])
+    .index('by_user', ['userId']),
 
   courseModules: defineTable({
     courseId: v.id('courses'),
