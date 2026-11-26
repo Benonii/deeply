@@ -2793,6 +2793,8 @@ li {
 @media (prefers-reduced-motion: reduce) {
   .runner-out {
     animation: none;
+  }
+}
 
 /* ---------------- highlight and ask ---------------- */
 .ask-chip {
