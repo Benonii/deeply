@@ -18,9 +18,27 @@ export const conceptActivityInput = v.union(
   videoWatch
 );
 
+export const rubricPointResult = v.object({ isMet: v.boolean(), note: v.string() });
+
+const explainBackPending = v.object({
+  kind: v.literal('explainBack'),
+  text: v.string(),
+  status: v.literal('pending grading')
+});
+
+const explainBackGraded = v.object({
+  kind: v.literal('explainBack'),
+  text: v.string(),
+  status: v.literal('graded'),
+  points: v.array(rubricPointResult),
+  isPass: v.boolean(),
+  gradedAt: v.number()
+});
+
 export const conceptActivityDetail = v.union(
   quizAnswer,
-  v.object({ kind: v.literal('explainBack'), text: v.string(), status: v.literal('pending grading') }),
+  explainBackPending,
+  explainBackGraded,
   articleCheckIn,
   videoWatch
 );
