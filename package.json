@@ -20,6 +20,8 @@
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.109",
     "@ai-sdk/openai": "4.0.124",
+    "@assistant-ui/react": "^0.15.38",
+    "@assistant-ui/react-ai-sdk": "^1.4.25",
     "@convex-dev/better-auth": "0.13.1",
     "@convex-dev/polar": "0.9.3",
     "@convex-dev/rate-limiter": "0.4.3",

@@ -4,9 +4,12 @@ import { internal } from './_generated/api';
 import { currentUser } from './auth';
 import { rateLimiter } from './rateLimits';
 import { isAdminUser } from './lib/admin';
+import { readCourseModuleProgress } from './lib/courseCards';
 import { COST } from './lib/pricing';
 import { parseRepoUrl } from './generate/github';
 import { WATCHDOG_MS } from './generate/state';
+
+import type { Id } from './_generated/dataModel';
 
 async function userId(context: QueryCtx | MutationCtx): Promise<string | null> {
   const user = await currentUser(context);
@@ -24,15 +27,9 @@ function slugify(text: string) {
   );
 }
 
-async function moduleCounts(context: QueryCtx, courseId: import('./_generated/dataModel').Id<'courses'>) {
-  const courseModules = await context.db
-    .query('courseModules')
-    .withIndex('by_course', (indexRange) => indexRange.eq('courseId', courseId))
-    .collect();
-  return {
-    moduleCount: courseModules.length,
-    readyModules: courseModules.filter((courseModule) => courseModule.status === 'ready').length
-  };
+async function moduleCounts(context: QueryCtx, courseId: Id<'courses'>) {
+  const progress = await readCourseModuleProgress(context, courseId);
+  return { moduleCount: progress.total, readyModules: progress.ready };
 }
 
 export const listPublic = query({
