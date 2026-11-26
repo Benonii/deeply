@@ -33,7 +33,7 @@
     "formatter": { "trailingCommas": "none" }
   },
   "linter": {
-    "rules": { "recommended": true }
+    "rules": { "preset": "recommended" }
   },
   "overrides": [
     {
