@@ -1,4 +1,4 @@
-import { parseCitations } from '../../lib/lessonLint';
+import { parseCitations } from '../../lib/lessonMarks';
 import { collapseSpaces, listTextFields, shorten, stripInlineCode, stripMarks } from '../moduleText';
 import { factsCitedPrompt } from './prompt';
 import { factsCitedThresholds } from './thresholds';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useIsMounted } from '../lib/hooks';
-import { AppEffects } from '../platform/App';
+import { AppEffects } from '../platform/AppEffects';
 import '../engine/fonts.css';
 import '../engine/styles.css';
 

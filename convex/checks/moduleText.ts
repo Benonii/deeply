@@ -1,4 +1,4 @@
-import { TERM_MARK } from '../lib/lessonLint';
+import { TERM_MARK } from '../lib/lessonMarks';
 import type { ModulePack, Section } from '../lib/courseSchema';
 import type { LinkTarget, QuizQuestion, RunnableCodeBlock, TextField, VideoTarget } from './types';
 

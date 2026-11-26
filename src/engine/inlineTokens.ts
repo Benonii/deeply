@@ -1,4 +1,4 @@
-import { parseTermReferences } from '../../convex/lib/lessonLint';
+import { parseTermReferences } from '../../convex/lib/lessonMarks';
 
 import type { InlineToken } from '../types';
 

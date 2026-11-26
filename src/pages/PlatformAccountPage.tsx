@@ -1,8 +1,8 @@
 'use client';
 
 import { ClientOnly } from '../components/ClientOnly';
-import { AccountPage } from '../account';
-import { PlatformScreen } from '../platform/App';
+import { AccountPage } from '../account/AccountPage';
+import { PlatformScreen } from '../platform/Shell';
 
 export const PlatformAccountPage = () => (
   <ClientOnly>

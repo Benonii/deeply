@@ -105,6 +105,7 @@ import type * as lib_fixtures_pythonGenerators from "../lib/fixtures/pythonGener
 import type * as lib_fixtures_pythonGeneratorsMap from "../lib/fixtures/pythonGeneratorsMap.js";
 import type * as lib_fixtures_pythonGeneratorsModules from "../lib/fixtures/pythonGeneratorsModules.js";
 import type * as lib_lessonLint from "../lib/lessonLint.js";
+import type * as lib_lessonMarks from "../lib/lessonMarks.js";
 import type * as lib_mastery from "../lib/mastery.js";
 import type * as lib_model from "../lib/model.js";
 import type * as lib_outputText from "../lib/outputText.js";
@@ -251,6 +252,7 @@ declare const fullApi: ApiFromModules<{
   "lib/fixtures/pythonGeneratorsMap": typeof lib_fixtures_pythonGeneratorsMap;
   "lib/fixtures/pythonGeneratorsModules": typeof lib_fixtures_pythonGeneratorsModules;
   "lib/lessonLint": typeof lib_lessonLint;
+  "lib/lessonMarks": typeof lib_lessonMarks;
   "lib/mastery": typeof lib_mastery;
   "lib/model": typeof lib_model;
   "lib/outputText": typeof lib_outputText;
