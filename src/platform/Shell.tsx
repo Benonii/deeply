@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useQuery } from 'convex/react';
+import { anyApi } from 'convex/server';
 import { Link } from '@farm.js/core/client';
 import { usePathname } from '@farm.js/core/navigation';
 import type { Brand } from '../../convex/lib/courseSchema';
@@ -7,7 +9,10 @@ import { builtinCourseLinks } from '../courses/catalog';
 import { CodeDrawer } from '../engine/CodeDrawer';
 import { Toaster } from '../engine/kit';
 import { brandVars, DEEPLY_BRAND, isLight, useBrandFonts } from '../engine/theme';
+import { useConvexClient } from './convexClient';
 import { NotFound } from './NotFound';
+
+import type { OwnedCourseSummary } from '../types';
 
 function Wordmark() {
   return (
@@ -74,13 +79,40 @@ export function Shell({ brand, nav, children }: { brand: Brand; nav: React.React
   );
 }
 
-function PlatformNav() {
-  const route = usePathname();
-  const item = (href: string, label: string, icon: string, on: boolean) => (
-    <Link key={href} href={href} className={`nav-item ${on ? 'on' : ''}`}>
+function NavItem({ href, label, icon, isOn }: { href: string; label: string; icon: string; isOn: boolean }) {
+  return (
+    <Link href={href} className={`nav-item ${isOn ? 'on' : ''}`}>
       <span className="nav-n">{icon}</span>
       <span className="nav-t">{label}</span>
     </Link>
+  );
+}
+
+function PublishedCourseLinks() {
+  const ownedCourses = useQuery(anyApi.courses.myCourses, {}) as OwnedCourseSummary[] | undefined;
+  const publishedCourses = ownedCourses?.filter((ownedCourse) => ownedCourse.status === 'ready') ?? [];
+  if (publishedCourses.length === 0) return null;
+  return (
+    <>
+      <div className="nav-label">Your courses</div>
+      {publishedCourses.map((publishedCourse) => (
+        <NavItem
+          key={publishedCourse.slug}
+          href={`/g/${publishedCourse.slug}`}
+          label={publishedCourse.title}
+          icon="▸"
+          isOn={false}
+        />
+      ))}
+    </>
+  );
+}
+
+function PlatformNav() {
+  const route = usePathname();
+  const client = useConvexClient();
+  const item = (href: string, label: string, icon: string, on: boolean) => (
+    <NavItem key={href} href={href} label={label} icon={icon} isOn={on} />
   );
   return (
     <nav aria-label="Deeply">
@@ -89,6 +121,7 @@ function PlatformNav() {
       {item('/courses', 'All courses', '◇', route.startsWith('/courses'))}
       {item('/create', 'Create a course', '+', route.startsWith('/create'))}
       {item('/account', 'Account & credits', '◎', route.startsWith('/account'))}
+      {client && <PublishedCourseLinks />}
       <div className="nav-label">Courses</div>
       {builtinCourseLinks.map((builtinCourse) => item(`/c/${builtinCourse.id}`, builtinCourse.title, '▸', false))}
     </nav>

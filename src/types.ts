@@ -33,6 +33,12 @@ export interface PublicCourseListing {
   createdAt: number;
 }
 
+export interface OwnedCourseSummary {
+  slug: string;
+  title: string;
+  status: string;
+}
+
 export interface UntrustedBrand {
   name?: unknown;
   colors?: Record<string, unknown>;
