@@ -22,9 +22,9 @@
     "@convex-dev/better-auth": "0.12.5",
     "@convex-dev/polar": "0.9.3",
     "@convex-dev/rate-limiter": "0.4.3",
-    "@farm.js/better-auth": "0.1.49",
+    "@farm.js/better-auth": "0.1.87",
     "@farm.js/convex": "file:vendor/farm.js-convex-0.1.0-beta.0-9c47795.tgz",
-    "@farm.js/core": "0.1.49",
+    "@farm.js/core": "0.1.87",
     "@paper-design/shaders-react": "^0.0.82",
     "@polar-sh/checkout": "^0.4.3",
     "@polar-sh/sdk": "^0.49.0",
@@ -37,9 +37,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.9",
-    "@farm.js/cli": "0.1.49",
-    "@farm.js/desktop": "0.1.0-beta.1",
-    "@types/node": "^22.20.5",
+    "@farm.js/cli": "0.1.87",
+    "@farm.js/desktop": "0.1.0-beta.8",
+    "@types/node": "^22.20.7",
     "@types/react": "^19.3.3",
     "@types/react-dom": "^19.3.0",
     "electrobun": "2.0.7",
@@ -56,7 +56,7 @@
   "overrides": {
     "@farm.js/convex": {
       "@farm.js/core": "$@farm.js/core",
-      "@farm.js/integration-utils": "0.1.49"
+      "@farm.js/integration-utils": "0.1.87"
     }
   }
 }
