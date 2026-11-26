@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { courseRequestOrigin, courseRequestStage, courseRequestStatus } from './lib/courseRequests';
 import { conceptActivityRow, masteryRow } from './lib/validators';
 
 export default defineSchema({
@@ -77,6 +78,29 @@ export default defineSchema({
     .index('by_owner', ['ownerId'])
     .index('by_status_visibility', ['status', 'visibility']),
 
+  courseRequests: defineTable({
+    ownerId: v.string(),
+    topic: v.string(),
+    goal: v.optional(v.string()),
+    status: courseRequestStatus,
+    stepsDone: v.array(courseRequestStage),
+    courseId: v.optional(v.id('courses')),
+    origin: courseRequestOrigin,
+    error: v.optional(v.string()),
+    updatedAt: v.number()
+  }).index('by_owner', ['ownerId']),
+
+  agentKeys: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    prefix: v.string(),
+    secretHash: v.string(),
+    lastUsedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number())
+  })
+    .index('by_hash', ['secretHash'])
+    .index('by_user', ['userId']),
+
   courseModules: defineTable({
     courseId: v.id('courses'),
     n: v.number(),
@@ -100,6 +124,27 @@ export default defineSchema({
   })
     .index('by_hash', ['pairingHash'])
     .index('by_expiry', ['expiresAt']),
+
+  conceptMedia: defineTable({
+    conceptKey: v.string(),
+    topic: v.string(),
+    conceptName: v.string(),
+    conceptId: v.string(),
+    videoCandidates: v.optional(v.any()),
+    articleCandidates: v.optional(v.any()),
+    videos: v.optional(v.any()),
+    articles: v.optional(v.any()),
+    fetchedAt: v.number(),
+    quotaUnits: v.number()
+  }).index('by_concept_key', ['conceptKey']),
+
+  finderQuota: defineTable({
+    day: v.string(),
+    conceptKey: v.string(),
+    call: v.union(v.literal('search'), v.literal('videos'), v.literal('commentThreads'), v.literal('channels')),
+    calls: v.number(),
+    units: v.number()
+  }).index('by_day', ['day']),
 
   messages: defineTable({ room: v.string(), author: v.string(), body: v.string() }).index('by_room', ['room']),
   counters: defineTable({ name: v.string(), value: v.number() }).index('by_name', ['name'])

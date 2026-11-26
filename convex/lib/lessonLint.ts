@@ -1,15 +1,21 @@
 import { lintModule } from './courseSchema';
 import type { CoursePack, ModulePack } from './courseSchema';
 import type { ConceptMap } from './conceptMapSchema';
-import type { LessonLintOptions, TermReference } from './types';
+import type { Citation, LessonLintOptions, TermReference } from './types';
 
-const TERM_REFERENCE = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
+export const TERM_MARK = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
+
+export const CITATION_MARK = /\[\^([a-z0-9]+(?:-[a-z0-9]+)*)\]/g;
 
 export function parseTermReferences(text: string): TermReference[] {
-  return [...text.matchAll(TERM_REFERENCE)].map((match) => ({
+  return [...text.matchAll(TERM_MARK)].map((match) => ({
     id: match[1].trim(),
     display: (match[2] ?? match[1]).trim()
   }));
+}
+
+export function parseCitations(text: string): Citation[] {
+  return [...text.matchAll(CITATION_MARK)].map((match) => ({ sourceId: match[1] }));
 }
 
 const KEYS_HOLDING_SOURCE_CODE = new Set(['code']);
