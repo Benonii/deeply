@@ -36,11 +36,12 @@ export const handleAgentRequest = httpAction(async (actionContext, request) => {
     secretHash: await hashAgentKeySecret(secret)
   });
   if (authResult.status === 'rateLimited') {
-    const retryAfterSeconds = Math.ceil(authResult.retryAfterMs / 1000);
+    const retryAfterSeconds = Math.max(1, Math.ceil(authResult.retryAfterMs / 1000));
+    const unit = retryAfterSeconds === 1 ? 'second' : 'seconds';
     return jsonRpcErrorResponse(
       429,
       RATE_LIMITED_CODE,
-      `Too many calls on this key. Try again in ${retryAfterSeconds} seconds.`,
+      `Too many calls on this key. Try again in ${retryAfterSeconds} ${unit}.`,
       { 'retry-after': String(retryAfterSeconds) }
     );
   }

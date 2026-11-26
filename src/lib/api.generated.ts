@@ -7,6 +7,7 @@
 
 import type { POST as POST_desktop_session } from "../app/api/desktop/session/route";
 import type { POST as POST_desktop_sign_in } from "../app/api/desktop/sign-in/route";
+import type { POST as POST_mcp } from "../app/api/mcp/route";
 
 // Type-only representation of your API routes
 export type APIRouter = {
@@ -18,6 +19,9 @@ export type APIRouter = {
       post: typeof POST_desktop_sign_in;
     };
   };
+  mcp: {
+    post: typeof POST_mcp;
+  };
 };
 
 // Pass this schema-free manifest to createApiClients({ routes: apiRoutes }).
@@ -28,6 +32,10 @@ export const apiRoutes = [
   },
   {
     path: "/api/desktop/sign-in",
+    methods: ["POST"],
+  },
+  {
+    path: "/api/mcp",
     methods: ["POST"],
   },
 ] as const;
