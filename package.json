@@ -9,7 +9,7 @@
     "build:desktop": "farm build --desktop",
     "convex": "convex dev",
     "typecheck": "farm generate && tsc --noEmit -p . && tsc --noEmit -p convex",
-    "test": "node --experimental-strip-types --no-warnings --import ./scripts/resolveTsImports.mjs --test \"convex/**/*.test.ts\"",
+    "test": "node --experimental-strip-types --no-warnings --import ./scripts/resolveTsImports.mjs --test \"convex/**/*.test.ts\" \"src/**/*.test.ts\"",
     "verify-code": "node --experimental-strip-types --no-warnings scripts/verify-code.mjs ${SRC_REF:-../src-ref}",
     "fetch-sources": "sh scripts/fetch-sources.sh",
     "lint": "biome lint .",
@@ -35,6 +35,7 @@
     "convex": "^1.51.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "ts-fsrs": "^6.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {

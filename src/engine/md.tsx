@@ -1,36 +1,43 @@
-import React from 'react';
+import { readInlineTokens } from './inlineTokens';
+import { TermMark } from './TermMark';
 
-import type { MarkdownSegment } from '../types';
+import type { InlineToken, MarkdownSegment } from '../types';
 
-const INLINE = /(`[^`\n]+`)|(\*\*[^*\n]+\*\*)|(\*[^*\n]+\*)|(\[[^\]\n]+\]\((https?:\/\/[^)\s]+)\))/g;
-
-export function Inline({ text }: { text: string }) {
-  const out: React.ReactNode[] = [];
-  let last = 0;
-  let keyCounter = 0;
-  let match: RegExpExecArray | null;
-  INLINE.lastIndex = 0;
-  while ((match = INLINE.exec(text))) {
-    if (match.index > last) out.push(text.slice(last, match.index));
-    const [token, code, bold, emphasis, link, href] = match;
-    if (code)
-      out.push(
-        <code key={keyCounter++} className="ic">
-          {code.slice(1, -1)}
-        </code>
+function InlineBit({ token }: { token: InlineToken }) {
+  switch (token.kind) {
+    case 'code':
+      return <code className="ic">{token.text}</code>;
+    case 'term':
+      return <TermMark termId={token.termId} display={token.text} />;
+    case 'citation':
+      return (
+        <sup className="cite-mark" aria-hidden>
+          ◦
+        </sup>
       );
-    else if (bold) out.push(<strong key={keyCounter++}>{bold.slice(2, -2)}</strong>);
-    else if (emphasis) out.push(<em key={keyCounter++}>{emphasis.slice(1, -1)}</em>);
-    else if (link)
-      out.push(
-        <a key={keyCounter++} href={href} target="_blank" rel="noreferrer">
-          {link.slice(1, link.indexOf(']'))}
+    case 'bold':
+      return <strong>{token.text}</strong>;
+    case 'emphasis':
+      return <em>{token.text}</em>;
+    case 'link':
+      return (
+        <a href={token.href} target="_blank" rel="noreferrer">
+          {token.text}
         </a>
       );
-    last = match.index + token.length;
+    default:
+      return <>{token.text}</>;
   }
-  if (last < text.length) out.push(text.slice(last));
-  return <>{out}</>;
+}
+
+export function Inline({ text }: { text: string }) {
+  return (
+    <>
+      {readInlineTokens(text).map((token, index) => (
+        <InlineBit key={index} token={token} />
+      ))}
+    </>
+  );
 }
 
 const FENCED_CODE = /```([\w-]*)[ \t]*\n?([\s\S]*?)(?:```|$)/g;

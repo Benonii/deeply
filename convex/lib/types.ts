@@ -2,6 +2,8 @@ import type { Infer } from 'convex/values';
 
 import type { Id } from '../_generated/dataModel';
 import type { courseRequestOrigin, courseRequestStage, courseRequestStatus } from './courseRequests';
+import type { articleCheckInOutcome, conceptActivityDetail, conceptActivityInput } from './validators';
+import type { conceptActivityRow, masteryCard, masteryRow } from './validators';
 
 export type ModelProvider = 'openai' | 'anthropic';
 
@@ -19,6 +21,24 @@ export interface Citation {
 export interface LessonLintOptions {
   termIdsTaughtEarlier?: Set<string>;
   codeRefIds?: Set<string>;
+}
+
+export type MasteryCard = Infer<typeof masteryCard>;
+
+export interface Learner {
+  deviceId: string;
+  userId?: string;
+}
+
+export type MasteryRow = Infer<typeof masteryRow>;
+export type ConceptActivityRow = Infer<typeof conceptActivityRow>;
+export type ConceptActivityInput = Infer<typeof conceptActivityInput>;
+export type ConceptActivityDetail = Infer<typeof conceptActivityDetail>;
+export type ArticleCheckInOutcome = Infer<typeof articleCheckInOutcome>;
+
+export interface CourseLearningState {
+  concepts: MasteryRow[];
+  activity: ConceptActivityRow[];
 }
 
 export interface HttpActionInternals {
