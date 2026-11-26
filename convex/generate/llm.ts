@@ -7,7 +7,7 @@ import type { ModelEffort } from '../lib/types';
 
 export class GenerationError extends Error {}
 
-function extractJson(text: string): unknown {
+export function extractJson(text: string): unknown {
   const cleaned = text
     .trim()
     .replace(/^```(?:json)?\s*/i, '')

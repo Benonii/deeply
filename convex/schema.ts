@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { askRow } from './player/validators';
 import { checkMode } from './checks/validators';
 import { courseRequestOrigin, courseRequestStage, courseRequestStatus } from './lib/courseRequests';
 import { conceptActivityRow, masteryRow } from './lib/validators';
@@ -22,6 +23,8 @@ export default defineSchema({
   conceptActivity: defineTable(conceptActivityRow)
     .index('by_device', ['deviceId', 'courseId', 'subjectId'])
     .index('by_user', ['userId', 'courseId', 'subjectId']),
+
+  asks: defineTable(askRow).index('by_user_module', ['userId', 'courseId', 'moduleId']),
 
   wallets: defineTable({
     userId: v.string(),
@@ -89,7 +92,9 @@ export default defineSchema({
     origin: courseRequestOrigin,
     error: v.optional(v.string()),
     updatedAt: v.number()
-  }).index('by_owner', ['ownerId']),
+  })
+    .index('by_owner', ['ownerId'])
+    .index('by_course', ['courseId']),
 
   agentKeys: defineTable({
     userId: v.string(),

@@ -1,4 +1,7 @@
+import { useRef } from 'react';
 import { Link } from '@farm.js/core/client';
+import { openSignIn } from '../account';
+import { AskLayer } from '../engine/AskLayer';
 import { ConceptProgress } from '../engine/ConceptProgress';
 import { buildPrompt, CopyBtn, ModuleCtx } from '../engine/kit';
 import { PackChallenges } from '../engine/PackChallenges';
@@ -227,6 +230,7 @@ function ModuleBody({ courseModule: m }: { courseModule: ShellModule }) {
 export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId: string }) {
   const index = course.modules.findIndex((courseModule) => courseModule.id === moduleId);
   const { progress, markModule } = useProgress(course.id);
+  const proseRef = useRef<HTMLDivElement>(null);
   if (index < 0) return <NotFound what="module" back={`#${course.base}`} />;
   const courseModule = course.modules[index];
   const next = course.modules.slice(index + 1).find((courseModule) => courseModule.status === 'ready');
@@ -259,9 +263,14 @@ export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId
             <p className="lede">{courseModule.summary}</p>
           </div>
         </header>
-        <div className="module-body" key={courseModule.id}>
+        <div className="module-body" key={courseModule.id} ref={proseRef}>
           <ModuleBody courseModule={courseModule} />
         </div>
+        <AskLayer
+          key={`ask-${courseModule.id}`}
+          proseRef={proseRef}
+          onSignIn={() => openSignIn('Sign in to ask about a passage.')}
+        />
         <footer className="module-foot">
           <div className="module-foot-shader" aria-hidden>
             <BrandShader brand={course.brand} role="foot" />

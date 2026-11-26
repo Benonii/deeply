@@ -22,9 +22,9 @@ export function findMissingAPIKey(): string | null {
   return process.env[keyName] ? null : keyName;
 }
 
-export function selectModel(effort: ModelEffort) {
+export function selectModel(effort: ModelEffort, requestedModelID?: string) {
   const provider = readProvider();
-  const modelID = process.env.AI_MODEL ?? DEFAULT_MODEL_IDS[provider];
+  const modelID = requestedModelID ?? process.env.AI_MODEL ?? DEFAULT_MODEL_IDS[provider];
   return {
     model: provider === 'anthropic' ? anthropic(modelID) : openai(modelID),
     providerOptions: {
