@@ -10,6 +10,8 @@ import { CHAT_SYSTEM_PROMPT } from './prompt';
 import { buildChatTools } from './tools';
 import { chatRequestBody } from './validators';
 
+import type { ActionCtx } from '../_generated/server';
+
 const MAX_OUTPUT_TOKENS = 700;
 
 const BAD_REQUEST_MESSAGE = 'That message could not be read. Reload the page and try again.';
@@ -23,10 +25,18 @@ function selectChatModel() {
   return selectModel('low');
 }
 
+async function readUserId(actionContext: ActionCtx): Promise<string | null> {
+  try {
+    const user = await currentUser(actionContext);
+    return user ? String(user._id) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const handleChatRequest = httpAction(async (actionContext, request) => {
-  const user = await currentUser(actionContext);
-  if (!user) return textResponse(401, CHAT_SIGNED_OUT_MESSAGE);
-  const userId = String(user._id);
+  const userId = await readUserId(actionContext);
+  if (!userId) return textResponse(401, CHAT_SIGNED_OUT_MESSAGE);
 
   const body = chatRequestBody.safeParse(await request.json().catch(() => null));
   if (!body.success) return textResponse(400, BAD_REQUEST_MESSAGE);
