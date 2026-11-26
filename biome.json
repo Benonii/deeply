@@ -6,6 +6,7 @@
       "convex/**",
       "scripts/**",
       "evals/**",
+      "!evals/reports",
       "*.ts",
       "!convex/_generated",
       "!src/courses/convex/code",
