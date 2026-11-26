@@ -5,7 +5,13 @@ import { useLesson } from './lesson';
 import { Inline } from './md';
 
 import type { GradeResult } from '../../convex/player/types';
-import type { ExplainBackBlockData, ExplainBackStatus, MarkPhase } from '../types';
+import type {
+  ExplainAction,
+  ExplainBackBlockData,
+  ExplainBackGrade,
+  ExplainBackStatus,
+  MarkPhase
+} from '../types';
 
 interface ExplainBackProps {
   block: ExplainBackBlockData;
@@ -26,11 +32,23 @@ function readProblem(result: GradeResult): MarkPhase {
   return { kind: 'problem', message: result.message };
 }
 
+const ACTION_HINTS: Record<Exclude<ExplainAction, 'none'>, string> = {
+  submit: 'A model marks it against those points and updates the concept.',
+  mark: 'Your answer is saved. It has not been marked yet.',
+  rewrite: 'Rewrite it to cover the points you missed, then mark it again.'
+};
+
 function readStatusLabel({ isMarking, isSaved, grade, metCount }: ExplainBackStatus): string {
   if (isMarking) return 'Marking…';
   if (!grade) return isSaved ? 'Saved · not marked' : '';
   const score = `${metCount} of ${grade.points.length} points`;
   return grade.isPass ? `Marked · ${score}` : `Marked · ${score}, not yet`;
+}
+
+function readAction({ isWriting, grade }: { isWriting: boolean; grade: ExplainBackGrade | null }): ExplainAction {
+  if (isWriting) return 'submit';
+  if (!grade) return 'mark';
+  return grade.isPass ? 'none' : 'rewrite';
 }
 
 export const ExplainBack = ({ block, subjectId }: ExplainBackProps) => {
@@ -41,9 +59,10 @@ export const ExplainBack = ({ block, subjectId }: ExplainBackProps) => {
   const [draft, setDraft] = useState('');
   const [phase, setPhase] = useState<MarkPhase>({ kind: 'idle' });
 
-  const answer = savedAnswer ? savedAnswer.text : draft;
-  const isSent = savedAnswer !== null || phase.kind === 'marking';
+  const isWriting = savedAnswer === null || phase.kind === 'rewriting';
+  const answer = isWriting ? draft : savedAnswer.text;
   const metCount = grade ? grade.points.filter((point) => point.isMet).length : 0;
+  const action = readAction({ isWriting, grade });
 
   const mark = async () => {
     const text = answer.trim();
@@ -67,13 +86,13 @@ export const ExplainBack = ({ block, subjectId }: ExplainBackProps) => {
       <textarea
         className="explain-input"
         value={answer}
-        readOnly={isSent}
+        readOnly={!isWriting}
         rows={5}
         placeholder="Write it the way you would say it out loud."
         aria-label="Your explanation"
         onChange={(event) => setDraft(event.target.value)}
       />
-      {grade ? (
+      {grade && !isWriting ? (
         <ul className="explain-points">
           {block.rubric.map((point, index) => {
             const result = grade.points[index];
@@ -112,21 +131,30 @@ export const ExplainBack = ({ block, subjectId }: ExplainBackProps) => {
           </ul>
         </div>
       )}
-      {!grade && (
+      {action !== 'none' && (
         <div className="explain-actions">
-          <button
-            type="button"
-            className="btn primary"
-            disabled={answer.trim().length === 0 || phase.kind === 'marking'}
-            onClick={mark}
-          >
-            {phase.kind === 'marking' ? 'Marking…' : savedAnswer ? 'Mark it again' : 'Submit'}
-          </button>
-          <span className="explain-hint">
-            {phase.kind === 'problem'
-              ? phase.message
-              : 'A model marks it against those points and updates the concept.'}
-          </span>
+          {action === 'rewrite' ? (
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() => {
+                setDraft(savedAnswer?.text ?? '');
+                setPhase({ kind: 'rewriting' });
+              }}
+            >
+              Try another answer
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn primary"
+              disabled={answer.trim().length === 0 || phase.kind === 'marking'}
+              onClick={mark}
+            >
+              {phase.kind === 'marking' ? 'Marking…' : action === 'mark' ? 'Mark it' : 'Submit'}
+            </button>
+          )}
+          <span className="explain-hint">{phase.kind === 'problem' ? phase.message : ACTION_HINTS[action]}</span>
         </div>
       )}
     </div>

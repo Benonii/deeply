@@ -228,7 +228,10 @@ export type MarkPhase =
   | { kind: 'idle' }
   | { kind: 'marking' }
   | { kind: 'marked' }
+  | { kind: 'rewriting' }
   | { kind: 'problem'; message: string };
+
+export type ExplainAction = 'submit' | 'mark' | 'rewrite' | 'none';
 
 export type AskRequest =
   | { kind: 'idle' }

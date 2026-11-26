@@ -266,7 +266,11 @@ export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId
         <div className="module-body" key={courseModule.id} ref={proseRef}>
           <ModuleBody courseModule={courseModule} />
         </div>
-        <AskLayer proseRef={proseRef} onSignIn={() => openSignIn('Sign in to ask about a passage.')} />
+        <AskLayer
+          key={`ask-${courseModule.id}`}
+          proseRef={proseRef}
+          onSignIn={() => openSignIn('Sign in to ask about a passage.')}
+        />
         <footer className="module-foot">
           <div className="module-foot-shader" aria-hidden>
             <BrandShader brand={course.brand} role="foot" />
