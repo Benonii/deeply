@@ -1,8 +1,12 @@
 import React from 'react';
 
+import { parseTermReferences } from '../../convex/lib/lessonLint';
+import { TermMark } from './TermMark';
+
 import type { MarkdownSegment } from '../types';
 
-const INLINE = /(`[^`\n]+`)|(\*\*[^*\n]+\*\*)|(\*[^*\n]+\*)|(\[[^\]\n]+\]\((https?:\/\/[^)\s]+)\))/g;
+const INLINE =
+  /(`[^`\n]+`)|(\[\[[^\]\n]+\]\])|(\[\^[A-Za-z0-9_-]+\])|(\*\*[^*\n]+\*\*)|(\*[^*\n]+\*)|(\[[^\]\n]+\]\((https?:\/\/[^)\s]+)\))/g;
 
 export function Inline({ text }: { text: string }) {
   const out: React.ReactNode[] = [];
@@ -12,12 +16,21 @@ export function Inline({ text }: { text: string }) {
   INLINE.lastIndex = 0;
   while ((match = INLINE.exec(text))) {
     if (match.index > last) out.push(text.slice(last, match.index));
-    const [token, code, bold, emphasis, link, href] = match;
+    const [token, code, termMark, citation, bold, emphasis, link, href] = match;
     if (code)
       out.push(
         <code key={keyCounter++} className="ic">
           {code.slice(1, -1)}
         </code>
+      );
+    else if (termMark) {
+      const [reference] = parseTermReferences(termMark);
+      out.push(<TermMark key={keyCounter++} termId={reference.id} display={reference.display} />);
+    } else if (citation)
+      out.push(
+        <sup key={keyCounter++} className="cite-mark" aria-hidden>
+          ◦
+        </sup>
       );
     else if (bold) out.push(<strong key={keyCounter++}>{bold.slice(2, -2)}</strong>);
     else if (emphasis) out.push(<em key={keyCounter++}>{emphasis.slice(1, -1)}</em>);

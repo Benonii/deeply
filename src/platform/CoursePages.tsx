@@ -1,4 +1,5 @@
 import { Link } from '@farm.js/core/client';
+import { ConceptProgress } from '../engine/ConceptProgress';
 import { buildPrompt, CopyBtn, ModuleCtx } from '../engine/kit';
 import { PackChallenges } from '../engine/PackChallenges';
 import { PackModule } from '../engine/PackModule';
@@ -69,6 +70,7 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
           );
         })}
       </nav>
+      <ConceptProgress />
     </>
   );
 }

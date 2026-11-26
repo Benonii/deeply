@@ -4,6 +4,7 @@ import { FlowEdgeLabel } from './FlowEdgeLabel';
 import { measureNode } from './flowGeometry';
 import { routeFlowEdges } from './flowRouting';
 import { Inline } from './md';
+import { registerToast, showToast } from './toast';
 
 import type { FlowEdge, FlowNode, FlowStep } from '../types';
 
@@ -30,13 +31,12 @@ export function openCode(ids: string[], context: string) {
   codeOpener?.({ ids, context });
 }
 
-let toastSetter: ((message: string | null) => void) | null = null;
 export function Toaster() {
   const [message, setMessage] = useState<string | null>(null);
   useEffect(() => {
-    toastSetter = setMessage;
+    registerToast(setMessage);
     return () => {
-      toastSetter = null;
+      registerToast(null);
     };
   }, []);
   useEffect(() => {
@@ -62,7 +62,7 @@ export async function copyText(text: string, label = 'Copied — paste it to Cla
     document.execCommand('copy');
     textArea.remove();
   }
-  toastSetter?.(label);
+  showToast(label);
 }
 
 export function CopyBtn({ get, label = 'Copy', title }: { get: () => string; label?: string; title?: string }) {
