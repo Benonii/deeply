@@ -105,3 +105,15 @@ export interface ShowCoursesOutcome {
   filter: CourseCardFilter;
   count: number;
 }
+
+export interface UrlProbe {
+  status?: number;
+  error?: string;
+}
+
+export interface WebFetchOptions {
+  fetchResponse: typeof fetch;
+  timeoutMs: number;
+  method?: 'GET' | 'HEAD';
+  accept?: string;
+}
