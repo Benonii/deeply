@@ -1,11 +1,9 @@
 import { findMissingAPIKey, selectModel } from '../lib/model';
 import { fakeAskModel, fakeGradeModel, isPlayerFake } from './fakeModel';
 
-const PLAYER_MODEL_ID = 'gpt-6-luna';
-
-function readModelID(): string {
+function readModelID(): string | undefined {
   const configured = process.env.PLAYER_MODEL;
-  return configured && configured.length > 0 ? configured : PLAYER_MODEL_ID;
+  return configured && configured.length > 0 ? configured : undefined;
 }
 
 function selectRealModel() {
