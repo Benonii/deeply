@@ -10,8 +10,10 @@ const SERVER_VERSION = '1.0.0';
 
 const SERVER_INSTRUCTIONS = [
   'Deeply turns a topic into a course the person can learn from in the browser.',
-  'Start with start_course, which records the request and tells you the next step.',
-  'Read course_status for one request, or list_course_requests for the recent ones.',
+  'You do the research, the planning and the writing. Deeply validates every step with code, runs the checks and stores the result.',
+  'The steps run in order: start_course, submit_research, submit_concept_map, then per module get_module_brief and submit_module, then publish_course.',
+  'submit_challenges is optional and belongs before publish_course.',
+  'Every tool answers with the next step. Read course_status for one request, or list_course_requests for the recent ones.',
   'Every request belongs to the owner of the key in the Authorization header.'
 ].join(' ');
 

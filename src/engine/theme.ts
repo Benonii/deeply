@@ -1,28 +1,11 @@
 import { useEffect } from 'react';
 import type React from 'react';
+import { DEEPLY_BRAND } from '../../convex/lib/brand';
 import { listShaderColors, makeBrandReadable } from '../../convex/lib/brandContrast';
 import type { Brand } from '../../convex/lib/courseSchema';
 import type { UntrustedBrand } from '../types';
 
-export const DEEPLY_BRAND: Brand = {
-  name: 'Deeply',
-  colors: {
-    bg: '#000000',
-    surface: '#0a0a0a',
-    surface2: '#141414',
-    fg: '#f5f5f5',
-    fg2: '#d0d0d0',
-    muted: '#8c8c8c',
-    line: '#262626',
-    accent: '#c9f0ff',
-    accent2: '#ff8f70',
-    accent3: '#a99bff',
-    onAccent: '#001018'
-  },
-  fonts: { display: 'Unbounded', body: 'Geist', mono: 'JetBrains Mono' },
-  shader: { kind: 'dither', colors: ['#000000', '#3a3a3a'] },
-  source: 'designed'
-};
+export { DEEPLY_BRAND };
 
 const MONO_FALLBACK = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 

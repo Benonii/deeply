@@ -1,6 +1,9 @@
 import { internal } from '../_generated/api';
 import { normalizeTopic, readGoalProblem, readTopicProblem } from '../lib/courseRequests';
-import { describeCourseRequest, summarizeCourseRequest } from './format';
+import { describeCourseRequest, describeEngineState, summarizeCourseRequest } from './format';
+import { MODULE_TOOLS } from './moduleTools';
+import { PUBLISH_TOOLS } from './publishTools';
+import { RESEARCH_TOOLS } from './researchTools';
 import { defineAgentTool } from './server';
 import { courseStatusInput, listCourseRequestsInput, startCourseInput } from './validators';
 
@@ -37,17 +40,15 @@ const startCourse = defineAgentTool({
 const courseStatus = defineAgentTool({
   name: 'course_status',
   title: 'Read a course request',
-  description: 'Read where one course request stands and what the next step is.',
+  description:
+    'Read where one course request stands: the stage, the course, and every module with its attempts and whether it is unverified.',
   inputSchema: courseStatusInput,
   run: async ({ id }, { actionContext, userId }) => {
-    const request = await actionContext.runQuery(internal.courseRequests.getForOwner, {
-      ownerId: userId,
-      requestId: id
-    });
-    if (!request) {
+    const state = await actionContext.runQuery(internal.courseBuilds.readState, { ownerId: userId, requestId: id });
+    if (!state) {
       return { status: 'failed', message: 'No course request with that id. Call list_course_requests to see yours.' };
     }
-    return { status: 'ok', text: describeCourseRequest(request) };
+    return { status: 'ok', text: describeEngineState(state) };
   }
 });
 
@@ -65,4 +66,11 @@ const listCourseRequests = defineAgentTool({
   }
 });
 
-export const AGENT_TOOLS: readonly AgentTool[] = [startCourse, courseStatus, listCourseRequests];
+export const AGENT_TOOLS: readonly AgentTool[] = [
+  startCourse,
+  courseStatus,
+  listCourseRequests,
+  ...RESEARCH_TOOLS,
+  ...MODULE_TOOLS,
+  ...PUBLISH_TOOLS
+];
