@@ -47,7 +47,9 @@ function buildQuizInput(calibrationCase: QuizCase): CheckInput {
 const answerKeysTarget: EvalTarget = {
   check: answerKeysCheck,
   prepareCases: prepareCasesWith(QuizCase, buildQuizInput),
-  describeMaterial: (input) => describeModule(stripAnswerKeys(input.pack))
+  describeMaterial: (input) => describeModule(stripAnswerKeys(input.pack)),
+  knownLimit:
+    'accepted for V1: a question with two defensible answers passes whenever the judge picks the stored key, so ambiguity is rarely caught'
 };
 
 const quizQualityTarget: EvalTarget = {

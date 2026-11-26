@@ -2,35 +2,54 @@ import { CheckSubmission } from '../convex/checks/submissionSchema';
 
 import type { ParsedReply } from './types';
 
-const FENCED_JSON = /```(?:json)?\s*([\s\S]*?)```/;
-
-function extractJSONText(reply: string): string | null {
-  const fenced = reply.match(FENCED_JSON)?.[1];
-  const candidate = fenced ?? reply;
-  const start = candidate.indexOf('{');
-  const end = candidate.lastIndexOf('}');
-  if (start === -1 || end <= start) return null;
-  return candidate.slice(start, end + 1);
+function findObjectEnd(text: string, start: number): number {
+  let depth = 0;
+  let isInString = false;
+  for (let index = start; index < text.length; index += 1) {
+    const character = text[index];
+    if (isInString) {
+      if (character === '\\') index += 1;
+      else if (character === '"') isInString = false;
+      continue;
+    }
+    if (character === '"') isInString = true;
+    if (character === '{') depth += 1;
+    if (character === '}') depth -= 1;
+    if (depth === 0) return index;
+  }
+  return -1;
 }
 
-function parseJSON(text: string): { ok: true; value: unknown } | { ok: false; error: string } {
+function listTopLevelObjects(reply: string): string[] {
+  const objects: string[] = [];
+  let start = reply.indexOf('{');
+  while (start !== -1) {
+    const end = findObjectEnd(reply, start);
+    if (end === -1) break;
+    objects.push(reply.slice(start, end + 1));
+    start = reply.indexOf('{', end + 1);
+  }
+  return objects;
+}
+
+function parseJSON(text: string): unknown {
   try {
-    return { ok: true, value: JSON.parse(text) };
-  } catch (error) {
-    return {
-      ok: false,
-      error: `the reply is not valid JSON: ${error instanceof Error ? error.message : String(error)}`
-    };
+    return JSON.parse(text);
+  } catch {
+    return undefined;
   }
 }
 
 export function parseReply(reply: string): ParsedReply {
-  const text = extractJSONText(reply);
-  if (text === null) return { ok: false, error: 'the reply holds no JSON object' };
-  const json = parseJSON(text);
-  if (!json.ok) return json;
-  const parsed = CheckSubmission.safeParse(json.value);
-  if (!parsed.success)
-    return { ok: false, error: `the reply does not match the submission schema: ${parsed.error.message}` };
-  return { ok: true, submission: parsed.data };
+  const values = listTopLevelObjects(reply)
+    .map(parseJSON)
+    .filter((value) => value !== undefined);
+  if (values.length === 0) return { ok: false, error: 'the reply holds no valid JSON object' };
+  const lastFirst = [...values].reverse();
+  for (const value of lastFirst) {
+    const parsed = CheckSubmission.safeParse(value);
+    if (parsed.success) return { ok: true, submission: parsed.data };
+  }
+  const lastError = CheckSubmission.safeParse(lastFirst[0]).error?.message ?? 'unknown';
+  return { ok: false, error: `no JSON object in the reply matches the submission schema: ${lastError}` };
 }

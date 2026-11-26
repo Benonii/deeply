@@ -31,6 +31,7 @@ export function formatReport(report: EvalReport): string {
     `borderline      ${score.accuracyByKind.borderline.correct} of ${score.accuracyByKind.borderline.total} agree`,
     `errors          ${score.errors}`,
     `cost            $${report.costUSD.toFixed(4)}`,
+    ...(report.knownLimit === undefined ? [] : [`known limit     ${report.knownLimit}`]),
     '',
     '              got fail  got pass     error',
     `label fail  ${formatCounts([confusion.failCaught, confusion.failMissed, confusion.failErrored])}`,

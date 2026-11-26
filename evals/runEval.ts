@@ -32,6 +32,7 @@ export async function runEval({ target, cases, judge, concurrency, onResult }: R
     checkId: target.check.checkId,
     checkVersion: target.check.version,
     judge: judge.name,
+    knownLimit: target.knownLimit,
     startedAt,
     score: scoreResults(results),
     costUSD: results.reduce((total, result) => total + (result.costUSD ?? 0), 0),

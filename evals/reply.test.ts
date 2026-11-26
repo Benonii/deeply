@@ -17,13 +17,26 @@ describe('reading a judge reply', () => {
   });
 
   it('refuses a reply with no JSON in it', () => {
-    assert.deepEqual(parseReply('I could not decide.'), { ok: false, error: 'the reply holds no JSON object' });
+    assert.deepEqual(parseReply('I could not decide.'), { ok: false, error: 'the reply holds no valid JSON object' });
   });
 
   it('refuses broken JSON', () => {
-    const parsed = parseReply('{"quizAnswers": [}');
-    assert.equal(parsed.ok, false);
-    if (!parsed.ok) assert.match(parsed.error, /not valid JSON/);
+    assert.deepEqual(parseReply('{"quizAnswers": [}'), { ok: false, error: 'the reply holds no valid JSON object' });
+  });
+
+  it('takes the last object when the judge corrects itself', () => {
+    const parsed = parseReply(
+      '{"quizDistractors":[{"block":1,"hasMistakeBasedOptions":false,"note":"wait {not} quite"}]}\n\nOn reflection:\n{"quizDistractors":[{"block":1,"hasMistakeBasedOptions":true}]}'
+    );
+    assert.deepEqual(parsed, {
+      ok: true,
+      submission: { quizDistractors: [{ block: 1, hasMistakeBasedOptions: true }] }
+    });
+  });
+
+  it('skips a broken object and keeps the valid one before it', () => {
+    const parsed = parseReply('{"coldReaderWords": []} and then {"coldReaderWords": [}');
+    assert.deepEqual(parsed, { ok: true, submission: { coldReaderWords: [] } });
   });
 
   it('refuses JSON that does not match the submission schema', () => {

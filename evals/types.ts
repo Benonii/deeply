@@ -35,6 +35,7 @@ export interface EvalTarget {
   check: CheckModule;
   prepareCases: (raw: unknown) => PreparedCase[];
   describeMaterial: (input: CheckInput) => string[];
+  knownLimit?: string;
 }
 
 export interface CaseResult {
@@ -73,6 +74,7 @@ export interface EvalReport {
   checkId: CheckID;
   checkVersion: string;
   judge: string;
+  knownLimit?: string;
   startedAt: string;
   score: Score;
   costUSD: number;
