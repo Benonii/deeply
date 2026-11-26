@@ -19,7 +19,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.109",
     "@ai-sdk/openai": "4.0.124",
-    "@convex-dev/better-auth": "0.12.5",
+    "@convex-dev/better-auth": "0.13.1",
     "@convex-dev/polar": "0.9.3",
     "@convex-dev/rate-limiter": "0.4.3",
     "@farm.js/better-auth": "0.1.87",
@@ -29,7 +29,7 @@
     "@polar-sh/checkout": "^0.4.3",
     "@polar-sh/sdk": "^0.49.0",
     "ai": "7.0.182",
-    "better-auth": "1.6.11",
+    "better-auth": "1.7.28",
     "convex": "^1.51.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
