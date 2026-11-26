@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { inspectLinksAndVideos, parseIsoDuration } from './check';
+import { inspectLinksAndVideos } from './check';
+import { parseIsoDuration } from '../../lib/youtube';
 import { linksAndVideosExamples } from './examples';
 import type { ModulePack } from '../../lib/courseSchema';
 
