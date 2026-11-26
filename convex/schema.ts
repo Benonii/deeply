@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { checkMode } from './checks/validators';
 import { courseRequestOrigin, courseRequestStage, courseRequestStatus } from './lib/courseRequests';
 import { conceptActivityRow, masteryRow } from './lib/validators';
 
@@ -108,8 +109,28 @@ export default defineSchema({
     outline: v.any(),
     pack: v.optional(v.any()),
     error: v.optional(v.string()),
-    attempts: v.optional(v.number())
+    attempts: v.optional(v.number()),
+    unverified: v.optional(v.boolean())
   }).index('by_course', ['courseId', 'n']),
+
+  courseBuilds: defineTable({
+    requestId: v.id('courseRequests'),
+    sources: v.optional(v.array(v.any())),
+    map: v.optional(v.any()),
+    updatedAt: v.number()
+  }).index('by_request', ['requestId']),
+
+  checkRuns: defineTable({
+    requestId: v.id('courseRequests'),
+    moduleId: v.string(),
+    attempt: v.number(),
+    checkId: v.string(),
+    version: v.string(),
+    mode: checkMode,
+    pass: v.boolean(),
+    problems: v.array(v.object({ where: v.string(), message: v.string() })),
+    fixNote: v.string()
+  }).index('by_module_attempt', ['requestId', 'moduleId', 'attempt']),
 
   generationEvents: defineTable({
     courseId: v.id('courses'),

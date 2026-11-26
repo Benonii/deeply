@@ -5,23 +5,13 @@ import { currentUser } from './auth';
 import { rateLimiter } from './rateLimits';
 import { isAdminUser } from './lib/admin';
 import { COST } from './lib/pricing';
+import { pickFreeCourseSlug } from './lib/slug';
 import { parseRepoUrl } from './generate/github';
 import { WATCHDOG_MS } from './generate/state';
 
 async function userId(context: QueryCtx | MutationCtx): Promise<string | null> {
   const user = await currentUser(context);
   return user ? String(user._id) : null;
-}
-
-function slugify(text: string) {
-  return (
-    text
-      .toLowerCase()
-      .replace(/^https?:\/\/(www\.)?github\.com\//, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 40) || 'course'
-  );
 }
 
 async function moduleCounts(context: QueryCtx, courseId: import('./_generated/dataModel').Id<'courses'>) {
@@ -95,7 +85,8 @@ export const getBySlug = query({
         status: courseModule.status,
         outline: courseModule.outline,
         pack: courseModule.pack ?? null,
-        error: courseModule.error ?? null
+        error: courseModule.error ?? null,
+        unverified: courseModule.unverified === true
       }))
     };
   }
@@ -196,15 +187,7 @@ async function startCourse(
   const global = await rateLimiter.check(context, 'generateCourseGlobal');
   if (!global.ok) return { status: 'rate', retryAfterMs: global.retryAfter ?? 60_000 };
 
-  let slug = slugify(topic);
-  while (
-    await context.db
-      .query('courses')
-      .withIndex('by_slug', (indexRange) => indexRange.eq('slug', slug))
-      .first()
-  ) {
-    slug = `${slugify(topic).slice(0, 34)}-${Math.random().toString(36).slice(2, 6)}`;
-  }
+  const slug = await pickFreeCourseSlug(context, topic);
 
   const chargeRef = `course:${slug}:${Date.now()}`;
   const charged = await context.runMutation(internal.wallet.charge, {

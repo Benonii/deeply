@@ -46,6 +46,7 @@ export interface CheckModule {
   checkId: CheckID;
   version: string;
   stage: CheckStage;
+  prompt?: string;
   run: (input: CheckInput) => CheckOutcome | Promise<CheckOutcome>;
 }
 

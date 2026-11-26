@@ -14,6 +14,7 @@ export type ShellModule = {
   minutes: number;
   summary: string;
   status: 'ready' | 'pending' | 'writing' | 'failed';
+  isUnverified?: boolean;
   Component?: React.FC;
   pack?: ModulePack;
 };
@@ -92,6 +93,7 @@ export type GeneratedCourseDoc = {
     outline?: GeneratedModuleDetails;
     pack?: ModulePack;
     error?: string;
+    unverified?: boolean;
   }[];
 };
 
@@ -122,6 +124,7 @@ export function fromGenerated(doc: GeneratedCourseDoc, fallbackBrand: Brand): Sh
           minutes: details.minutes ?? 20,
           summary: details.summary ?? '',
           status: courseModule.status,
+          isUnverified: courseModule.unverified === true,
           pack: courseModule.status === 'ready' ? courseModule.pack : undefined
         };
       })

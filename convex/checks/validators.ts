@@ -1,8 +1,11 @@
+import { v } from 'convex/values';
 import { z } from 'zod';
 
 import { ConceptMap } from '../lib/conceptMapSchema';
 import { Challenge, GlossaryTerm, ModulePack } from '../lib/courseSchema';
 import { CheckSubmission } from './submissionSchema';
+
+export const checkMode = v.union(v.literal('on'), v.literal('off'), v.literal('shadow'));
 
 export const CheckStageName = z.enum(['code', 'network', 'agent']);
 

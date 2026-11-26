@@ -248,6 +248,12 @@ export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId
             <div className="eyebrow">
               Module {padTwoDigits(courseModule.n)}
               {courseModule.kicker ? ` · ${courseModule.kicker}` : ''} · {courseModule.minutes} min
+              {courseModule.isUnverified && (
+                <span className="muted" title="Some checks on this module did not pass before it was published.">
+                  {' '}
+                  · unverified
+                </span>
+              )}
             </div>
             <h1>{courseModule.title}</h1>
             <p className="lede">{courseModule.summary}</p>
