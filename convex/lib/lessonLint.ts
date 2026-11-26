@@ -12,11 +12,15 @@ export function parseTermReferences(text: string): TermReference[] {
   }));
 }
 
+const KEYS_HOLDING_SOURCE_CODE = new Set(['code']);
+
 function collectStrings(value: unknown): string[] {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.flatMap(collectStrings);
   if (value === null || typeof value !== 'object') return [];
-  return Object.values(value).flatMap(collectStrings);
+  return Object.entries(value)
+    .filter(([key]) => !KEYS_HOLDING_SOURCE_CODE.has(key))
+    .flatMap(([, entry]) => collectStrings(entry));
 }
 
 function collectConceptIds(value: unknown): string[] {

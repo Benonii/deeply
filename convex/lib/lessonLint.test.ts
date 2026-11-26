@@ -95,6 +95,18 @@ describe('lintLessonV2 glossary marks', () => {
     expectOnly(errors, /\[\[coroutine\]\] has no glossary entry/);
   });
 
+  it('leaves double brackets inside source code alone', () => {
+    const errors = lint([
+      { type: 'code', lang: 'python', code: 'first_row = frame[[0]]', note: 'Picks one column as a frame.' }
+    ]);
+    assert.deepEqual(errors, []);
+  });
+
+  it('still reads a mark in the note beside a code block', () => {
+    const errors = lint([{ type: 'code', lang: 'python', code: 'x = 1', note: 'A [[coroutine]] is different.' }]);
+    expectOnly(errors, /\[\[coroutine\]\] has no glossary entry/);
+  });
+
   it('resolves a mark against a term an earlier module taught', () => {
     const laterLesson = structuredClone(pythonGeneratorsPack.modules[1]);
     expectAmong(lintLessonV2(laterLesson, pythonGeneratorsMap), /\[\[iterator\]\] has no glossary entry/);
