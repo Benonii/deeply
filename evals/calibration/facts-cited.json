@@ -1,0 +1,645 @@
+{
+  "checkId": "facts-cited",
+  "cases": [
+    {
+      "id": "fc-stopiteration",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Python iterators",
+      "text": ["An iterator raises StopIteration when it has no items left. [^py-iterators]"],
+      "sources": [
+        {
+          "id": "py-iterators",
+          "quote": "When no more data are available a StopIteration exception is raised instead."
+        }
+      ]
+    },
+    {
+      "id": "fc-not-found-crash",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the spec says 404 means no representation was found, not that the server crashed",
+      "topic": "HTTP status codes",
+      "text": ["A 404 status means the server crashed while it handled the request. [^http-semantics]"],
+      "sources": [
+        {
+          "id": "http-semantics",
+          "quote": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource."
+        }
+      ]
+    },
+    {
+      "id": "fc-dict-order-uncited",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "a factual sentence with no citation mark",
+      "topic": "Python dictionaries",
+      "text": ["Python dictionaries keep keys in insertion order since version 3.7."],
+      "sources": [
+        {
+          "id": "py-dict",
+          "quote": "Changed in version 3.7: Dictionary order is guaranteed to be insertion order."
+        }
+      ]
+    },
+    {
+      "id": "fc-dict-order",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Python dictionaries",
+      "text": ["Since Python 3.7, dictionaries keep keys in the order they were inserted. [^py-dict]"],
+      "sources": [
+        {
+          "id": "py-dict",
+          "quote": "Changed in version 3.7: Dictionary order is guaranteed to be insertion order."
+        }
+      ]
+    },
+    {
+      "id": "fc-every-browser",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says most browsers, the sentence says every browser",
+      "topic": "WebSockets",
+      "text": ["Every modern browser supports WebSockets with no extra setup. [^ws-guide]"],
+      "sources": [{ "id": "ws-guide", "quote": "WebSockets are supported in most current browsers." }]
+    },
+    {
+      "id": "fc-page-size-wrong",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says 50, the sentence says 100",
+      "topic": "Paging through an API",
+      "text": ["When you leave out limit, the API returns 100 items per page. [^api-reference]"],
+      "sources": [{ "id": "api-reference", "quote": "If limit is omitted, the API returns 50 items per page." }]
+    },
+    {
+      "id": "fc-page-size",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Paging through an API",
+      "text": ["When you leave out limit, the API returns 50 items per page. [^api-reference]"],
+      "sources": [{ "id": "api-reference", "quote": "If limit is omitted, the API returns 50 items per page." }]
+    },
+    {
+      "id": "fc-instruction-and-fact",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the instruction is not factual and the one fact is supported",
+      "topic": "Command-line tools",
+      "text": [
+        "Open a terminal and run the command below.",
+        "It prints the installed version and exits with status 0. [^cli-docs]"
+      ],
+      "sources": [{ "id": "cli-docs", "quote": "tool --version prints the installed version and exits with status 0." }]
+    },
+    {
+      "id": "fc-most-teams",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says the tool can run in CI, it says nothing about what most teams do",
+      "topic": "Database migrations",
+      "text": ["Most teams run the migration tool in their release pipeline. [^migrate-docs]"],
+      "sources": [{ "id": "migrate-docs", "quote": "The migration tool can be run from a CI pipeline." }]
+    },
+    {
+      "id": "fc-set-duplicates",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "\"adding an item that is already there changes nothing\" follows from \"no duplicate elements\" with a small step",
+      "topic": "Python sets",
+      "text": [
+        "A set never holds the same item twice, so adding an item that is already there changes nothing. [^py-sets]"
+      ],
+      "sources": [{ "id": "py-sets", "quote": "A set is an unordered collection with no duplicate elements." }]
+    },
+    {
+      "id": "fc-tls-zero-rtt",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the first sentence is supported, but the source says 0-RTT is only for resumed sessions, not every handshake",
+      "topic": "TLS 1.3",
+      "text": [
+        "TLS 1.3 removed static RSA key exchange. [^tls-notes]",
+        "It also made every handshake take zero round trips. [^tls-notes]"
+      ],
+      "sources": [
+        {
+          "id": "tls-notes",
+          "quote": "Static RSA and Diffie-Hellman cipher suites have been removed. When resuming a session, a client can send early data in its first message (0-RTT)."
+        }
+      ]
+    },
+    {
+      "id": "fc-analogy-and-fact",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the analogy is not factual and the fact is supported",
+      "topic": "Caching",
+      "text": [
+        "Think of a cache as a notebook on your desk instead of a library across town.",
+        "A cache hit is answered from local memory, with no network request. [^cache-docs]"
+      ],
+      "sources": [{ "id": "cache-docs", "quote": "A cache hit is served from local memory without a network request." }]
+    },
+    {
+      "id": "fc-unknown-source-id",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the mark names a source the map does not list",
+      "topic": "Git stash",
+      "text": ["git stash saves your uncommitted changes and leaves a clean working directory. [^git-manual]"],
+      "sources": [
+        {
+          "id": "git-docs",
+          "quote": "Use git stash when you want to record the current state of the working directory and the index, but want to go back to a clean working directory."
+        }
+      ]
+    },
+    {
+      "id": "fc-git-stash",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Git stash",
+      "text": ["git stash saves your uncommitted changes and leaves a clean working directory. [^git-docs]"],
+      "sources": [
+        {
+          "id": "git-docs",
+          "quote": "Use git stash when you want to record the current state of the working directory and the index, but want to go back to a clean working directory."
+        }
+      ]
+    },
+    {
+      "id": "fc-fetch-stable-version",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source puts stable fetch in version 21, the sentence says 18",
+      "topic": "Server-side JavaScript",
+      "text": ["The runtime's global fetch became stable in version 18. [^runtime-notes]"],
+      "sources": [{ "id": "runtime-notes", "quote": "Version 21 marks the global fetch API as stable." }]
+    },
+    {
+      "id": "fc-fetch-no-flag",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the sentence only claims availability without a flag, which the source says; it leaves out \"experimental\" but does not claim stability",
+      "topic": "Server-side JavaScript",
+      "text": ["Version 18 of the runtime made fetch available globally, with no flag. [^runtime-notes]"],
+      "sources": [
+        {
+          "id": "runtime-notes",
+          "quote": "Version 18 ships an experimental global fetch API, available without a flag."
+        }
+      ]
+    },
+    {
+      "id": "fc-http2-year",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote gives RFC 7540 and May 2015",
+      "topic": "HTTP/2",
+      "text": ["HTTP/2 was published as RFC 7540 in 2015. [^h2-rfc]"],
+      "sources": [{ "id": "h2-rfc", "quote": "RFC 7540, Hypertext Transfer Protocol Version 2 (HTTP/2), May 2015." }]
+    },
+    {
+      "id": "fc-http2-wrong-year",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says 2015, the sentence says 2012",
+      "topic": "HTTP/2",
+      "text": ["HTTP/2 was published in 2012. [^h2-rfc]"],
+      "sources": [{ "id": "h2-rfc", "quote": "RFC 7540, Hypertext Transfer Protocol Version 2 (HTTP/2), May 2015." }]
+    },
+    {
+      "id": "fc-body-limit",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "bodies over 10 MB are rejected, so 10 MB is the most a body can be",
+      "topic": "Upload limits",
+      "text": ["A request body can be at most 10 MB; anything larger is rejected with status 413. [^limits]"],
+      "sources": [{ "id": "limits", "quote": "Request bodies larger than 10 MB are rejected with status 413." }]
+    },
+    {
+      "id": "fc-body-truncated",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says rejected, the sentence says silently truncated",
+      "topic": "Upload limits",
+      "text": ["Request bodies larger than 10 MB are silently cut down to 10 MB. [^limits]"],
+      "sources": [{ "id": "limits", "quote": "Request bodies larger than 10 MB are rejected with status 413." }]
+    },
+    {
+      "id": "fc-eviction-uncited",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the second sentence states a fact with no citation",
+      "topic": "Caching",
+      "text": [
+        "Entries stay in the cache for 60 seconds by default. [^cache-reference]",
+        "When the cache is full it throws away the oldest entry first."
+      ],
+      "sources": [{ "id": "cache-reference", "quote": "The default time to live is 60 seconds." }]
+    },
+    {
+      "id": "fc-own-term-definition",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the first sentence defines the lesson's own term, so it needs no source; the fact is supported",
+      "topic": "Caching",
+      "text": [
+        "In this course, a warm cache is one that already holds the entries a request needs.",
+        "When the key is already in the cache, the value comes back without a database query. [^cache-reference]"
+      ],
+      "sources": [
+        {
+          "id": "cache-reference",
+          "quote": "When the requested key is present, the value is returned without a database query."
+        }
+      ]
+    },
+    {
+      "id": "fc-index-always",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says an index can speed up some queries at a cost, not always",
+      "topic": "Database indexes",
+      "text": ["An index always makes queries faster. [^db-guide]"],
+      "sources": [
+        {
+          "id": "db-guide",
+          "quote": "An index can speed up queries that filter on the indexed column, at the cost of slower writes."
+        }
+      ]
+    },
+    {
+      "id": "fc-index-tradeoff",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Database indexes",
+      "text": ["An index can speed up reads that filter on its column, but it slows down writes. [^db-guide]"],
+      "sources": [
+        {
+          "id": "db-guide",
+          "quote": "An index can speed up queries that filter on the indexed column, at the cost of slower writes."
+        }
+      ]
+    },
+    {
+      "id": "fc-udp-retransmits",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says the opposite",
+      "topic": "Transport protocols",
+      "text": ["UDP resends lost packets automatically. [^net-notes]"],
+      "sources": [
+        {
+          "id": "net-notes",
+          "quote": "UDP provides no guarantee of delivery and does not retransmit lost datagrams."
+        }
+      ]
+    },
+    {
+      "id": "fc-udp-no-resend",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Transport protocols",
+      "text": ["UDP does not resend datagrams that get lost on the way. [^net-notes]"],
+      "sources": [
+        {
+          "id": "net-notes",
+          "quote": "UDP provides no guarantee of delivery and does not retransmit lost datagrams."
+        }
+      ]
+    },
+    {
+      "id": "fc-stable-sort",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the sentence about the next section is not factual and the stability fact is supported",
+      "topic": "Sorting in Python",
+      "text": [
+        "In the next section we will measure this ourselves.",
+        "Python's sorted() is stable, so items that compare equal keep their original order. [^py-sorting]"
+      ],
+      "sources": [
+        {
+          "id": "py-sorting",
+          "quote": "The built-in sorted() function is guaranteed to be stable. A sort is stable if it guarantees not to change the relative order of elements that compare equal."
+        }
+      ]
+    },
+    {
+      "id": "fc-sort-algorithm",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says nothing about which algorithm sorted() uses",
+      "topic": "Sorting in Python",
+      "text": ["Python's sorted() uses quicksort under the hood. [^py-sorting]"],
+      "sources": [
+        {
+          "id": "py-sorting",
+          "quote": "The built-in sorted() function is guaranteed to be stable. A sort is stable if it guarantees not to change the relative order of elements that compare equal."
+        }
+      ]
+    },
+    {
+      "id": "fc-reset-midnight",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the source says limits reset daily, it does not say when; the sentence adds midnight UTC",
+      "topic": "Rate limits",
+      "text": ["Rate limits reset at midnight UTC. [^rate-docs]"],
+      "sources": [{ "id": "rate-docs", "quote": "Rate limits reset daily." }]
+    },
+    {
+      "id": "fc-reset-daily",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Rate limits",
+      "text": ["Rate limits reset once a day. [^rate-docs]"],
+      "sources": [{ "id": "rate-docs", "quote": "Rate limits reset daily." }]
+    },
+    {
+      "id": "fc-outage-percentage",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says most common trigger, it gives no 90% figure",
+      "topic": "Running services",
+      "text": ["About 90% of outages are caused by configuration changes. [^ops-review]"],
+      "sources": [
+        {
+          "id": "ops-review",
+          "quote": "In our review, configuration changes were the most common trigger of outages."
+        }
+      ]
+    },
+    {
+      "id": "fc-git-snapshots",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "both sentences are stated by the quote",
+      "topic": "How Git stores history",
+      "text": [
+        "Git stores each commit as a snapshot of the project. [^git-book]",
+        "Every commit also records which commit came directly before it. [^git-book]"
+      ],
+      "sources": [
+        {
+          "id": "git-book",
+          "quote": "Git thinks of its data like a series of snapshots. Each commit stores a pointer to the commit or commits that directly came before it, its parent or parents."
+        }
+      ]
+    },
+    {
+      "id": "fc-free-plan-uncited",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "a factual number with no citation",
+      "topic": "Plans and limits",
+      "text": ["The free plan allows three projects per account."],
+      "sources": [{ "id": "pricing-page", "quote": "Free accounts can create up to three projects." }]
+    },
+    {
+      "id": "fc-upgrade-uncited",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the first fact is cited and supported, the second fact has no citation",
+      "topic": "Plans and limits",
+      "text": [
+        "Free accounts can create up to three projects. [^pricing-page]",
+        "Upgrades take effect immediately, without a restart."
+      ],
+      "sources": [{ "id": "pricing-page", "quote": "Free accounts can create up to three projects." }]
+    },
+    {
+      "id": "fc-utf8-lengths",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Text encoding",
+      "text": ["UTF-8 uses between one and four bytes for each character. [^unicode-notes]"],
+      "sources": [{ "id": "unicode-notes", "quote": "UTF-8 encodes each code point in one to four bytes." }]
+    },
+    {
+      "id": "fc-utf8-two-bytes",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says one to four bytes, not always two",
+      "topic": "Text encoding",
+      "text": ["UTF-8 always uses two bytes per character. [^unicode-notes]"],
+      "sources": [{ "id": "unicode-notes", "quote": "UTF-8 encodes each code point in one to four bytes." }]
+    },
+    {
+      "id": "fc-redirect-cached-mostly",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "\"most browsers\" matches \"browsers typically\" closely enough",
+      "topic": "HTTP redirects",
+      "text": ["Most browsers cache a 301 redirect, so later visits go straight to the new address. [^redirect-guide]"],
+      "sources": [
+        {
+          "id": "redirect-guide",
+          "quote": "Browsers typically cache 301 responses and go straight to the new location on later requests."
+        }
+      ]
+    },
+    {
+      "id": "fc-redirect-cached-forever",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the source says typically cached, not cached forever",
+      "topic": "HTTP redirects",
+      "text": ["Browsers cache a 301 redirect forever. [^redirect-guide]"],
+      "sources": [
+        {
+          "id": "redirect-guide",
+          "quote": "Browsers typically cache 301 responses and go straight to the new location on later requests."
+        }
+      ]
+    },
+    {
+      "id": "fc-json-trailing-comma",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "JSON syntax",
+      "text": ["JSON does not allow a comma after the last item of an array or object. [^json-notes]"],
+      "sources": [
+        {
+          "id": "json-notes",
+          "quote": "A comma separates values; a trailing comma after the last value is not allowed in arrays or objects."
+        }
+      ]
+    },
+    {
+      "id": "fc-json-comments",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source is about commas and says nothing about comments",
+      "topic": "JSON syntax",
+      "text": ["JSON allows comments that start with //. [^json-notes]"],
+      "sources": [
+        {
+          "id": "json-notes",
+          "quote": "A comma separates values; a trailing comma after the last value is not allowed in arrays or objects."
+        }
+      ]
+    },
+    {
+      "id": "fc-exit-zero",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Command-line programs",
+      "text": ["A program that finishes successfully exits with status 0. [^shell-notes]"],
+      "sources": [
+        { "id": "shell-notes", "quote": "A zero exit status indicates success; a non-zero status indicates failure." }
+      ]
+    },
+    {
+      "id": "fc-exit-one-meaning",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source only says non-zero means failure, not what 1 means",
+      "topic": "Command-line programs",
+      "text": ["An exit status of 1 always means a file was not found. [^shell-notes]"],
+      "sources": [
+        { "id": "shell-notes", "quote": "A zero exit status indicates success; a non-zero status indicates failure." }
+      ]
+    },
+    {
+      "id": "fc-century-leap",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Calendars in code",
+      "text": ["A year divisible by 100 is a leap year only if it is also divisible by 400. [^calendar-rules]"],
+      "sources": [
+        {
+          "id": "calendar-rules",
+          "quote": "Every year divisible by 4 is a leap year, except years divisible by 100, which are leap years only if they are also divisible by 400."
+        }
+      ]
+    },
+    {
+      "id": "fc-every-fourth-year",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the sentence drops the century exception the source states, so the source contradicts it",
+      "topic": "Calendars in code",
+      "text": ["Every year divisible by 4 is a leap year. [^calendar-rules]"],
+      "sources": [
+        {
+          "id": "calendar-rules",
+          "quote": "Every year divisible by 4 is a leap year, except years divisible by 100, which are leap years only if they are also divisible by 400."
+        }
+      ]
+    },
+    {
+      "id": "fc-writable-layer",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Containers",
+      "text": ["Each container gets its own writable layer on top of the image it was started from. [^container-docs]"],
+      "sources": [
+        {
+          "id": "container-docs",
+          "quote": "When a container starts, a thin writable layer is added on top of the read-only image layers, and its changes are stored there."
+        }
+      ]
+    },
+    {
+      "id": "fc-shared-writable-layer",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source says each container gets its own layer",
+      "topic": "Containers",
+      "text": ["Containers started from the same image share one writable layer. [^container-docs]"],
+      "sources": [
+        {
+          "id": "container-docs",
+          "quote": "When a container starts, a thin writable layer is added on top of the read-only image layers, and its changes are stored there."
+        }
+      ]
+    },
+    {
+      "id": "fc-uploads-not-downloads",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the source is about downloads, the sentence about uploads; easy to miss",
+      "topic": "Command-line tools",
+      "text": ["The tool retries a failed upload up to three times. [^cli-reference]"],
+      "sources": [{ "id": "cli-reference", "quote": "The tool retries failed downloads up to three times." }]
+    },
+    {
+      "id": "fc-bcrypt-slow",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the quote states the sentence",
+      "topic": "Storing passwords",
+      "text": ["Bcrypt is slow on purpose, which makes each password guess more expensive. [^password-guide]"],
+      "sources": [
+        {
+          "id": "password-guide",
+          "quote": "Bcrypt is deliberately slow, so each guess in a brute-force attack costs more."
+        }
+      ]
+    },
+    {
+      "id": "fc-bcrypt-best",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the source ranks another algorithm first and calls bcrypt acceptable for legacy systems",
+      "topic": "Storing passwords",
+      "text": ["Bcrypt is the best password hashing algorithm available. [^password-guide]"],
+      "sources": [
+        {
+          "id": "password-guide",
+          "quote": "Argon2id is the first choice for new systems; bcrypt remains acceptable for legacy systems."
+        }
+      ]
+    },
+    {
+      "id": "fc-memoized-faster",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the instructions are not factual; \"faster because the result is reused\" follows from the quote with a small step",
+      "topic": "Memoization",
+      "text": [
+        "Run the example twice and watch the timer.",
+        "The second call returns the stored result instead of computing it again. [^memo-docs]"
+      ],
+      "sources": [
+        {
+          "id": "memo-docs",
+          "quote": "Repeated calls with the same arguments return the stored result instead of recomputing it."
+        }
+      ]
+    },
+    {
+      "id": "fc-star-uncited-wrong",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the second sentence is uncited and also contradicts the source",
+      "topic": "Regular expressions",
+      "text": [
+        "The regex engine scans the string from left to right. [^regex-docs]",
+        "A star matches one or more repetitions of the item before it."
+      ],
+      "sources": [
+        {
+          "id": "regex-docs",
+          "quote": "The engine scans the string from left to right. The * quantifier matches zero or more repetitions of the preceding item."
+        }
+      ]
+    }
+  ]
+}

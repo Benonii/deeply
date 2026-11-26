@@ -12,7 +12,9 @@ import type { GlossaryTerm, ModulePack as ModulePackType } from '../lib/courseSc
 
 const PACK_SCHEMA = JSON.stringify(z.toJSONSchema(ModulePack, { io: 'input', unrepresentable: 'any' }));
 
-const SUBMISSION_SCHEMA = JSON.stringify(z.toJSONSchema(CheckSubmission, { io: 'input', unrepresentable: 'any' }));
+export const SUBMISSION_SCHEMA = JSON.stringify(
+  z.toJSONSchema(CheckSubmission, { io: 'input', unrepresentable: 'any' })
+);
 
 export interface EarlierModule {
   plan: ModulePlan;

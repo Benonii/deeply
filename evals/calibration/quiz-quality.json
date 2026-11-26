@@ -1,0 +1,543 @@
+{
+  "checkId": "quiz-quality",
+  "cases": [
+    {
+      "id": "qq-range-end",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "both wrong options are the off-by-one readings learners really make",
+      "topic": "Python ranges",
+      "question": "What does list(range(2, 5)) return?",
+      "options": ["[2, 3, 4]", "[2, 3, 4, 5]", "[3, 4, 5]"],
+      "key": 0
+    },
+    {
+      "id": "qq-range-joke",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"a picture of a cat\" is a joke option nobody picks",
+      "topic": "Python ranges",
+      "question": "What does list(range(2, 5)) return?",
+      "options": ["[2, 3, 4]", "[2, 3, 4, 5]", "A picture of a cat"],
+      "key": 0
+    },
+    {
+      "id": "qq-typeof-null",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "\"null\" and \"undefined\" are exactly what learners expect typeof null to be",
+      "topic": "JavaScript types",
+      "question": "What does typeof null evaluate to in JavaScript?",
+      "options": ["\"object\"", "\"null\"", "\"undefined\""],
+      "key": 0
+    },
+    {
+      "id": "qq-not-found-fire",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"the server catches fire\" is filler",
+      "topic": "HTTP status codes",
+      "question": "Which status code means the requested resource was not found?",
+      "options": ["404", "500", "403", "The server catches fire"],
+      "key": 0
+    },
+    {
+      "id": "qq-count-nulls",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "5 is the belief that COUNT counts NULLs, 2 is counting the NULLs themselves",
+      "topic": "SQL aggregates",
+      "question": "A table has 5 rows and 2 of them have a NULL email. What does SELECT COUNT(email) return?",
+      "options": ["3", "5", "2"],
+      "key": 0
+    },
+    {
+      "id": "qq-git-add-duplicate",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the second option repeats the right answer with one word changed",
+      "topic": "Git basics",
+      "question": "What does git add do?",
+      "options": [
+        "Stages changes for the next commit",
+        "Stages the changes for the next commit.",
+        "Uploads commits to the remote",
+        "Creates a new branch"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-var-closure",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "0 1 2 is the classic wrong expectation, 0 0 0 is a real misreading of capture",
+      "topic": "JavaScript closures",
+      "question": "for (var i = 0; i < 3; i++) setTimeout(() => console.log(i)); What is printed?",
+      "options": ["3 3 3", "0 1 2", "0 0 0"],
+      "key": 0
+    },
+    {
+      "id": "qq-hash-framework",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"a JavaScript framework\" is a category error",
+      "topic": "Hash functions",
+      "question": "What does a hash function return?",
+      "options": [
+        "A fixed-size digest of its input",
+        "The input, encrypted",
+        "A JavaScript framework",
+        "A different random number each time"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-float-equality",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "True is the main misconception; the operating-system option is weak but a real half-belief about floats",
+      "topic": "Floating point",
+      "question": "What does 0.1 + 0.2 == 0.3 evaluate to in Python?",
+      "options": ["False", "True", "It depends on the operating system"],
+      "key": 0
+    },
+    {
+      "id": "qq-nested-loops",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "O(n), O(2n) and O(n log n) are all mistakes learners make when counting nested loops",
+      "topic": "Big O notation",
+      "question": "A loop over n items runs another loop over the same n items inside it. What is the time complexity?",
+      "options": ["O(n^2)", "O(n)", "O(2n)", "O(n log n)"],
+      "key": 0
+    },
+    {
+      "id": "qq-hash-banana",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "O(banana) is a joke",
+      "topic": "Hash maps",
+      "question": "What is the average time to look up a key in a hash map?",
+      "options": ["O(1)", "O(n)", "O(log n)", "O(banana)"],
+      "key": 0
+    },
+    {
+      "id": "qq-dns-return",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the page and the certificate are what learners mix up with a DNS answer",
+      "topic": "How DNS works",
+      "question": "What does a DNS lookup return for a hostname?",
+      "options": ["An IP address", "The page's HTML", "The site's TLS certificate"],
+      "key": 0
+    },
+    {
+      "id": "qq-lifo-all-of-above",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "\"all of the above\" and \"none of the above\" are filler, not mistakes about stacks",
+      "topic": "Stacks and queues",
+      "question": "Which structure hands back the last item you put in?",
+      "options": ["Stack", "Queue", "All of the above", "None of the above"],
+      "key": 0
+    },
+    {
+      "id": "qq-retransmit",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "UDP and IP are the neighbouring protocols learners confuse with TCP",
+      "topic": "Transport protocols",
+      "question": "Which protocol resends packets that get lost?",
+      "options": ["TCP", "UDP", "IP"],
+      "key": 0
+    },
+    {
+      "id": "qq-byte-million",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "a million bits in a byte is absurd",
+      "topic": "Units of data",
+      "question": "How many bits are in a byte?",
+      "options": ["8", "16", "4", "1,000,000"],
+      "key": 0
+    },
+    {
+      "id": "qq-median-even",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "2 and 3 come from picking one middle value instead of averaging the two",
+      "topic": "Descriptive statistics",
+      "question": "What is the median of 1, 2, 3, 4?",
+      "options": ["2.5", "2", "3"],
+      "key": 0
+    },
+    {
+      "id": "qq-percent-increase",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "10% is the raw difference, 16.7% divides by the new value: both real mistakes",
+      "topic": "Percentages",
+      "question": "A price goes from 50 to 60. By what percentage did it rise?",
+      "options": ["20%", "10%", "16.7%"],
+      "key": 0
+    },
+    {
+      "id": "qq-push-desk",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"pushes the computer off the desk\" is a joke",
+      "topic": "Git remotes",
+      "question": "What does git push do?",
+      "options": [
+        "Sends your local commits to the remote",
+        "Downloads commits from the remote",
+        "Pushes the computer off the desk",
+        "Deletes the current branch"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-mutable-default",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "[1] is the expectation that defaults are fresh, [] that append did not stick",
+      "topic": "Python functions",
+      "question": "def f(x=[]):\n    x.append(1)\n    return x\nf()\nWhat does a second call f() return?",
+      "options": ["[1, 1]", "[1]", "[]"],
+      "key": 0
+    },
+    {
+      "id": "qq-utf8-same-option",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"Two bytes\" is the right answer written again in words",
+      "topic": "Text encoding",
+      "question": "How many bytes does é (U+00E9) take in UTF-8?",
+      "options": ["2 bytes", "Two bytes", "1 byte", "4 bytes"],
+      "key": 0
+    },
+    {
+      "id": "qq-inner-join",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the NULL row is the left-join behaviour learners expect, the zero count is the aggregate confusion",
+      "topic": "SQL joins",
+      "question": "You INNER JOIN customers to orders. What happens to a customer with no orders?",
+      "options": [
+        "They do not appear",
+        "They appear once with NULL order columns",
+        "They appear with an order count of 0"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-where-ceo",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"the CEO\" is not a SQL clause and nobody would pick it",
+      "topic": "SQL filtering",
+      "question": "Which clause filters rows before they are grouped?",
+      "options": ["WHERE", "HAVING", "ORDER BY", "The CEO"],
+      "key": 0
+    },
+    {
+      "id": "qq-stop-loop",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "continue, return and exit are all things learners reach for to leave a loop",
+      "topic": "Python loops",
+      "question": "Which statement leaves a for loop early and carries on after it?",
+      "options": ["break", "continue", "return", "exit()"],
+      "key": 0
+    },
+    {
+      "id": "qq-len-negative",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "-3 is not a mistake anyone makes about len",
+      "topic": "Python strings",
+      "question": "What does len('abc') return?",
+      "options": ["3", "2", "-3", "'abc'"],
+      "key": 0
+    },
+    {
+      "id": "qq-queue-first",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the last item is the stack confusion, the smallest item is the priority-queue confusion",
+      "topic": "Queues",
+      "question": "You enqueue 3, then 1, then 2 and dequeue once. What do you get?",
+      "options": ["3, the first one added", "2, the last one added", "1, the smallest"],
+      "key": 0
+    },
+    {
+      "id": "qq-stack-explodes",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"the stack explodes\" is filler",
+      "topic": "Stacks",
+      "question": "You push 1, then 2, then 3 onto a stack and pop once. What do you get?",
+      "options": ["3", "1", "The stack explodes"],
+      "key": 0
+    },
+    {
+      "id": "qq-exit-code",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "1 comes from treating 1 as true, -1 from C-style error returns",
+      "topic": "Command-line programs",
+      "question": "Which exit status means a command succeeded on a Unix-like system?",
+      "options": ["0", "1", "-1"],
+      "key": 0
+    },
+    {
+      "id": "qq-index-speeds",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "faster writes and faster everything are the two common beliefs about indexes",
+      "topic": "Database indexes",
+      "question": "Adding an index on a column mostly speeds up what?",
+      "options": ["Reads that filter on that column", "Writes to that table", "Every query on the database"],
+      "key": 0
+    },
+    {
+      "id": "qq-git-history-please",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"git history --please\" is a joke command",
+      "topic": "Git history",
+      "question": "Which command lists the commit history of the current branch?",
+      "options": ["git log", "git status", "git history --please", "git diff"],
+      "key": 0
+    },
+    {
+      "id": "qq-leap-year",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "1900 and 2100 are the century years learners think are leap years",
+      "topic": "Calendars in code",
+      "question": "Which of these years is a leap year?",
+      "options": ["2000", "1900", "2100"],
+      "key": 0
+    },
+    {
+      "id": "qq-median-blue",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"Blue\" is not a number",
+      "topic": "Descriptive statistics",
+      "question": "What is the median of 1, 2, 3, 4, 100?",
+      "options": ["3", "22", "Blue", "4"],
+      "key": 0
+    },
+    {
+      "id": "qq-unsigned-wrap",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "256 ignores the width, an error is what checked languages do",
+      "topic": "Integer overflow",
+      "question": "An unsigned 8-bit counter holds 255 and you add 1, in a language where unsigned integers wrap. What does it hold?",
+      "options": ["0", "256", "It raises an overflow error"],
+      "key": 0
+    },
+    {
+      "id": "qq-moved-permanently-twice",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"Permanently moved\" says the same as the right answer",
+      "topic": "HTTP redirects",
+      "question": "What does HTTP status 301 mean?",
+      "options": ["Moved permanently", "Moved temporarily", "Permanently moved", "Not modified"],
+      "key": 0
+    },
+    {
+      "id": "qq-css-specificity",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "more classes winning and source order winning are both real beliefs",
+      "topic": "CSS specificity",
+      "question": "Both rules set the colour of the same link. Which wins: \"#nav a\" or \".menu a.link\"?",
+      "options": ["#nav a", ".menu a.link", "Whichever rule comes last in the file"],
+      "key": 0
+    },
+    {
+      "id": "qq-recursion-poem",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"it prints a poem\" is filler",
+      "topic": "Recursion",
+      "question": "A recursive function has no base case. What usually happens?",
+      "options": [
+        "The call stack overflows",
+        "It returns None after the first call",
+        "It runs forever using constant memory",
+        "It prints a poem"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-child-env",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "learners believe the change leaks to the parent, or that it removes the variable there",
+      "topic": "Processes",
+      "question": "A child process changes an environment variable it inherited. What happens to the parent's value?",
+      "options": ["It keeps its old value", "It takes the child's new value", "It is removed from the parent"],
+      "key": 0
+    },
+    {
+      "id": "qq-angle-bracket-list",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the tuple and set are real confusions, but <1, 2, 3> is not syntax any learner would write in Python",
+      "topic": "Python lists",
+      "question": "Which of these creates a list in Python?",
+      "options": ["[1, 2, 3]", "(1, 2, 3)", "{1, 2, 3}", "<1, 2, 3>"],
+      "key": 0
+    },
+    {
+      "id": "qq-precision",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "8% misplaces the decimal and the third option is the precision-recall confusion",
+      "topic": "Classifier metrics",
+      "question": "A spam filter flags 10 emails and 8 of them really are spam. What is its precision?",
+      "options": ["80%", "8%", "It cannot be known without the total number of spam emails"],
+      "key": 0
+    },
+    {
+      "id": "qq-precision-kilograms",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"measured in kilograms\" is a category error",
+      "topic": "Classifier metrics",
+      "question": "A spam filter flags 10 emails and 8 of them really are spam. What is its precision?",
+      "options": [
+        "80%",
+        "8%",
+        "It cannot be known without the total number of spam emails",
+        "Precision is measured in kilograms"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-event-loop",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "a b c is the belief that a zero timeout runs at once, b a c is running timers first",
+      "topic": "The JavaScript event loop",
+      "question": "console.log('a'); setTimeout(() => console.log('b'), 0); console.log('c'); In what order are the letters printed?",
+      "options": ["a c b", "a b c", "b a c"],
+      "key": 0
+    },
+    {
+      "id": "qq-event-loop-user",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the browser asking the user is not a belief anyone holds",
+      "topic": "The JavaScript event loop",
+      "question": "console.log('a'); setTimeout(() => console.log('b'), 0); console.log('c'); In what order are the letters printed?",
+      "options": ["a c b", "a b c", "The browser asks the user which to print first"],
+      "key": 0
+    },
+    {
+      "id": "qq-container-layer",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "sharing files through the image is the main misconception; the restart option is weaker but still a half-belief",
+      "topic": "Containers",
+      "question": "Two containers run from the same image. One writes a file. Does the other see it?",
+      "options": [
+        "No, each container has its own writable layer",
+        "Yes, they share the image, so they share its files",
+        "Only after the other container restarts"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-regex-star",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "learners think ac fails because b* needs a b, and that long runs fail",
+      "topic": "Regular expressions",
+      "question": "Which string does ^ab*c$ NOT match?",
+      "options": ["abac", "ac", "abbbc"],
+      "key": 0
+    },
+    {
+      "id": "qq-append-twice",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"append()\" is the right option again with brackets added",
+      "topic": "Python lists",
+      "question": "Which list method adds one item to the end of a Python list?",
+      "options": ["append", "extend", "append()", "insert"],
+      "key": 0
+    },
+    {
+      "id": "qq-fetch-page",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "all four are real methods; POST and PUT are what newcomers reach for, DELETE is weak but on topic",
+      "topic": "HTTP methods",
+      "question": "Which HTTP method does a browser use to load a page from a link?",
+      "options": ["GET", "POST", "PUT", "DELETE"],
+      "key": 0
+    },
+    {
+      "id": "qq-percent-decrease",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "20% divides by the new value, 10% is the raw difference",
+      "topic": "Percentages",
+      "question": "A price goes from 60 to 50. By what percentage did it fall?",
+      "options": ["16.7%", "20%", "10%"],
+      "key": 0
+    },
+    {
+      "id": "qq-hash-ask-nicely",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"just ask nicely\" is a joke",
+      "topic": "Hash functions",
+      "question": "Can you recover the input from its SHA-256 digest?",
+      "options": [
+        "Only by guessing inputs and comparing digests",
+        "Yes, decrypt it with the key",
+        "Yes, with enough memory it can be reversed",
+        "No problem, just ask nicely"
+      ],
+      "key": 0
+    },
+    {
+      "id": "qq-mean-outlier",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "3 is the median-for-mean confusion, 4 drops the outlier",
+      "topic": "Descriptive statistics",
+      "question": "What is the mean of 1, 2, 3, 4, 100?",
+      "options": ["22", "3", "4"],
+      "key": 0
+    },
+    {
+      "id": "qq-git-delete",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "\"git delete\" is not a command and does not come from a real misunderstanding of undo",
+      "topic": "Undoing in Git",
+      "question": "Which command safely undoes a commit that others have already pulled?",
+      "options": ["git revert", "git reset --hard", "git commit --amend", "git delete"],
+      "key": 0
+    },
+    {
+      "id": "qq-binary-search",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "O(n) is linear-search thinking, O(1) is hash-map thinking",
+      "topic": "Binary search",
+      "question": "What is the time complexity of binary search on a sorted array?",
+      "options": ["O(log n)", "O(n)", "O(1)"],
+      "key": 0
+    }
+  ]
+}
