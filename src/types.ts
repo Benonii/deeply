@@ -162,6 +162,15 @@ export interface MarkdownSegment {
   text: string;
 }
 
+export type InlineToken =
+  | { kind: 'text'; text: string }
+  | { kind: 'code'; text: string }
+  | { kind: 'bold'; text: string }
+  | { kind: 'emphasis'; text: string }
+  | { kind: 'citation'; text: string }
+  | { kind: 'term'; text: string; termId: string }
+  | { kind: 'link'; text: string; href: string };
+
 export type VideoBlockData = Extract<Block, { type: 'video' }>;
 export type ArticleBlockData = Extract<Block, { type: 'article' }>;
 export type ExplainBackBlockData = Extract<Block, { type: 'explainback' }>;
