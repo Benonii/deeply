@@ -137,6 +137,27 @@ export default defineSchema({
     .index('by_hash', ['pairingHash'])
     .index('by_expiry', ['expiresAt']),
 
+  conceptMedia: defineTable({
+    conceptKey: v.string(),
+    topic: v.string(),
+    conceptName: v.string(),
+    conceptId: v.string(),
+    videoCandidates: v.optional(v.any()),
+    articleCandidates: v.optional(v.any()),
+    videos: v.optional(v.any()),
+    articles: v.optional(v.any()),
+    fetchedAt: v.number(),
+    quotaUnits: v.number()
+  }).index('by_concept_key', ['conceptKey']),
+
+  finderQuota: defineTable({
+    day: v.string(),
+    conceptKey: v.string(),
+    call: v.union(v.literal('search'), v.literal('videos'), v.literal('commentThreads'), v.literal('channels')),
+    calls: v.number(),
+    units: v.number()
+  }).index('by_day', ['day']),
+
   messages: defineTable({ room: v.string(), author: v.string(), body: v.string() }).index('by_room', ['room']),
   counters: defineTable({ name: v.string(), value: v.number() }).index('by_name', ['name'])
 });

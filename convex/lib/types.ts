@@ -143,3 +143,15 @@ export type CreateAgentKeyResult =
   | { status: 'auth' }
   | { status: 'invalid'; message: string }
   | { status: 'rateLimited'; retryAfterMs: number };
+
+export interface UrlProbe {
+  status?: number;
+  error?: string;
+}
+
+export interface WebFetchOptions {
+  fetchResponse: typeof fetch;
+  timeoutMs: number;
+  method?: 'GET' | 'HEAD';
+  accept?: string;
+}
