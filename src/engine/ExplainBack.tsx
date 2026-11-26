@@ -5,13 +5,7 @@ import { useLesson } from './lesson';
 import { Inline } from './md';
 
 import type { GradeResult } from '../../convex/player/types';
-import type {
-  ExplainAction,
-  ExplainBackBlockData,
-  ExplainBackGrade,
-  ExplainBackStatus,
-  MarkPhase
-} from '../types';
+import type { ExplainAction, ExplainBackBlockData, ExplainBackGrade, ExplainBackStatus, MarkPhase } from '../types';
 
 interface ExplainBackProps {
   block: ExplainBackBlockData;
