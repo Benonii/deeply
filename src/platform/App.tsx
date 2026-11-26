@@ -127,7 +127,8 @@ function PlatformNav() {
   return (
     <nav aria-label="Deeply">
       <div className="nav-label">Explore</div>
-      {item('/', 'All courses', '◇', route === '/')}
+      {item('/', 'Chat', '◈', route === '/')}
+      {item('/courses', 'All courses', '◇', route.startsWith('/courses'))}
       {item('/create', 'Create a course', '+', route.startsWith('/create'))}
       {item('/account', 'Account & credits', '◎', route.startsWith('/account'))}
       <div className="nav-label">Courses</div>
@@ -161,6 +162,10 @@ function CourseRoutes({ course, section }: { course: ShellCourse; section?: Cour
             <nav aria-label="Deeply">
               <div className="nav-label">Deeply</div>
               <Link href="/" className="nav-item">
+                <span className="nav-n">◈</span>
+                <span className="nav-t">Chat</span>
+              </Link>
+              <Link href="/courses" className="nav-item">
                 <span className="nav-n">◇</span>
                 <span className="nav-t">All courses</span>
               </Link>

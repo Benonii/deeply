@@ -1,11 +1,12 @@
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { internalMutation, mutation, query } from './_generated/server';
 import type { Doc } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { currentUser } from './auth';
 import { reviewMasteryCard } from './lib/mastery';
-import { conceptActivityInput } from './lib/validators';
+import { conceptActivityInput, rubricPointResult } from './lib/validators';
 import type { ConceptActivityDetail, ConceptActivityInput, Learner } from './lib/types';
+import type { SaveGradeResult } from './player/types';
 
 const MAXIMUM_ID_LENGTH = 64;
 const MAXIMUM_SUBJECT_LENGTH = 200;
@@ -63,10 +64,10 @@ function readSavedDetail(input: ConceptActivityInput): ConceptActivityDetail {
 }
 
 function shouldReplacePreviousActivity(kind: ConceptActivityInput['kind']) {
-  return kind === 'articleCheckIn' || kind === 'videoWatch';
+  return kind === 'articleCheckIn' || kind === 'videoWatch' || kind === 'explainBack';
 }
 
-async function findActivity(context: QueryCtx, learner: Learner, courseId: string, subjectId: string) {
+export async function findActivity(context: QueryCtx, learner: Learner, courseId: string, subjectId: string) {
   if (learner.userId) {
     const mine = await context.db
       .query('conceptActivity')
@@ -102,7 +103,7 @@ async function findMastery(context: QueryCtx, learner: Learner, courseId: string
     .first();
 }
 
-async function updateMastery(
+export async function updateMastery(
   context: MutationCtx,
   learner: Learner,
   keys: { courseId: string; conceptId: string },
@@ -164,5 +165,43 @@ export const record = mutation({
         args.detail.isCorrect,
         now
       );
+  }
+});
+
+export const saveExplainBackGrade = internalMutation({
+  args: {
+    courseId: v.string(),
+    subjectId: v.string(),
+    conceptId: v.string(),
+    deviceId: v.string(),
+    userId: v.string(),
+    points: v.array(rubricPointResult),
+    isPass: v.boolean()
+  },
+  handler: async (context, args): Promise<SaveGradeResult> => {
+    const learner: Learner = { deviceId: args.deviceId, userId: args.userId };
+    const activity = await findActivity(context, learner, args.courseId, args.subjectId);
+    if (!activity || activity.detail.kind !== 'explainBack') return { status: 'notFound' };
+    if (activity.detail.status === 'graded') return { status: 'alreadyGraded' };
+    const now = Date.now();
+    await context.db.patch(activity._id, {
+      detail: {
+        kind: 'explainBack',
+        text: activity.detail.text,
+        status: 'graded',
+        points: args.points,
+        isPass: args.isPass,
+        gradedAt: now
+      },
+      updatedAt: now
+    });
+    await updateMastery(
+      context,
+      { deviceId: activity.deviceId, userId: activity.userId },
+      { courseId: args.courseId, conceptId: args.conceptId },
+      args.isPass,
+      now
+    );
+    return { status: 'saved' };
   }
 });

@@ -16,7 +16,7 @@ export const CHECK_REGISTRY: CheckRegistration[] = [
   { check: orderCheck, mode: 'on' },
   { check: jargonCheck, mode: 'shadow' },
   { check: loadCheck, mode: 'on' },
-  { check: quizQualityCheck, mode: 'on' },
+  { check: quizQualityCheck, mode: 'shadow' },
   { check: linksAndVideosCheck, mode: 'on' },
   { check: teachingQualityCheck, mode: 'on' }
 ];

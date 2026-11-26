@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { anyApi } from 'convex/server';
 
 import { buildTermIndex, listCourseConcepts } from './lessonIndex';
@@ -7,6 +7,7 @@ import { showToast } from './toast';
 
 import type { ModulePack } from '../../convex/lib/courseSchema';
 import type { ConceptActivityRow, CourseLearningState, MasteryRow } from '../../convex/lib/types';
+import type { GradeResult } from '../../convex/player/types';
 import type { LessonActivity, LessonState } from '../types';
 
 interface LessonModule {
@@ -32,7 +33,8 @@ const noLesson: LessonState = {
   concepts: [],
   masteryByConcept: new Map(),
   activityBySubject: new Map(),
-  recordActivity: () => {}
+  recordActivity: () => {},
+  submitExplainBack: async () => ({ status: 'unsupported' })
 };
 
 export const LessonContext = createContext<LessonState>(noLesson);
@@ -48,6 +50,7 @@ export function useLessonState({ courseId, basePath, moduleId, modules, deviceId
     | CourseLearningState
     | undefined;
   const record = useMutation(anyApi.mastery.record);
+  const grade = useAction(anyApi.player.explainBack.grade);
   const saved = useMemo(
     () => ({
       masteryByConcept: new Map((learning?.concepts ?? []).map((row: MasteryRow) => [row.conceptId, row])),
@@ -63,5 +66,20 @@ export function useLessonState({ courseId, basePath, moduleId, modules, deviceId
     },
     [record, courseId, moduleId, deviceId]
   );
-  return { courseId, basePath, moduleId, terms, concepts, ...saved, recordActivity };
+  const submitExplainBack = useCallback(
+    async (activity: LessonActivity): Promise<GradeResult> => {
+      try {
+        await record({ courseId, moduleId, deviceId, ...activity });
+      } catch {
+        return { status: 'error', message: "Couldn't save that. Check your connection." };
+      }
+      try {
+        return (await grade({ courseId, subjectId: activity.subjectId, deviceId })) as GradeResult;
+      } catch {
+        return { status: 'error', message: "Couldn't reach the marker. Try again." };
+      }
+    },
+    [record, grade, courseId, moduleId, deviceId]
+  );
+  return { courseId, basePath, moduleId, terms, concepts, ...saved, recordActivity, submitExplainBack };
 }

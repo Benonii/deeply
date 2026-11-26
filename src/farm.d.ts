@@ -18,6 +18,7 @@ export type RoutePath =
   | `/c/${string}`
   | `/c/${string}/m/${string}`
   | `/c/${string}/p/${string}`
+  | "/courses"
   | "/create"
   | `/create/${string}`
   | "/desktop/connect"
@@ -30,6 +31,7 @@ export type RoutePattern =
   | "/c/[course]"
   | "/c/[course]/m/[module]"
   | "/c/[course]/p/[page]"
+  | "/courses"
   | "/create"
   | "/create/[course]"
   | "/desktop/connect"
@@ -42,6 +44,7 @@ export type RouteModulePattern =
   | "/c/[course]"
   | "/c/[course]/m/[module]"
   | "/c/[course]/p/[page]"
+  | "/courses"
   | "/create"
   | "/create/[course]"
   | "/desktop/connect"

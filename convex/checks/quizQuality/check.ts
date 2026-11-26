@@ -94,7 +94,7 @@ function checkQuizQuality(input: CheckInput): CheckOutcome {
 
 export const quizQualityCheck: CheckModule = {
   checkId: 'quiz-quality',
-  version: '1.0.0',
+  version: '1.1.0',
   stage: 'agent',
   prompt: quizQualityPrompt,
   run: checkQuizQuality

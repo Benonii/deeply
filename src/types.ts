@@ -1,6 +1,8 @@
 import type { convexBetterAuth } from '@farm.js/convex/better-auth';
 import type { Block, Challenge } from '../convex/lib/courseSchema';
-import type { ConceptActivityInput, ConceptActivityRow, MasteryRow } from '../convex/lib/types';
+import type { ConceptActivityDetail, ConceptActivityInput } from '../convex/lib/types';
+import type { ConceptActivityRow, MasteryRow } from '../convex/lib/types';
+import type { GradeResult } from '../convex/player/types';
 
 export interface GeneratedCourseMeta {
   title?: string;
@@ -240,6 +242,45 @@ export interface LessonActivity {
   detail: ConceptActivityInput;
 }
 
+export interface ContinueInClaudeInput {
+  courseTitle: string;
+  moduleTitle: string;
+  quote: string;
+  question: string;
+  answer: string;
+}
+
+export interface AskSelection {
+  quote: string;
+  sectionId: string;
+  top: number;
+  left: number;
+}
+
+export type ExplainBackGrade = Extract<ConceptActivityDetail, { kind: 'explainBack'; status: 'graded' }>;
+
+export interface ExplainBackStatus {
+  isMarking: boolean;
+  isSaved: boolean;
+  grade: ExplainBackGrade | null;
+  metCount: number;
+}
+
+export type MarkPhase =
+  | { kind: 'idle' }
+  | { kind: 'marking' }
+  | { kind: 'marked' }
+  | { kind: 'rewriting' }
+  | { kind: 'problem'; message: string };
+
+export type ExplainAction = 'submit' | 'mark' | 'rewrite' | 'none';
+
+export type AskRequest =
+  | { kind: 'idle' }
+  | { kind: 'sending' }
+  | { kind: 'sent'; askId: string }
+  | { kind: 'refused'; message: string };
+
 export interface LessonState {
   courseId: string;
   basePath: string;
@@ -249,6 +290,7 @@ export interface LessonState {
   masteryByConcept: Map<string, MasteryRow>;
   activityBySubject: Map<string, ConceptActivityRow>;
   recordActivity: (activity: LessonActivity) => void;
+  submitExplainBack: (activity: LessonActivity) => Promise<GradeResult>;
 }
 
 export type ConvexBetterAuth = ReturnType<typeof convexBetterAuth>;

@@ -5,3 +5,4 @@ dist
 .convex
 *.log
 .vercel
+evals/reports
