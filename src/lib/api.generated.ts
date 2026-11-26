@@ -9,6 +9,7 @@ import type { POST as POST_chat } from "../app/api/chat/route";
 import type { POST as POST_desktop_session } from "../app/api/desktop/session/route";
 import type { POST as POST_desktop_sign_in } from "../app/api/desktop/sign-in/route";
 import type { POST as POST_mcp } from "../app/api/mcp/route";
+import type { GET as GET_skill } from "../app/api/skill/route";
 
 // Type-only representation of your API routes
 export type APIRouter = {
@@ -25,6 +26,9 @@ export type APIRouter = {
   };
   mcp: {
     post: typeof POST_mcp;
+  };
+  skill: {
+    get: typeof GET_skill;
   };
 };
 
@@ -45,5 +49,9 @@ export const apiRoutes = [
   {
     path: "/api/mcp",
     methods: ["POST"],
+  },
+  {
+    path: "/api/skill",
+    methods: ["GET"],
   },
 ] as const;
