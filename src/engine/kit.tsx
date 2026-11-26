@@ -629,12 +629,14 @@ export function Check({
   question: q,
   options,
   answer,
-  explain
+  explain,
+  onAnswer
 }: {
   question: string;
   options: string[];
   answer: number;
   explain: string;
+  onAnswer?: (choice: number, isCorrect: boolean) => void;
 }) {
   const [pick, setPick] = useState<number | null>(null);
   const courseModule = useContext(ModuleCtx);
@@ -670,7 +672,10 @@ export function Check({
             key={index}
             disabled={pick !== null}
             className={pick === null ? '' : index === answer ? 'right' : index === pick ? 'wrong' : 'dim'}
-            onClick={() => setPick(index)}
+            onClick={() => {
+              setPick(index);
+              onAnswer?.(index, index === answer);
+            }}
           >
             <span className="opt-letter">{String.fromCharCode(65 + index)}</span>
             <span>

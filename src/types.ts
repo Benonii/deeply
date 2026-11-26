@@ -1,5 +1,5 @@
 import type { convexBetterAuth } from '@farm.js/convex/better-auth';
-import type { Challenge } from '../convex/lib/courseSchema';
+import type { Block, Challenge } from '../convex/lib/courseSchema';
 import type { ConceptActivityInput, ConceptActivityRow, MasteryRow } from '../convex/lib/types';
 
 export interface GeneratedCourseMeta {
@@ -161,6 +161,10 @@ export interface MarkdownSegment {
   kind: 'prose' | 'code';
   text: string;
 }
+
+export type VideoBlockData = Extract<Block, { type: 'video' }>;
+export type ArticleBlockData = Extract<Block, { type: 'article' }>;
+export type ExplainBackBlockData = Extract<Block, { type: 'explainback' }>;
 
 export interface LessonTerm {
   id: string;

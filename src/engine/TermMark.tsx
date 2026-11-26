@@ -48,7 +48,7 @@ export const TermMark = ({ termId, display }: TermMarkProps) => {
         type="button"
         className="term-ref-word"
         aria-expanded={isOpen}
-        aria-controls={popoverID}
+        aria-controls={isOpen ? popoverID : undefined}
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={(event) => {
           if (event.key === 'Escape') setIsOpen(false);
@@ -56,20 +56,17 @@ export const TermMark = ({ termId, display }: TermMarkProps) => {
       >
         {display}
       </button>
-      <span
-        className={`term-ref-pop ${isOpen ? 'open' : ''}`}
-        id={popoverID}
-        ref={popoverRef}
-        style={{ left: shiftLeft }}
-      >
-        <span className="term-ref-name">{term.term}</span>
-        <span className="term-ref-def">{term.definition}</span>
-        {term.moduleId !== lesson.moduleId && (
-          <Link className="term-ref-back" href={`${lesson.basePath}/m/${term.moduleId}`}>
-            Taught in module {term.moduleNumber}: {term.moduleTitle} →
-          </Link>
-        )}
-      </span>
+      {isOpen && (
+        <span className="term-ref-pop" id={popoverID} ref={popoverRef} style={{ left: shiftLeft }}>
+          <span className="term-ref-name">{term.term}</span>
+          <span className="term-ref-def">{term.definition}</span>
+          {term.moduleId !== lesson.moduleId && (
+            <Link className="term-ref-back" href={`${lesson.basePath}/m/${term.moduleId}`}>
+              Taught in module {term.moduleNumber}: {term.moduleTitle} →
+            </Link>
+          )}
+        </span>
+      )}
     </span>
   );
 };
