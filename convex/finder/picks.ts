@@ -2,19 +2,12 @@ import { v } from 'convex/values';
 
 import { internalMutation, internalQuery } from '../_generated/server';
 import { toArticleBlocks, toVideoBlocks } from './blocks';
-import { isFresh } from './cache';
+import { findConceptRow, isFresh } from './cache';
 import { buildConceptKey } from './concepts';
 import { keepBest, scoreArticle, scoreVideo } from './scoring';
 import { ReadConceptMediaRequest, ScoreArticlesRequest, ScoreVideosRequest } from './validators';
 import { StoredArticleCandidates, StoredVideoCandidates } from './validators';
-import type { MutationCtx } from '../_generated/server';
 import type { RejectedTarget, ScoredArticle, ScoredVideo } from './types';
-
-const loadRow = (context: MutationCtx, conceptKey: string) =>
-  context.db
-    .query('conceptMedia')
-    .withIndex('by_concept_key', (index) => index.eq('conceptKey', conceptKey))
-    .unique();
 
 export const scoreVideos = internalMutation({
   args: { request: v.any() },
@@ -23,7 +16,7 @@ export const scoreVideos = internalMutation({
     if (!parsed.success)
       return { data: null, message: `the request does not match the schema: ${parsed.error.message}` };
     const { conceptKey, judgements, keep } = parsed.data;
-    const row = await loadRow(context, conceptKey);
+    const row = await findConceptRow(context.db, conceptKey);
     if (row === null) return { data: null, message: `nothing is cached for ${conceptKey}; find candidates first` };
     const stored = StoredVideoCandidates.safeParse(row.videoCandidates ?? []);
     if (!stored.success) return { data: null, message: `the cached candidates for ${conceptKey} are unreadable` };
@@ -55,7 +48,7 @@ export const scoreArticles = internalMutation({
     if (!parsed.success)
       return { data: null, message: `the request does not match the schema: ${parsed.error.message}` };
     const { conceptKey, judgements, keep } = parsed.data;
-    const row = await loadRow(context, conceptKey);
+    const row = await findConceptRow(context.db, conceptKey);
     if (row === null) return { data: null, message: `nothing is cached for ${conceptKey}; vet articles first` };
     const stored = StoredArticleCandidates.safeParse(row.articleCandidates ?? []);
     if (!stored.success) return { data: null, message: `the vetted pages for ${conceptKey} are unreadable` };
@@ -87,10 +80,7 @@ export const readConceptMedia = internalQuery({
     if (!parsed.success)
       return { data: null, message: `the request does not match the schema: ${parsed.error.message}` };
     const conceptKey = buildConceptKey(parsed.data);
-    const row = await context.db
-      .query('conceptMedia')
-      .withIndex('by_concept_key', (index) => index.eq('conceptKey', conceptKey))
-      .unique();
+    const row = await findConceptRow(context.db, conceptKey);
     if (row === null) return { data: null, message: `nothing is cached for ${conceptKey}` };
     const fresh = isFresh(row, Date.now());
     return {

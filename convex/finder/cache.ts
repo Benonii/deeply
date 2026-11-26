@@ -3,9 +3,17 @@ import { v } from 'convex/values';
 import { internalMutation, internalQuery } from '../_generated/server';
 import { finderThresholds, quotaUnitsPerCall } from './weights';
 import type { Doc } from '../_generated/dataModel';
+import type { DatabaseReader } from '../_generated/server';
 import type { QuotaSpend } from './types';
 
 const quotaCallNames = Object.keys(quotaUnitsPerCall) as (keyof typeof quotaUnitsPerCall)[];
+
+export function findConceptRow(database: DatabaseReader, conceptKey: string) {
+  return database
+    .query('conceptMedia')
+    .withIndex('by_concept_key', (index) => index.eq('conceptKey', conceptKey))
+    .unique();
+}
 
 export function isFresh(row: Doc<'conceptMedia'>, now: number): boolean {
   return now - row.fetchedAt < finderThresholds.cacheDays * 86_400 * 1000;
@@ -13,11 +21,7 @@ export function isFresh(row: Doc<'conceptMedia'>, now: number): boolean {
 
 export const loadConcept = internalQuery({
   args: { conceptKey: v.string() },
-  handler: (context, { conceptKey }) =>
-    context.db
-      .query('conceptMedia')
-      .withIndex('by_concept_key', (index) => index.eq('conceptKey', conceptKey))
-      .unique()
+  handler: (context, { conceptKey }) => findConceptRow(context.db, conceptKey)
 });
 
 export const saveVideoCandidates = internalMutation({
@@ -30,10 +34,7 @@ export const saveVideoCandidates = internalMutation({
     quotaUnits: v.number()
   },
   handler: async (context, { conceptKey, quotaUnits, ...fields }) => {
-    const existing = await context.db
-      .query('conceptMedia')
-      .withIndex('by_concept_key', (index) => index.eq('conceptKey', conceptKey))
-      .unique();
+    const existing = await findConceptRow(context.db, conceptKey);
     const fetchedAt = Date.now();
     if (existing === null)
       return context.db.insert('conceptMedia', { conceptKey, ...fields, fetchedAt, quotaUnits, videos: [] });
@@ -56,10 +57,7 @@ export const saveArticleCandidates = internalMutation({
     articleCandidates: v.any()
   },
   handler: async (context, { conceptKey, ...fields }) => {
-    const existing = await context.db
-      .query('conceptMedia')
-      .withIndex('by_concept_key', (index) => index.eq('conceptKey', conceptKey))
-      .unique();
+    const existing = await findConceptRow(context.db, conceptKey);
     if (existing === null)
       return context.db.insert('conceptMedia', {
         conceptKey,
