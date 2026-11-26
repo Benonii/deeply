@@ -172,6 +172,12 @@ export type CourseCardStatus =
   | { kind: 'ready' }
   | { kind: 'failed'; reason: string | null };
 
+export interface CourseRequestProgress {
+  status: CourseRequestStatus;
+  origin: CourseRequestOrigin;
+  error?: string;
+}
+
 export interface CourseModuleProgress {
   total: number;
   ready: number;

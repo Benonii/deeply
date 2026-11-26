@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link } from '@farm.js/core/client';
 
 import { BuildStages } from './BuildStages';
-import { readStageProgress, readStatusLabel, TOTAL_STAGES } from './labels';
+import { readModulesWritingProgress, readStageProgress, readStatusLabel } from './labels';
+import { TOTAL_STAGES } from './labels';
 
 import type { CourseCardView } from '../../convex/lib/types';
 
@@ -17,6 +18,7 @@ export const CourseCard = ({ card }: CourseCardProps) => {
   const { status } = card;
   const isBuilding = status.kind === 'building';
   const isWaiting = isBuilding && card.origin === 'chat' && status.stepsDone.length === 0;
+  const modulesWriting = isBuilding ? readModulesWritingProgress(status.stage, card.modules) : null;
 
   return (
     <article className={`ccard ccard-${status.kind}`}>
@@ -33,10 +35,11 @@ export const CourseCard = ({ card }: CourseCardProps) => {
       {isBuilding && (
         <div className="ccard-progress">
           <div className="ccard-bar">
-            <span style={{ width: `${Math.round(readStageProgress(status.stepsDone) * 100)}%` }} />
+            <span style={{ width: `${Math.round(readStageProgress(status.stepsDone, modulesWriting) * 100)}%` }} />
           </div>
           <p className="ccard-meter">
             {status.stepsDone.length} of {TOTAL_STAGES} steps done
+            {modulesWriting && `, ${modulesWriting.ready} of ${modulesWriting.total} modules written`}
           </p>
         </div>
       )}
