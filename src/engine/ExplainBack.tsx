@@ -1,29 +1,65 @@
 import { useState } from 'react';
 
+import { formatWait } from './ask';
 import { useLesson } from './lesson';
 import { Inline } from './md';
 
-import type { ExplainBackBlockData } from '../types';
+import type { GradeResult } from '../../convex/player/types';
+import type { ExplainBackBlockData, ExplainBackStatus, MarkPhase } from '../types';
 
 interface ExplainBackProps {
   block: ExplainBackBlockData;
   subjectId: string;
 }
 
+function readProblem(result: GradeResult): MarkPhase {
+  if (result.status === 'graded' || result.status === 'alreadyGraded') return { kind: 'marked' };
+  if (result.status === 'auth')
+    return { kind: 'problem', message: 'Your answer is saved. Sign in to have it marked against the rubric.' };
+  if (result.status === 'rate')
+    return {
+      kind: 'problem',
+      message: `Marking is used up for today. It comes back in ${formatWait(result.retryAfterMs)}.`
+    };
+  if (result.status === 'unsupported')
+    return { kind: 'problem', message: 'Your answer is saved. This course cannot be marked yet.' };
+  return { kind: 'problem', message: result.message };
+}
+
+function readStatusLabel({ isMarking, isSaved, grade, metCount }: ExplainBackStatus): string {
+  if (isMarking) return 'Marking…';
+  if (!grade) return isSaved ? 'Saved · not marked' : '';
+  const score = `${metCount} of ${grade.points.length} points`;
+  return grade.isPass ? `Marked · ${score}` : `Marked · ${score}, not yet`;
+}
+
 export const ExplainBack = ({ block, subjectId }: ExplainBackProps) => {
-  const { recordActivity, activityBySubject } = useLesson();
+  const { submitExplainBack, activityBySubject } = useLesson();
   const saved = activityBySubject.get(subjectId);
-  const savedText = saved?.detail.kind === 'explainBack' ? saved.detail.text : '';
+  const savedAnswer = saved?.detail.kind === 'explainBack' ? saved.detail : null;
+  const grade = savedAnswer?.status === 'graded' ? savedAnswer : null;
   const [draft, setDraft] = useState('');
-  const [hasJustSent, setHasJustSent] = useState(false);
-  const isSent = hasJustSent || savedText.length > 0;
-  const answer = savedText.length > 0 ? savedText : draft;
+  const [phase, setPhase] = useState<MarkPhase>({ kind: 'idle' });
+
+  const answer = savedAnswer ? savedAnswer.text : draft;
+  const isSent = savedAnswer !== null || phase.kind === 'marking';
+  const metCount = grade ? grade.points.filter((point) => point.isMet).length : 0;
+
+  const mark = async () => {
+    const text = answer.trim();
+    if (text.length === 0) return;
+    setPhase({ kind: 'marking' });
+    const detail = { kind: 'explainBack' as const, text };
+    setPhase(readProblem(await submitExplainBack({ conceptId: block.conceptId, subjectId, detail })));
+  };
 
   return (
     <div className="explain reveal">
       <div className="explain-head">
         <span className="explain-kicker">Explain back</span>
-        {isSent && <span className="explain-status">Saved · pending grading</span>}
+        <span className="explain-status">
+          {readStatusLabel({ isMarking: phase.kind === 'marking', isSaved: savedAnswer !== null, grade, metCount })}
+        </span>
       </div>
       <div className="explain-prompt">
         <Inline text={block.prompt} />
@@ -37,7 +73,36 @@ export const ExplainBack = ({ block, subjectId }: ExplainBackProps) => {
         aria-label="Your explanation"
         onChange={(event) => setDraft(event.target.value)}
       />
-      {isSent ? (
+      {grade ? (
+        <ul className="explain-points">
+          {block.rubric.map((point, index) => {
+            const result = grade.points[index];
+            return (
+              <li
+                key={point}
+                className={result?.isMet ? 'met' : 'missed'}
+                style={{ animationDelay: `${index * 70}ms` }}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  aria-hidden
+                >
+                  {result?.isMet ? <path d="M5 13l4 4L19 7" /> : <path d="M6 12h12" />}
+                </svg>
+                <span className="explain-point">
+                  <span className="explain-point-text">{point}</span>
+                  {result && <span className="explain-point-note">{result.note}</span>}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
         <div className="explain-rubric">
           <span className="explain-rubric-head">A complete answer covers</span>
           <ul>
@@ -45,28 +110,23 @@ export const ExplainBack = ({ block, subjectId }: ExplainBackProps) => {
               <li key={point}>{point}</li>
             ))}
           </ul>
-          <p className="explain-note">
-            A model marks this against those points in a later release. Nothing marks it yet.
-          </p>
         </div>
-      ) : (
+      )}
+      {!grade && (
         <div className="explain-actions">
           <button
             type="button"
             className="btn primary"
-            disabled={draft.trim().length === 0}
-            onClick={() => {
-              setHasJustSent(true);
-              recordActivity({
-                conceptId: block.conceptId,
-                subjectId,
-                detail: { kind: 'explainBack', text: draft.trim() }
-              });
-            }}
+            disabled={answer.trim().length === 0 || phase.kind === 'marking'}
+            onClick={mark}
           >
-            Submit
+            {phase.kind === 'marking' ? 'Marking…' : savedAnswer ? 'Mark it again' : 'Submit'}
           </button>
-          <span className="explain-hint">Saved to your concept record. No grade yet.</span>
+          <span className="explain-hint">
+            {phase.kind === 'problem'
+              ? phase.message
+              : 'A model marks it against those points and updates the concept.'}
+          </span>
         </div>
       )}
     </div>
