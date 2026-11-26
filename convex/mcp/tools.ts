@@ -27,7 +27,9 @@ const startCourse = defineAgentTool({
       origin: 'claude'
     });
     const request = await actionContext.runQuery(internal.courseRequests.getForOwner, { ownerId: userId, requestId });
-    if (!request) return { status: 'failed', message: 'The course request was not readable right after it was made.' };
+    if (!request) {
+      return { status: 'failed', message: 'Could not read the request back. Call list_course_requests to check it.' };
+    }
     return { status: 'ok', text: `Course request created.\n\n${describeCourseRequest(request)}` };
   }
 });
