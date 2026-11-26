@@ -1,4 +1,5 @@
 import { collapseSpaces, listQuizQuestions, shorten } from '../moduleText';
+import { quizQualityPrompt } from './prompt';
 import { quizQualityThresholds } from './thresholds';
 import type { CheckInput, CheckModule, CheckOutcome, CheckProblem, QuizQuestion } from '../types';
 
@@ -95,5 +96,6 @@ export const quizQualityCheck: CheckModule = {
   checkId: 'quiz-quality',
   version: '1.0.0',
   stage: 'agent',
+  prompt: quizQualityPrompt,
   run: checkQuizQuality
 };

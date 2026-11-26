@@ -1,3 +1,4 @@
+import { teachingQualityPrompt } from './prompt';
 import { teachingQualityThresholds } from './thresholds';
 import type { TeachingScores } from '../submissionSchema';
 import type { CheckInput, CheckModule, CheckOutcome, CheckProblem } from '../types';
@@ -53,5 +54,6 @@ export const teachingQualityCheck: CheckModule = {
   checkId: 'teaching-quality',
   version: '1.0.0',
   stage: 'agent',
+  prompt: teachingQualityPrompt,
   run: scoreTeaching
 };

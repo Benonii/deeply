@@ -1,5 +1,6 @@
 import { parseCitations } from '../../lib/lessonLint';
 import { collapseSpaces, listTextFields, shorten, stripInlineCode, stripMarks } from '../moduleText';
+import { factsCitedPrompt } from './prompt';
 import { factsCitedThresholds } from './thresholds';
 import type { CheckInput, CheckModule, CheckOutcome, CheckProblem } from '../types';
 
@@ -70,5 +71,6 @@ export const factsCitedCheck: CheckModule = {
   checkId: 'facts-cited',
   version: '1.0.0',
   stage: 'agent',
+  prompt: factsCitedPrompt,
   run: checkCitations
 };

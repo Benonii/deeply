@@ -1,4 +1,5 @@
 import { listQuizQuestions, shorten } from '../moduleText';
+import { answerKeysPrompt } from './prompt';
 import { answerKeysThresholds } from './thresholds';
 import type { CheckInput, CheckModule, CheckOutcome, CheckProblem } from '../types';
 import type { QuizAnswer } from '../submissionSchema';
@@ -74,5 +75,6 @@ export const answerKeysCheck: CheckModule = {
   checkId: 'answer-keys',
   version: '1.0.0',
   stage: 'agent',
+  prompt: answerKeysPrompt,
   run: compareAnswers
 };
