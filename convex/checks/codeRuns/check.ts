@@ -1,4 +1,5 @@
 import { listRunnableCodeBlocks, normalizeOutput } from '../moduleText';
+import { codeRunsPrompt } from './prompt';
 import { codeRunsThresholds } from './thresholds';
 import type { CheckInput, CheckModule, CheckOutcome, CheckProblem } from '../types';
 
@@ -62,5 +63,6 @@ export const codeRunsCheck: CheckModule = {
   checkId: 'code-runs',
   version: '1.0.0',
   stage: 'agent',
+  prompt: codeRunsPrompt,
   run: compareRuns
 };

@@ -1,5 +1,6 @@
 import { parseTermReferences } from '../../lib/lessonLint';
 import { listTextFields, shorten } from '../moduleText';
+import { jargonPrompt } from './prompt';
 import { jargonThresholds } from './thresholds';
 import type { GlossaryTerm } from '../../lib/courseSchema';
 import type { CheckInput, CheckModule, CheckOutcome, CheckProblem } from '../types';
@@ -63,5 +64,6 @@ export const jargonCheck: CheckModule = {
   checkId: 'jargon',
   version: '1.0.0',
   stage: 'agent',
+  prompt: jargonPrompt,
   run: checkJargon
 };
