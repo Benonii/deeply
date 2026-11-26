@@ -5,7 +5,8 @@ import { COURSE_REQUEST_STAGES } from './courseRequests';
 import type { Doc, Id } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
 import type { CourseCardFilter, CourseCardStatus } from './types';
-import type { CourseCardView, CourseModuleProgress, CourseRequestStage } from './types';
+import type { CourseCardView, CourseModuleProgress, CourseRequestProgress } from './types';
+import type { CourseRequestStage } from './types';
 
 export const courseCardFilter = v.union(v.literal('all'), v.literal('building'), v.literal('ready'));
 
@@ -20,6 +21,15 @@ const COURSE_STATUS_STAGES: Record<Doc<'courses'>['status'], CourseRequestStage>
 };
 
 const WAITING_TAGLINE = 'Waiting for your Claude to pick this up.';
+
+const STAGE_IN_PROGRESS: Record<CourseRequestStage, CourseRequestStage> = {
+  queued: 'researching',
+  researching: 'mapping',
+  mapping: 'writing',
+  writing: 'writing',
+  checking: 'published',
+  published: 'published'
+};
 
 function readStepsBefore(stage: CourseRequestStage): CourseRequestStage[] {
   return COURSE_REQUEST_STAGES.slice(0, COURSE_REQUEST_STAGES.indexOf(stage));
@@ -66,15 +76,25 @@ function readCourseStatus(course: Doc<'courses'>): CourseCardStatus {
   return { kind: 'building', stage, stepsDone: readStepsBefore(stage) };
 }
 
-function readRequestStatus(request: Doc<'courseRequests'>): CourseCardStatus {
+function isWaitingForPickup(request: CourseRequestProgress): boolean {
+  return request.status === 'queued' && request.origin === 'chat';
+}
+
+export function readRequestCardStatus(request: CourseRequestProgress): CourseCardStatus {
   if (request.status === 'failed') return { kind: 'failed', reason: request.error ?? null };
   if (request.status === 'published') return { kind: 'ready' };
-  return { kind: 'building', stage: request.status, stepsDone: request.stepsDone };
+  const stage = isWaitingForPickup(request) ? 'queued' : STAGE_IN_PROGRESS[request.status];
+  return { kind: 'building', stage, stepsDone: readStepsBefore(stage) };
 }
 
 function readRequestTagline(request: Doc<'courseRequests'>): string {
   if (request.goal) return request.goal;
-  return request.status === 'queued' ? WAITING_TAGLINE : '';
+  return isWaitingForPickup(request) ? WAITING_TAGLINE : '';
+}
+
+function readLinkedCourseStatus(request: Doc<'courseRequests'>, course: Doc<'courses'> | null): CourseCardStatus {
+  if (course?.status === 'failed') return { kind: 'failed', reason: course.error ?? null };
+  return readRequestCardStatus(request);
 }
 
 export function toRequestCard(
@@ -87,7 +107,7 @@ export function toRequestCard(
     key: request._id,
     title: courseText?.title ?? request.topic,
     tagline: courseText?.tagline || readRequestTagline(request),
-    status: course ? readCourseStatus(course) : readRequestStatus(request),
+    status: readLinkedCourseStatus(request, course),
     href: course && course.status !== 'failed' ? `/g/${course.slug}` : null,
     origin: request.origin,
     requestId: request._id,

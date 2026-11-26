@@ -2,7 +2,7 @@
 
 import { ClientOnly } from '../components/ClientOnly';
 import { readCourseSection } from '../lib/routes';
-import { CourseScreen } from '../platform/App';
+import { BuiltinCourseScreen } from '../platform/BuiltinCourseScreen';
 
 import type { CourseRouteParams } from '../types';
 
@@ -12,6 +12,6 @@ interface BuiltinCoursePageProps {
 
 export const BuiltinCoursePage = ({ params }: BuiltinCoursePageProps) => (
   <ClientOnly>
-    <CourseScreen source="c" courseID={params.course} section={readCourseSection(params)} />
+    <BuiltinCourseScreen courseID={params.course} section={readCourseSection(params)} />
   </ClientOnly>
 );

@@ -143,7 +143,10 @@ export type PublishCourseResult =
   | { status: 'published'; slug: string; moduleCount: number; unverifiedCount: number }
   | { status: 'unknownRequest' }
   | { status: 'noCourse' }
-  | { status: 'modulesPending'; pending: CourseModuleView[] };
+  | { status: 'modulesPending'; pending: CourseModuleView[] }
+  | { status: 'alreadyPublished'; slug: string };
+
+export type BearerSecretReading = { kind: 'missing' } | { kind: 'malformed' } | { kind: 'present'; secret: string };
 
 export interface AgentKeyView {
   id: Id<'agentKeys'>;
@@ -171,6 +174,12 @@ export type CourseCardStatus =
   | { kind: 'building'; stage: CourseRequestStage; stepsDone: CourseRequestStage[] }
   | { kind: 'ready' }
   | { kind: 'failed'; reason: string | null };
+
+export interface CourseRequestProgress {
+  status: CourseRequestStatus;
+  origin: CourseRequestOrigin;
+  error?: string;
+}
 
 export interface CourseModuleProgress {
   total: number;

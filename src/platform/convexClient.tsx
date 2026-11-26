@@ -62,6 +62,16 @@ function installWireTap() {
   window.WebSocket = Tapped;
 }
 
+function openConnectionBeforeFirstRender() {
+  if (typeof window === 'undefined') return;
+  const deploymentURL = getPublicEnv('CONVEX_URL');
+  if (!deploymentURL || getConvexUrl() !== deploymentURL) return;
+  installWireTap();
+  readConvexReactClient(deploymentURL).connectionState();
+}
+
+openConnectionBeforeFirstRender();
+
 export function useFrames() {
   const [, force] = useState(0);
   useEffect(() => {

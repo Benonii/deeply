@@ -8,6 +8,7 @@ import { PackChallenges } from '../engine/PackChallenges';
 import { PackModule } from '../engine/PackModule';
 import { useProgress } from '../engine/progress';
 import { BrandShader } from './BrandShader';
+import { NotFound } from './NotFound';
 import type React from 'react';
 import type { ShellCourse, ShellModule } from './model';
 
@@ -317,17 +318,5 @@ export function PageView({ course, pageId }: { course: ShellCourse; pageId: stri
         <PackChallenges challenges={course.challenges ?? []} course={course.title} subject={course.subject} />
       )}
     </ModuleCtx.Provider>
-  );
-}
-
-export function NotFound({ what, back }: { what: string; back: string }) {
-  return (
-    <div className="page-head">
-      <div className="eyebrow">Not found</div>
-      <h1>That {what} doesn't exist.</h1>
-      <p className="lede">
-        <Link href={back}>Go back</Link>
-      </p>
-    </div>
   );
 }

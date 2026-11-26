@@ -2238,7 +2238,8 @@ li {
     animation: none;
   }
   .spinner,
-  .live-dot {
+  .live-dot,
+  .skel {
     animation: none;
   }
   .cc:hover {
@@ -3105,5 +3106,43 @@ li {
   .ask-panel-close,
   .ask-earlier-question {
     transition: none;
+  }
+}
+
+.skel {
+  display: block;
+  background: var(--panel);
+  animation: shimmer 2s ease-in-out infinite;
+}
+.skel-eyebrow {
+  width: 180px;
+  height: 12px;
+}
+.skel-heading {
+  width: min(520px, 80%);
+  height: 34px;
+  margin-top: 16px;
+}
+.skel-lede {
+  width: min(640px, 92%);
+  height: 16px;
+  margin-top: 18px;
+}
+.skel-line {
+  max-width: 760px;
+  height: 14px;
+  margin-top: 16px;
+}
+.skel-nav {
+  height: 14px;
+  margin: 12px 8px;
+}
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
   }
 }

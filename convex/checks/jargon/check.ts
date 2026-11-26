@@ -1,4 +1,4 @@
-import { parseTermReferences } from '../../lib/lessonLint';
+import { parseTermReferences } from '../../lib/lessonMarks';
 import { listTextFields, shorten } from '../moduleText';
 import { jargonPrompt } from './prompt';
 import { jargonThresholds } from './thresholds';

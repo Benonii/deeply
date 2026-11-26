@@ -33,6 +33,12 @@ export interface PublicCourseListing {
   createdAt: number;
 }
 
+export interface OwnedCourseSummary {
+  slug: string;
+  title: string;
+  status: string;
+}
+
 export interface UntrustedBrand {
   name?: unknown;
   colors?: Record<string, unknown>;
@@ -52,11 +58,14 @@ export interface TraceStep {
   state: TraceStepState;
 }
 
-export type CourseSource = 'c' | 'g';
-
 export interface CourseSection {
   kind: 'm' | 'p';
   id: string;
+}
+
+export interface BuiltinCourseLink {
+  id: string;
+  title: string;
 }
 
 export interface CourseRouteParams {
@@ -301,4 +310,29 @@ export interface DesktopSessionBody {
 
 export interface DesktopSignInBody {
   pairingCode: string;
+}
+
+export interface AccountProfile {
+  userId: string;
+  name: string;
+  email: string;
+  image: string | null;
+  credits: number;
+  isUnlimited: boolean;
+  costs: Record<string, number>;
+}
+
+export interface CreditPack {
+  key: 'small' | 'large';
+  name: string;
+  credits: number;
+  priceCents: number | null;
+  currency: string;
+}
+
+export interface CreditLedgerRow {
+  id: string;
+  at: number;
+  delta: number;
+  reason: string;
 }

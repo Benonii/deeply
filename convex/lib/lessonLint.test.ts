@@ -4,7 +4,8 @@ import { describe, it } from 'node:test';
 import type { Block, CoursePack, GlossaryTerm, ModulePack } from './courseSchema';
 import { pythonGeneratorsMap } from './fixtures/pythonGeneratorsMap';
 import { pythonGeneratorsPack } from './fixtures/pythonGenerators';
-import { lintCourseV2, lintLessonV2, parseCitations, parseTermReferences } from './lessonLint';
+import { lintCourseV2, lintLessonV2 } from './lessonLint';
+import { parseCitations, parseTermReferences } from './lessonMarks';
 
 const glossary: GlossaryTerm[] = [
   { id: 'iterable', term: 'iterable', definition: 'An object you can hand to iter().' },
