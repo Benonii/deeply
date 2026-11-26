@@ -171,6 +171,48 @@ export type InlineToken =
   | { kind: 'term'; text: string; termId: string }
   | { kind: 'link'; text: string; href: string };
 
+export type CodeBlockData = Extract<Block, { type: 'code' }>;
+export type RunnableLanguage = NonNullable<CodeBlockData['runnable']>;
+
+export interface RunCodeBlockOptions {
+  language: RunnableLanguage;
+  code: string;
+  onStarted: () => void;
+}
+
+export type CodeRunRequest = { kind: 'run'; runID: number; code: string };
+
+export type CodeRunEvent =
+  | { kind: 'started' }
+  | { kind: 'printed'; runID: number; stdout: string; stderr: string }
+  | { kind: 'raised'; runID: number; stdout: string; stderr: string; errorLine: string };
+
+export type CodeRunState =
+  | { kind: 'idle' }
+  | { kind: 'booting'; startedAt: number }
+  | { kind: 'running'; startedAt: number }
+  | { kind: 'printed'; stdout: string; stderr: string; milliseconds: number }
+  | { kind: 'raised'; stdout: string; stderr: string; errorLine: string; milliseconds: number };
+
+export type CodeRunOutcome = Extract<CodeRunState, { kind: 'printed' | 'raised' }>;
+export type ActiveCodeRunState = Exclude<CodeRunState, { kind: 'idle' }>;
+
+export interface PyodideStreamOptions {
+  batched: (text: string) => void;
+}
+
+export interface PyodideRuntime {
+  setStdin: (options: { error: boolean }) => void;
+  setStdout: (options: PyodideStreamOptions) => void;
+  setStderr: (options: PyodideStreamOptions) => void;
+  toPy: (value: unknown) => unknown;
+  runPythonAsync: (code: string, options?: { globals?: unknown }) => Promise<unknown>;
+}
+
+export interface PyodideModule {
+  loadPyodide: (options: { indexURL: string }) => Promise<PyodideRuntime>;
+}
+
 export type VideoBlockData = Extract<Block, { type: 'video' }>;
 export type ArticleBlockData = Extract<Block, { type: 'article' }>;
 export type ExplainBackBlockData = Extract<Block, { type: 'explainback' }>;

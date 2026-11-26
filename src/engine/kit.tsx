@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { readableText, SimplifiedView, SimplifyMenu, useSimplify } from './simplify';
+import { CodeRunner } from './CodeRunner';
 import { FlowEdgeLabel } from './FlowEdgeLabel';
 import { measureNode } from './flowGeometry';
 import { routeFlowEdges } from './flowRouting';
 import { Inline } from './md';
 import { registerToast, showToast } from './toast';
 
-import type { FlowEdge, FlowNode, FlowStep } from '../types';
+import type { FlowEdge, FlowNode, FlowStep, RunnableLanguage } from '../types';
 
 export const ModuleCtx = createContext<{ title: string; course?: string; subject: string }>({
   title: 'Deeply',
@@ -282,12 +283,16 @@ export function Code({
   code,
   title,
   lang = 'ts',
-  note
+  note,
+  runnable,
+  expectedOutput
 }: {
   code: string;
   title?: string;
   lang?: string;
   note?: React.ReactNode;
+  runnable?: RunnableLanguage;
+  expectedOutput?: string;
 }) {
   const courseModule = useContext(ModuleCtx);
   const body = code.replace(/^\n/, '').replace(/\s+$/, '');
@@ -320,9 +325,13 @@ export function Code({
           />
         </span>
       </figcaption>
-      <pre>
-        <code>{highlighted}</code>
-      </pre>
+      {runnable ? (
+        <CodeRunner key={body} language={runnable} code={body} expectedOutput={expectedOutput} />
+      ) : (
+        <pre>
+          <code>{highlighted}</code>
+        </pre>
+      )}
       {note && (
         <div className="code-note" ref={noteRef}>
           {note}

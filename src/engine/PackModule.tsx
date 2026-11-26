@@ -116,7 +116,16 @@ export function PackBlock({ block: b, blockPath = '' }: { block: Block; blockPat
         />
       );
     case 'code':
-      return <Code title={b.title} lang={b.lang} code={b.code} note={b.note ? <Inline text={b.note} /> : undefined} />;
+      return (
+        <Code
+          title={b.title}
+          lang={b.lang}
+          code={b.code}
+          note={b.note ? <Inline text={b.note} /> : undefined}
+          runnable={b.runnable}
+          expectedOutput={b.expectedOutput}
+        />
+      );
     case 'flow': {
       const { nodes, width, height } = layoutFlow(b.nodes, b.edges);
       return (
