@@ -197,3 +197,14 @@ describe('searchVideoCandidates', () => {
     assert.deepEqual(result.rejected, [{ target: 'dQw4w9WgXcQ', reason: 'it is a Short (30s)' }]);
   });
 });
+
+describe('ids that answer with nothing', () => {
+  it('says so when a proposed id is gone or private', async () => {
+    const { result } = await search({}, { searchQueries: [], proposedVideoIds: ['bD05uGo_sVI', 'aaaaaaaaaaa'] });
+    assert.deepEqual(
+      result.candidates.map((candidate) => candidate.youtubeId),
+      ['bD05uGo_sVI']
+    );
+    assert.deepEqual(result.rejected, [{ target: 'aaaaaaaaaaa', reason: 'it does not exist, or it is private' }]);
+  });
+});

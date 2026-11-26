@@ -116,7 +116,9 @@ export async function searchVideoCandidates(options: VideoSearchOptions): Promis
     return { candidates: [], rejected: [], quota: spend, searchedQueries, error: details.error };
   const kept: VideoCandidate[] = [];
   const rejected: RejectedTarget[] = [];
+  const answered = new Set<string>();
   for (const facts of details.body.items ?? []) {
+    answered.add(facts.id);
     const verdict = judgeHardFilters(facts, publishedAfter);
     if (verdict.kind === 'rejected') {
       rejected.push({ target: facts.id, reason: verdict.reason });
@@ -124,6 +126,8 @@ export async function searchVideoCandidates(options: VideoSearchOptions): Promis
     }
     kept.push(toCandidate(facts, verdict.durationSec));
   }
+  for (const id of foundIds.slice(0, finderThresholds.maxVideoIdsPerRequest))
+    if (!answered.has(id)) rejected.push({ target: id, reason: 'it does not exist, or it is private' });
   const candidates = kept
     .sort((left, right) => rankWithoutJudgement(right, now) - rankWithoutJudgement(left, now))
     .slice(0, finderThresholds.candidateLimit);

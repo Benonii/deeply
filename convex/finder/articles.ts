@@ -16,6 +16,16 @@ const TIME_ELEMENT = /<time\b[^>]*\bdatetime\s*=\s*(?:"([^"]*)"|'([^']*)')/i;
 
 const JSON_LD_DATE = /"datePublished"\s*:\s*"([^"]+)"/i;
 
+const MARKUP = /<(?:html|body|div|p|article|section)\b/i;
+
+const TEXT_DIRECTIVE = /^\.\./;
+
+const TEXT_DECORATION = /^([=\-*~^#"'`+:_])\1{2,}$/;
+
+const FENCE = /^\s*```/gm;
+
+const DIRECTIVE = /^\s*(?:\.\.\s+code-block::|\.\.\s+code::)/gm;
+
 const PUBLISHED_META_KEYS = new Set([
   'article:published_time',
   'article:published',
@@ -66,7 +76,41 @@ function readPublishedDate(html: string, meta: Map<string, string>): string | un
   return undefined;
 }
 
-export function extractArticleFacts(url: string, html: string): ArticleCandidate {
+function readPlainTextTitle(text: string): string {
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0 || TEXT_DIRECTIVE.test(trimmed) || TEXT_DECORATION.test(trimmed)) continue;
+    return trimmed.replace(/^#{1,6}\s*/, '').slice(0, 120);
+  }
+  return '';
+}
+
+function readPlainTextFacts(url: string, text: string): ArticleCandidate {
+  const title = readPlainTextTitle(text);
+  const words = text.split(/\s+/).filter((word) => /[a-z0-9]/i.test(word));
+  return {
+    url,
+    title: title.length === 0 ? url : unescapeHtml(title),
+    site: new URL(url).hostname.replace(/^www\./, ''),
+    publishedAt: undefined,
+    wordCount: words.length,
+    codeBlockCount: Math.floor((text.match(FENCE) ?? []).length / 2) + (text.match(DIRECTIVE) ?? []).length,
+    minutes: Math.max(1, Math.ceil(words.length / finderThresholds.articleWordsPerMinute))
+  };
+}
+
+export function extractArticleFacts({
+  url,
+  body,
+  contentType
+}: {
+  url: string;
+  body: string;
+  contentType?: string;
+}): ArticleCandidate {
+  const servedAsHtml = contentType === undefined ? MARKUP.test(body) : contentType.includes('html');
+  if (!servedAsHtml) return readPlainTextFacts(url, body);
+  const html = body;
   const meta = readMetaValues(html);
   const titleMatch = TITLE_ELEMENT.exec(html);
   const title =
@@ -74,12 +118,12 @@ export function extractArticleFacts(url: string, html: string): ArticleCandidate
     (titleMatch === null ? undefined : unescapeHtml(titleMatch[1])) ??
     meta.get('twitter:title') ??
     url;
-  const body = html.replace(STRIPPED_ELEMENTS, ' ');
-  const words = unescapeHtml(body.replace(TAG, ' '))
+  const readable = html.replace(STRIPPED_ELEMENTS, ' ');
+  const words = unescapeHtml(readable.replace(TAG, ' '))
     .split(' ')
     .filter((word) => /[a-z0-9]/i.test(word));
-  const preCount = (body.match(/<pre\b/gi) ?? []).length;
-  const codeBlockCount = preCount > 0 ? preCount : (body.match(/<code\b/gi) ?? []).length;
+  const preCount = (readable.match(/<pre\b/gi) ?? []).length;
+  const codeBlockCount = preCount > 0 ? preCount : (readable.match(/<code\b/gi) ?? []).length;
   return {
     url,
     title: title.length === 0 ? url : title,
@@ -113,8 +157,12 @@ export async function vetArticleUrl(
       await response.body?.cancel().catch(() => undefined);
       return { kind: 'rejected', rejection: { target: url, reason: `status ${response.status}` } };
     }
-    const html = (await response.text()).slice(0, finderThresholds.maxArticleBytes);
-    const candidate = extractArticleFacts(response.url.length > 0 ? response.url : url, html);
+    const body = (await response.text()).slice(0, finderThresholds.maxArticleBytes);
+    const candidate = extractArticleFacts({
+      url: response.url.length > 0 ? response.url : url,
+      body,
+      contentType: response.headers.get('content-type') ?? undefined
+    });
     if (candidate.wordCount === 0)
       return { kind: 'rejected', rejection: { target: url, reason: 'the page has no readable text' } };
     return { kind: 'kept', candidate };
