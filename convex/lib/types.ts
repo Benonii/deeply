@@ -7,6 +7,10 @@ export interface TermReference {
   display: string;
 }
 
+export interface Citation {
+  sourceId: string;
+}
+
 export interface LessonLintOptions {
   termIdsTaughtEarlier?: Set<string>;
   codeRefIds?: Set<string>;

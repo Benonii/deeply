@@ -4,7 +4,7 @@ import { describe, it } from 'node:test';
 import type { Block, CoursePack, GlossaryTerm, ModulePack } from './courseSchema';
 import { pythonGeneratorsMap } from './fixtures/pythonGeneratorsMap';
 import { pythonGeneratorsPack } from './fixtures/pythonGenerators';
-import { lintCourseV2, lintLessonV2, parseTermReferences } from './lessonLint';
+import { lintCourseV2, lintLessonV2, parseCitations, parseTermReferences } from './lessonLint';
 
 const glossary: GlossaryTerm[] = [
   { id: 'iterable', term: 'iterable', definition: 'An object you can hand to iter().' },
@@ -60,6 +60,23 @@ describe('parseTermReferences', () => {
 
   it('finds nothing in plain prose', () => {
     assert.deepEqual(parseTermReferences('A for loop calls iter() and then next().'), []);
+  });
+});
+
+describe('parseCitations', () => {
+  it('reads every citation mark in one string', () => {
+    assert.deepEqual(parseCitations('An iterator raises StopIteration. [^py-glossary] So do generators. [^py-howto]'), [
+      { sourceId: 'py-glossary' },
+      { sourceId: 'py-howto' }
+    ]);
+  });
+
+  it('ignores a term mark and plain prose', () => {
+    assert.deepEqual(parseCitations('An [[iterator]] has no length.'), []);
+  });
+
+  it('ignores a mark that is not a kebab-case source id', () => {
+    assert.deepEqual(parseCitations('The class [^A-Z0-9_] names no source.'), []);
   });
 });
 
