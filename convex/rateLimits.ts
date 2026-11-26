@@ -8,5 +8,8 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   generateCourseDaily: { kind: 'fixed window', rate: 10, period: 24 * HOUR },
   generateCourseGlobal: { kind: 'fixed window', rate: 30, period: HOUR },
   checkout: { kind: 'fixed window', rate: 10, period: HOUR },
+  agentKeyCreate: { kind: 'fixed window', rate: 10, period: HOUR },
+  agentCall: { kind: 'token bucket', rate: 120, period: MINUTE, capacity: 40 },
+  agentCallGlobal: { kind: 'token bucket', rate: 3000, period: MINUTE, capacity: 600, shards: 4 },
   walletCreateGlobal: { kind: 'token bucket', rate: 300, period: HOUR, capacity: 100 }
 });

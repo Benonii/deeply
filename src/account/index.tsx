@@ -7,6 +7,7 @@ import { platform } from '@farm.js/core/platform';
 import { getAuthClient } from '../lib/authClient';
 import { PRODUCTION_WEB_URL } from '../lib/deployment';
 import { countCourses, FREE_COURSES_TEXT } from '../../convex/lib/pricing';
+import { AgentKeys } from './AgentKeys';
 import { requestSignIn } from './host';
 import './account.css';
 
@@ -229,6 +230,8 @@ function AccountPageInner() {
         {error && <p className="acc-error">{error}</p>}
         <p className="acc-fine">Payments are handled by Polar. Credits don't expire.</p>
       </section>
+
+      <AgentKeys />
 
       <section className="acc-section">
         <h2>History</h2>

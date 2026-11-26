@@ -11,5 +11,7 @@ export function readConvexURL(): string {
 }
 
 export function deriveConvexSiteURL(convexURL: string): string {
-  return convexURL.replace(/\.convex\.cloud\/?$/, '.convex.site');
+  const cloudSiteURL = convexURL.replace(/\.convex\.cloud\/?$/, '.convex.site');
+  if (cloudSiteURL !== convexURL) return cloudSiteURL;
+  return process.env.CONVEX_SITE_URL ?? cloudSiteURL;
 }

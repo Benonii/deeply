@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as agentKeys from "../agentKeys.js";
 import type * as auth from "../auth.js";
 import type * as billing from "../billing.js";
 import type * as checks_actions from "../checks/actions.js";
@@ -51,6 +52,7 @@ import type * as checks_teachingQuality_prompt from "../checks/teachingQuality/p
 import type * as checks_teachingQuality_thresholds from "../checks/teachingQuality/thresholds.js";
 import type * as checks_types from "../checks/types.js";
 import type * as checks_validators from "../checks/validators.js";
+import type * as courseRequests from "../courseRequests.js";
 import type * as courses from "../courses.js";
 import type * as crons from "../crons.js";
 import type * as desktopSignIn from "../desktopSignIn.js";
@@ -64,9 +66,11 @@ import type * as generate_state from "../generate/state.js";
 import type * as http from "../http.js";
 import type * as lab from "../lab.js";
 import type * as lib_admin from "../lib/admin.js";
+import type * as lib_agentKeys from "../lib/agentKeys.js";
 import type * as lib_brandContrast from "../lib/brandContrast.js";
 import type * as lib_conceptMapLint from "../lib/conceptMapLint.js";
 import type * as lib_conceptMapSchema from "../lib/conceptMapSchema.js";
+import type * as lib_courseRequests from "../lib/courseRequests.js";
 import type * as lib_courseSchema from "../lib/courseSchema.js";
 import type * as lib_desktopPairing from "../lib/desktopPairing.js";
 import type * as lib_fixtures_pythonGenerators from "../lib/fixtures/pythonGenerators.js";
@@ -77,6 +81,12 @@ import type * as lib_model from "../lib/model.js";
 import type * as lib_polarWebhook from "../lib/polarWebhook.js";
 import type * as lib_pricing from "../lib/pricing.js";
 import type * as lib_types from "../lib/types.js";
+import type * as mcp_endpoint from "../mcp/endpoint.js";
+import type * as mcp_format from "../mcp/format.js";
+import type * as mcp_server from "../mcp/server.js";
+import type * as mcp_tools from "../mcp/tools.js";
+import type * as mcp_types from "../mcp/types.js";
+import type * as mcp_validators from "../mcp/validators.js";
 import type * as progress from "../progress.js";
 import type * as rateLimits from "../rateLimits.js";
 import type * as simplify from "../simplify.js";
@@ -89,6 +99,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentKeys: typeof agentKeys;
   auth: typeof auth;
   billing: typeof billing;
   "checks/actions": typeof checks_actions;
@@ -132,6 +143,7 @@ declare const fullApi: ApiFromModules<{
   "checks/teachingQuality/thresholds": typeof checks_teachingQuality_thresholds;
   "checks/types": typeof checks_types;
   "checks/validators": typeof checks_validators;
+  courseRequests: typeof courseRequests;
   courses: typeof courses;
   crons: typeof crons;
   desktopSignIn: typeof desktopSignIn;
@@ -145,9 +157,11 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   lab: typeof lab;
   "lib/admin": typeof lib_admin;
+  "lib/agentKeys": typeof lib_agentKeys;
   "lib/brandContrast": typeof lib_brandContrast;
   "lib/conceptMapLint": typeof lib_conceptMapLint;
   "lib/conceptMapSchema": typeof lib_conceptMapSchema;
+  "lib/courseRequests": typeof lib_courseRequests;
   "lib/courseSchema": typeof lib_courseSchema;
   "lib/desktopPairing": typeof lib_desktopPairing;
   "lib/fixtures/pythonGenerators": typeof lib_fixtures_pythonGenerators;
@@ -158,6 +172,12 @@ declare const fullApi: ApiFromModules<{
   "lib/polarWebhook": typeof lib_polarWebhook;
   "lib/pricing": typeof lib_pricing;
   "lib/types": typeof lib_types;
+  "mcp/endpoint": typeof mcp_endpoint;
+  "mcp/format": typeof mcp_format;
+  "mcp/server": typeof mcp_server;
+  "mcp/tools": typeof mcp_tools;
+  "mcp/types": typeof mcp_types;
+  "mcp/validators": typeof mcp_validators;
   progress: typeof progress;
   rateLimits: typeof rateLimits;
   simplify: typeof simplify;
