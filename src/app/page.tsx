@@ -1,3 +1,3 @@
-import { PlatformHomePage } from '@/pages/PlatformHomePage';
+import { PlatformChatPage } from '@/pages/PlatformChatPage';
 
-export default PlatformHomePage;
+export default PlatformChatPage;
