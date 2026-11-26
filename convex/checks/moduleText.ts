@@ -2,6 +2,8 @@ import { TERM_MARK } from '../lib/lessonLint';
 import type { ModulePack, Section } from '../lib/courseSchema';
 import type { LinkTarget, QuizQuestion, RunnableCodeBlock, TextField, VideoTarget } from './types';
 
+export { normalizeOutput } from '../lib/outputText';
+
 const KEYS_OUTSIDE_PROSE = new Set([
   'code',
   'lang',
@@ -131,16 +133,6 @@ export function countWords(text: string): number {
   return stripMarks(text)
     .split(/\s+/)
     .filter((word) => /[a-z0-9]/i.test(word)).length;
-}
-
-export function normalizeOutput(text: string): string {
-  return text
-    .replace(/\r\n?/g, '\n')
-    .split('\n')
-    .map((line) => line.replace(/[ \t]+$/, ''))
-    .join('\n')
-    .replace(/^\n+/, '')
-    .replace(/\n+$/, '');
 }
 
 export function mentionsPhrase(text: string, phrase: string): boolean {

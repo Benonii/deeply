@@ -2666,6 +2666,136 @@ li {
   }
 }
 
+/* runnable code */
+.runner {
+  display: grid;
+}
+.runner-code {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 16px 18px;
+  border: 0;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  caret-color: var(--accent);
+  font: var(--font-size-sm) / 1.6 var(--font-mono);
+  tab-size: 2;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  resize: vertical;
+}
+.runner-code:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: -2px;
+}
+.runner-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--bg2);
+}
+.runner-go,
+.runner-reset {
+  padding: 8px 16px;
+  font-size: var(--font-size-md);
+}
+.runner-go:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.runner-hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-subtle);
+}
+.runner-out {
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  animation: fadeUp 0.3s var(--ease-out);
+}
+.runner-out-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.runner-out-label,
+.runner-ms {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--muted);
+}
+.runner-out-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.runner-ms {
+  font-variant-numeric: tabular-nums;
+}
+.runner-match {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+.runner-match.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.runner-match.no {
+  background: var(--panel2);
+  color: var(--text-subtle);
+}
+.runner-out-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 10px;
+  min-height: 70px;
+  padding: 14px;
+}
+.runner-out .runner-stdout,
+.runner-out .runner-stderr {
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow: auto;
+  font: var(--font-size-sm) / 1.6 var(--font-mono);
+  white-space: pre-wrap;
+}
+.runner-out .runner-stdout {
+  color: var(--code-fg);
+}
+.runner-out .runner-stderr {
+  color: var(--text-subtle);
+}
+.runner-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--no-bg);
+  color: color-mix(in oklab, var(--accent2) 72%, var(--fg));
+  font-size: var(--font-size-md);
+}
+.runner-empty {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--text-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .runner-out {
+    animation: none;
+  }
+}
+
 /* ---------------- highlight and ask ---------------- */
 .ask-chip {
   position: fixed;

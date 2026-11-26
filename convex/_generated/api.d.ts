@@ -107,6 +107,7 @@ import type * as lib_fixtures_pythonGeneratorsModules from "../lib/fixtures/pyth
 import type * as lib_lessonLint from "../lib/lessonLint.js";
 import type * as lib_mastery from "../lib/mastery.js";
 import type * as lib_model from "../lib/model.js";
+import type * as lib_outputText from "../lib/outputText.js";
 import type * as lib_polarWebhook from "../lib/polarWebhook.js";
 import type * as lib_pricing from "../lib/pricing.js";
 import type * as lib_slug from "../lib/slug.js";
@@ -252,6 +253,7 @@ declare const fullApi: ApiFromModules<{
   "lib/lessonLint": typeof lib_lessonLint;
   "lib/mastery": typeof lib_mastery;
   "lib/model": typeof lib_model;
+  "lib/outputText": typeof lib_outputText;
   "lib/polarWebhook": typeof lib_polarWebhook;
   "lib/pricing": typeof lib_pricing;
   "lib/slug": typeof lib_slug;
