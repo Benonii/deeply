@@ -64,7 +64,7 @@ const publishCourse = defineAgentTool({
   name: 'publish_course',
   title: 'Publish the course',
   description:
-    'Publish once every module is ready. Give the title, tagline and summary. Returns the URL the person opens.',
+    'Publish once every module is ready. Give the title, tagline and summary. Returns the URL the person opens. A published course cannot be published again.',
   inputSchema: publishCourseInput,
   run: async ({ requestId, meta }, context) => {
     const loaded = await readMappedState(context, requestId);
@@ -86,6 +86,11 @@ const publishCourse = defineAgentTool({
     if (published.status === 'unknownRequest') return { status: 'failed', message: UNKNOWN_REQUEST };
     if (published.status === 'noCourse')
       return { status: 'failed', message: 'This request has no course yet. Call submit_concept_map first.' };
+    if (published.status === 'alreadyPublished')
+      return {
+        status: 'failed',
+        message: `This course is already published at ${readCourseURL(published.slug)}. Nothing was changed. A request publishes once: call start_course for a new course.`
+      };
     if (published.status === 'modulesPending')
       return {
         status: 'failed',

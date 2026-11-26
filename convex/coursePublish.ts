@@ -34,6 +34,7 @@ export const publishCourse = internalMutation({
     if (!request.courseId) return { status: 'noCourse' };
     const course = await context.db.get(request.courseId);
     if (!course) return { status: 'noCourse' };
+    if (request.status === 'published') return { status: 'alreadyPublished', slug: course.slug };
     const courseModules = await listCourseModules(context, course._id);
     const pending = courseModules.filter((courseModule) => courseModule.status !== 'ready');
     if (pending.length > 0 || courseModules.length === 0)

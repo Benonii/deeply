@@ -143,7 +143,8 @@ export type PublishCourseResult =
   | { status: 'published'; slug: string; moduleCount: number; unverifiedCount: number }
   | { status: 'unknownRequest' }
   | { status: 'noCourse' }
-  | { status: 'modulesPending'; pending: CourseModuleView[] };
+  | { status: 'modulesPending'; pending: CourseModuleView[] }
+  | { status: 'alreadyPublished'; slug: string };
 
 export interface AgentKeyView {
   id: Id<'agentKeys'>;
