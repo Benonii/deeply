@@ -22,12 +22,13 @@ function readToken(match: RegExpExecArray): InlineToken {
 export function readInlineTokens(text: string): InlineToken[] {
   const tokens: InlineToken[] = [];
   let last = 0;
-  let match: RegExpExecArray | null;
   INLINE.lastIndex = 0;
-  while ((match = INLINE.exec(text))) {
+  let match = INLINE.exec(text);
+  while (match) {
     if (match.index > last) tokens.push({ kind: 'text', text: text.slice(last, match.index) });
     tokens.push(readToken(match));
     last = match.index + match[0].length;
+    match = INLINE.exec(text);
   }
   if (last < text.length) tokens.push({ kind: 'text', text: text.slice(last) });
   return tokens;

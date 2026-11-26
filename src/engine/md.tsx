@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { readInlineTokens } from './inlineTokens';
 import { TermMark } from './TermMark';
 

@@ -2374,13 +2374,13 @@ li {
   border-color: var(--fg2);
   background: var(--fg2);
 }
-.concept.passed .concept-name {
-  color: var(--text-body);
-}
 .concept-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.concept.passed .concept-name {
+  color: var(--text-body);
 }
 .concept-state {
   font-size: var(--font-size-2xs);
