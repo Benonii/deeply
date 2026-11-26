@@ -18,6 +18,7 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm run typecheck
+      - run: npm test
       - run: npm run build
       - name: Verify source excerpts are verbatim
         env:
