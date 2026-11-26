@@ -38,6 +38,8 @@ export const TermMark = ({ termId, display }: TermMarkProps) => {
 
   if (!term) return <>{display}</>;
 
+  const label = display === termId ? term.term : display;
+
   const hover = (next: boolean) => (event: React.PointerEvent) => {
     if (event.pointerType === 'mouse') setIsOpen(next);
   };
@@ -54,7 +56,7 @@ export const TermMark = ({ termId, display }: TermMarkProps) => {
           if (event.key === 'Escape') setIsOpen(false);
         }}
       >
-        {display}
+        {label}
       </button>
       {isOpen && (
         <span className="term-ref-pop" id={popoverID} ref={popoverRef} style={{ left: shiftLeft }}>
