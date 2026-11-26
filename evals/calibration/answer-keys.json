@@ -1,0 +1,557 @@
+{
+  "checkId": "answer-keys",
+  "cases": [
+    {
+      "id": "ak-list-append",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "append adds the inner list as one item, so the length is 3 and the key says 3",
+      "topic": "Python lists",
+      "question": "xs = [1, 2]; xs.append([3]). What is len(xs) now?",
+      "options": ["2", "3", "4", "It raises a TypeError"],
+      "key": 1
+    },
+    {
+      "id": "ak-http-not-found",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "not found is 404, the key points at 500",
+      "topic": "HTTP status codes",
+      "question": "Which HTTP status code means the server could not find the requested resource?",
+      "options": ["200", "301", "404", "500"],
+      "key": 3
+    },
+    {
+      "id": "ak-typeof-null",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "typeof null is \"object\" in JavaScript and the key says so",
+      "topic": "JavaScript types",
+      "question": "What does typeof null evaluate to in JavaScript?",
+      "options": ["\"null\"", "\"object\"", "\"undefined\"", "\"number\""],
+      "key": 1
+    },
+    {
+      "id": "ak-count-column-nulls",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "COUNT(column) skips NULLs, so the answer is 3, the key says 5",
+      "topic": "SQL aggregates",
+      "question": "A table has 5 rows and 2 of them have a NULL email. What does SELECT COUNT(email) return?",
+      "options": ["5", "3", "2", "0"],
+      "key": 0
+    },
+    {
+      "id": "ak-git-add",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "git add stages changes, the key is right",
+      "topic": "Git basics",
+      "question": "Which command moves changes from the working tree into the staging area?",
+      "options": ["git commit", "git add", "git push", "git fetch"],
+      "key": 1
+    },
+    {
+      "id": "ak-fastest-sort",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "no sort is fastest in general, so the question has no single right answer and the key is arbitrary",
+      "topic": "Sorting algorithms",
+      "question": "Which sorting algorithm is the fastest?",
+      "options": ["Quicksort", "Merge sort", "Heapsort", "Timsort"],
+      "key": 0
+    },
+    {
+      "id": "ak-binary-search-steps",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "binary search over 1024 items needs about log2(1024) = 10 steps",
+      "topic": "Binary search",
+      "question": "Roughly how many comparisons does binary search need, at worst, to find an item among 1024 sorted items?",
+      "options": ["About 10", "About 512", "About 1024", "About 32"],
+      "key": 0
+    },
+    {
+      "id": "ak-floor-division",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "7 // 2 is 3 in Python 3, the key says 3.5",
+      "topic": "Python numbers",
+      "question": "What does 7 // 2 evaluate to in Python 3?",
+      "options": ["3.5", "3", "4", "3.0"],
+      "key": 0
+    },
+    {
+      "id": "ak-dns-lookup",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "DNS resolves a hostname to an IP address",
+      "topic": "How DNS works",
+      "question": "What does a DNS lookup turn a hostname into?",
+      "options": ["An IP address", "A TLS certificate", "A MAC address", "A port number"],
+      "key": 0
+    },
+    {
+      "id": "ak-default-array-sort",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the default sort compares strings, so the result is [1, 10, 9], not the numeric order the key picks",
+      "topic": "JavaScript arrays",
+      "question": "What does [10, 9, 1].sort() return in JavaScript?",
+      "options": ["[1, 9, 10]", "[1, 10, 9]", "[10, 9, 1]", "[9, 10, 1]"],
+      "key": 0
+    },
+    {
+      "id": "ak-median-outlier",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the median of 1, 2, 3, 4, 100 is 3",
+      "topic": "Descriptive statistics",
+      "question": "What is the median of 1, 2, 3, 4, 100?",
+      "options": ["3", "22", "4", "2"],
+      "key": 0
+    },
+    {
+      "id": "ak-range-end",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "range excludes its end, so the list is [2, 3, 4], the key includes 5",
+      "topic": "Python ranges",
+      "question": "What does list(range(2, 5)) return?",
+      "options": ["[2, 3, 4]", "[2, 3, 4, 5]", "[3, 4, 5]", "[2, 5]"],
+      "key": 1
+    },
+    {
+      "id": "ak-in-order-delivery",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "TCP guarantees in-order delivery",
+      "topic": "Transport protocols",
+      "question": "Which protocol guarantees that bytes arrive in the order they were sent?",
+      "options": ["UDP", "TCP", "ICMP", "ARP"],
+      "key": 1
+    },
+    {
+      "id": "ak-nested-loops",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "two nested loops over n are O(n^2), the key says O(n)",
+      "topic": "Big O notation",
+      "question": "A function runs a loop over n items, and inside it another loop over the same n items. What is its time complexity?",
+      "options": ["O(n)", "O(n log n)", "O(n^2)", "O(2^n)"],
+      "key": 0
+    },
+    {
+      "id": "ak-mutable-default",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the default list is shared between calls, so the second call returns [1, 1]; a hasty reader picks [1]",
+      "topic": "Python functions",
+      "question": "def f(x=[]):\n    x.append(1)\n    return x\nf()\nWhat does a second call f() return?",
+      "options": ["[1]", "[1, 1]", "[]", "It raises an error"],
+      "key": 1
+    },
+    {
+      "id": "ak-css-specificity",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "an id selector outweighs any number of classes, so #nav a wins",
+      "topic": "CSS specificity",
+      "question": "Both rules set the colour of the same link. Which one wins: \"#nav a\" or \".menu a.link\"?",
+      "options": ["#nav a", ".menu a.link", "Whichever rule comes last", "Neither, the browser default applies"],
+      "key": 0
+    },
+    {
+      "id": "ak-json-trailing-comma",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "JSON forbids trailing commas, the key says it is valid",
+      "topic": "JSON syntax",
+      "question": "Is {\"a\": 1,} valid JSON?",
+      "options": ["Yes", "No, a trailing comma is not allowed", "Only when the key is quoted", "Only inside an array"],
+      "key": 0
+    },
+    {
+      "id": "ak-hash-collision",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "two keys landing in one bucket is a collision",
+      "topic": "Hash tables",
+      "question": "Two different keys land in the same bucket of a hash table. What is this called?",
+      "options": ["A collision", "A rehash", "An overflow", "A cache miss"],
+      "key": 0
+    },
+    {
+      "id": "ak-const-freeze",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "const only stops reassignment; Object.freeze is what makes the object unchangeable",
+      "topic": "JavaScript objects",
+      "question": "Which of these makes a JavaScript object's properties impossible to change?",
+      "options": ["Declaring it with const", "Object.freeze", "Object.keys", "Declaring it with let"],
+      "key": 0
+    },
+    {
+      "id": "ak-success-exit-code",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "exit status 0 means success",
+      "topic": "Command-line programs",
+      "question": "Which exit status means a command finished successfully on a Unix-like system?",
+      "options": ["0", "1", "-1", "255"],
+      "key": 0
+    },
+    {
+      "id": "ak-utf8-accent",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "é (U+00E9) takes 2 bytes in UTF-8, the key says 1",
+      "topic": "Text encoding",
+      "question": "How many bytes does the character é (U+00E9) take in UTF-8?",
+      "options": ["1", "2", "3", "4"],
+      "key": 0
+    },
+    {
+      "id": "ak-not-idempotent",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "POST is the one that is not idempotent",
+      "topic": "HTTP methods",
+      "question": "Which of these HTTP methods is not idempotent?",
+      "options": ["GET", "PUT", "DELETE", "POST"],
+      "key": 3
+    },
+    {
+      "id": "ak-float-equality",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "0.1 + 0.2 == 0.3 is False because of binary floating point, the key says True",
+      "topic": "Floating point",
+      "question": "What does 0.1 + 0.2 == 0.3 evaluate to in Python?",
+      "options": ["True", "False", "It raises a ValueError", "None"],
+      "key": 0
+    },
+    {
+      "id": "ak-regex-no-match",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "^ab*c$ matches ac, abc and abbbc but not abac",
+      "topic": "Regular expressions",
+      "question": "Which string does the regular expression ^ab*c$ NOT match?",
+      "options": ["ac", "abc", "abbbc", "abac"],
+      "key": 3
+    },
+    {
+      "id": "ak-index-lookup",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "a selective filter on an indexed column uses the index",
+      "topic": "Database indexes",
+      "question": "A query filters on an indexed column and matches one row out of a million. What does the database most likely do?",
+      "options": [
+        "Use the index to jump to the row",
+        "Scan every row in the table",
+        "Sort the whole table first",
+        "Rebuild the index before reading"
+      ],
+      "key": 0
+    },
+    {
+      "id": "ak-git-fetch",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "git fetch only updates remote-tracking branches; merging is git pull",
+      "topic": "Git remotes",
+      "question": "What does git fetch do to the branch you have checked out?",
+      "options": [
+        "Merges the remote changes into it",
+        "Nothing; it only updates the remote-tracking branches",
+        "Deletes your unpushed commits",
+        "Pushes your commits to the remote"
+      ],
+      "key": 0
+    },
+    {
+      "id": "ak-percent-increase",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "50 to 60 is a 20% increase",
+      "topic": "Percentages",
+      "question": "A price goes from 50 to 60. By what percentage did it rise?",
+      "options": ["10%", "20%", "16.7%", "60%"],
+      "key": 1
+    },
+    {
+      "id": "ak-percent-decrease",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "60 to 50 is a 16.7% drop; 20% is the classic mistake of dividing by the new value",
+      "topic": "Percentages",
+      "question": "A price goes from 60 to 50. By what percentage did it fall?",
+      "options": ["20%", "16.7%", "10%", "83%"],
+      "key": 0
+    },
+    {
+      "id": "ak-var-closure",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "var is function-scoped, so every callback sees i = 3",
+      "topic": "JavaScript closures",
+      "question": "for (var i = 0; i < 3; i++) setTimeout(() => console.log(i)); What is printed?",
+      "options": ["0 1 2", "3 3 3", "0 0 0", "undefined three times"],
+      "key": 1
+    },
+    {
+      "id": "ak-let-closure",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "let makes a fresh binding per iteration, so it prints 0 1 2, the key says 3 3 3",
+      "topic": "JavaScript closures",
+      "question": "for (let i = 0; i < 3; i++) setTimeout(() => console.log(i)); What is printed?",
+      "options": ["0 1 2", "3 3 3", "0 0 0", "undefined three times"],
+      "key": 1
+    },
+    {
+      "id": "ak-cache-ttl-lesson",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the lesson says entries live 60 seconds, a read at 45 seconds returns the value",
+      "topic": "Cache expiry",
+      "lesson": "In this cache, an entry written with a time to live of 60 seconds stays readable for 60 seconds. The first read after that removes it and misses.",
+      "question": "An entry with a 60 second time to live is written at 12:00:00 and read at 12:00:45. What happens?",
+      "options": [
+        "The cached value is returned",
+        "The entry is removed and the read misses",
+        "The time to live resets to 60 seconds",
+        "The read fails with an error"
+      ],
+      "key": 0
+    },
+    {
+      "id": "ak-fifo-lesson",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the lesson says the queue is first in, first out, so A comes first, the key says C",
+      "topic": "Job queues",
+      "lesson": "The job queue hands out jobs in the order they arrived: first in, first out.",
+      "question": "Jobs A, B and C are added in that order. Which job does the first free worker get?",
+      "options": ["A", "B", "C", "A random one"],
+      "key": 2
+    },
+    {
+      "id": "ak-password-storage",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "a slow salted hash is the right answer and the key picks it",
+      "topic": "Storing passwords",
+      "question": "How should a web app store user passwords?",
+      "options": [
+        "Hash them with a slow, salted algorithm such as bcrypt",
+        "Encrypt them with a key kept on the same server",
+        "Hash them once with a fast hash and no salt",
+        "Store them as plain text in a private table"
+      ],
+      "key": 0
+    },
+    {
+      "id": "ak-kilobyte",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "1000 and 1024 are both defensible depending on the convention, so the question is ambiguous",
+      "topic": "Units of data",
+      "question": "How many bytes are in one kilobyte?",
+      "options": ["1000", "1024", "8000", "8"],
+      "key": 1
+    },
+    {
+      "id": "ak-mode",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "3 appears most often",
+      "topic": "Descriptive statistics",
+      "question": "What is the mode of 2, 3, 3, 5, 7?",
+      "options": ["3", "4", "5", "2"],
+      "key": 0
+    },
+    {
+      "id": "ak-stack-pop",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "a stack pops the last item pushed, 3",
+      "topic": "Stacks",
+      "question": "You push 1, then 2, then 3 onto a stack and pop once. What do you get?",
+      "options": ["1", "2", "3", "Nothing"],
+      "key": 2
+    },
+    {
+      "id": "ak-queue-dequeue",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "a queue returns the first item added, 1, the key says 3",
+      "topic": "Queues",
+      "question": "You enqueue 1, then 2, then 3 and dequeue once. What do you get?",
+      "options": ["1", "2", "3", "Nothing"],
+      "key": 2
+    },
+    {
+      "id": "ak-equality-identity",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "two equal lists compare equal but are different objects",
+      "topic": "Python identity",
+      "question": "a = [1]; b = [1]. What are a == b and a is b?",
+      "options": ["True, True", "True, False", "False, False", "False, True"],
+      "key": 1
+    },
+    {
+      "id": "ak-inner-join-missing",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "an inner join drops customers with no orders; the key describes a left join",
+      "topic": "SQL joins",
+      "question": "You INNER JOIN customers to orders. What happens to a customer with no orders?",
+      "options": [
+        "They appear once with NULL order columns",
+        "They do not appear",
+        "They appear with an order count of 0",
+        "The query fails"
+      ],
+      "key": 0
+    },
+    {
+      "id": "ak-left-join-missing",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "a left join keeps the customer with NULL order columns",
+      "topic": "SQL joins",
+      "question": "You LEFT JOIN customers to orders. What happens to a customer with no orders?",
+      "options": [
+        "They appear once with NULL order columns",
+        "They do not appear",
+        "They appear with an order count of 0",
+        "The query fails"
+      ],
+      "key": 0
+    },
+    {
+      "id": "ak-leap-year",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "2000 is divisible by 400, the others are not leap years",
+      "topic": "Calendars in code",
+      "question": "Which of these years is a leap year?",
+      "options": ["1900", "2000", "2100", "2023"],
+      "key": 1
+    },
+    {
+      "id": "ak-february-2100",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "2100 is not a leap year, so February has 28 days, the key says 29",
+      "topic": "Calendars in code",
+      "question": "How many days does February 2100 have?",
+      "options": ["28", "29", "30", "It depends on the time zone"],
+      "key": 1
+    },
+    {
+      "id": "ak-unsigned-wrap",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the question limits itself to wrapping arithmetic, where 255 + 1 is 0",
+      "topic": "Integer overflow",
+      "question": "An unsigned 8-bit counter holds 255 and you add 1, in a language where unsigned integers wrap around. What does it hold now?",
+      "options": ["0", "256", "255", "-1"],
+      "key": 0
+    },
+    {
+      "id": "ak-missing-base-case",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "in most languages unbounded recursion overflows the stack; tail-call languages are the exception the word usually covers",
+      "topic": "Recursion",
+      "question": "A recursive function has no base case. What usually happens when you call it?",
+      "options": [
+        "It runs until the call stack overflows",
+        "It returns None",
+        "It loops forever using constant memory",
+        "The compiler refuses to build it"
+      ],
+      "key": 0
+    },
+    {
+      "id": "ak-child-env",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "a child gets a copy of the environment, so the parent keeps its value, the key says it changes",
+      "topic": "Processes",
+      "question": "A child process changes an environment variable it inherited. What happens to the parent's value?",
+      "options": ["It changes too", "It stays the same", "It is deleted", "It changes after the child exits"],
+      "key": 0
+    },
+    {
+      "id": "ak-git-revert",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "git revert adds a new commit that undoes an old one",
+      "topic": "Undoing in Git",
+      "question": "Which command undoes a commit that is already pushed, by adding a new commit?",
+      "options": ["git revert", "git reset --hard", "git rebase -i", "git stash"],
+      "key": 0
+    },
+    {
+      "id": "ak-median-even-count",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the median of 1, 2, 3, 4 is 2.5, the key says 2",
+      "topic": "Descriptive statistics",
+      "question": "What is the median of 1, 2, 3, 4?",
+      "options": ["2.5", "2", "3", "10"],
+      "key": 1
+    },
+    {
+      "id": "ak-validation-status",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "400 and 422 are both widely used for a body that fails validation, so the question has two defensible answers",
+      "topic": "Designing HTTP APIs",
+      "question": "Which status code should an API return when a JSON request body is well formed but fails validation?",
+      "options": ["400", "422", "500", "200"],
+      "key": 1
+    },
+    {
+      "id": "ak-ipv4-size",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "an IPv4 address is 32 bits",
+      "topic": "IP addresses",
+      "question": "How many bits long is an IPv4 address?",
+      "options": ["32", "64", "128", "16"],
+      "key": 0
+    },
+    {
+      "id": "ak-seen-before",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "a hash set gives constant-time membership; a sorted array works but is slower to keep up to date",
+      "topic": "Choosing data structures",
+      "question": "You stream a million ids and need to know, for each one, whether you have seen it before. Which structure fits best?",
+      "options": ["A hash set", "A sorted array searched with binary search", "A linked list", "A stack"],
+      "key": 0
+    },
+    {
+      "id": "ak-reverse-hash",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "a hash cannot be reversed, only guessed",
+      "topic": "Hash functions",
+      "question": "Can you recover the input from its SHA-256 digest?",
+      "options": [
+        "Not by reversing it; only by guessing inputs and comparing digests",
+        "Yes, by decrypting it with the right key",
+        "Yes, the digest stores the input in compressed form",
+        "Only when the input was plain text"
+      ],
+      "key": 0
+    }
+  ]
+}

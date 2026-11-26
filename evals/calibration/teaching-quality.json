@@ -1,0 +1,1994 @@
+{
+  "checkId": "teaching-quality",
+  "cases": [
+    {
+      "id": "tq-generators-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "concrete objective, a traced example with output, a quiz, and the return-instead-of-yield mistake with its result",
+      "topic": "Writing a generator",
+      "goal": "Working Python developers who have never written a generator learn to stream large files.",
+      "summary": "A function with yield returns a generator. Each next() runs it to the next yield.",
+      "sections": [
+        {
+          "id": "yield",
+          "title": "yield pauses a function",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end of this module you can write a generator that reads a file one line at a time and predict what each next() call returns."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "def count_up(limit):\n    n = 1\n    while n <= limit:\n        yield n\n        n += 1\n\ncounter = count_up(3)\nprint(next(counter))\nprint(next(counter))\nprint(list(counter))",
+              "expectedOutput": "1\n2\n[3]\n",
+              "note": "The first next() runs to the first yield and stops there. list() drains what is left."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "The mistake everyone makes",
+              "text": "Writing return n instead of yield n inside the loop. The function then hands back 1 and ends, so a loop over it sees a single number and never the rest."
+            },
+            {
+              "type": "check",
+              "q": "counter = count_up(2); next(counter); next(counter); What does a third next(counter) do?",
+              "options": ["Returns 3", "Raises StopIteration", "Returns 1 again", "Returns None"],
+              "answer": 1,
+              "explain": "The loop ended after 2, so the generator is finished and next() raises StopIteration.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-no-example",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "it describes left joins in the abstract and never carries a real example through",
+      "topic": "Left joins",
+      "goal": "Analysts who know basic SELECT queries learn to combine two tables.",
+      "summary": "A left join keeps every row of the first table.",
+      "sections": [
+        {
+          "id": "left-join",
+          "title": "Keeping every row",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "After this module you can write a left join that lists every customer, including customers who have never ordered."
+            },
+            {
+              "type": "p",
+              "text": "A left join returns all rows from the left table and the matching rows from the right table. Where there is no match, the columns from the right table are empty. This is different from an inner join, which only returns rows that match on both sides."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Filtering in the wrong place",
+              "text": "Putting a condition on the right table in WHERE instead of ON quietly turns the left join back into an inner join, and the customers with no orders vanish from the report."
+            },
+            {
+              "type": "check",
+              "q": "You left join customers to orders. A customer has no orders. What happens?",
+              "options": ["They appear with empty order columns", "They are dropped", "The query fails"],
+              "answer": 0,
+              "explain": "A left join keeps every customer.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-git-revert-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present and specific",
+      "topic": "Undoing a pushed commit",
+      "goal": "Developers who use Git daily learn to undo mistakes without breaking their teammates' clones.",
+      "summary": "git revert adds a new commit that undoes an old one, so shared history stays intact.",
+      "sections": [
+        {
+          "id": "revert",
+          "title": "Undo by adding, not by deleting",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can undo a commit that is already on the shared branch, with one command, without forcing anyone else to fix their copy."
+            },
+            {
+              "type": "code",
+              "lang": "bash",
+              "code": "git log --oneline\n# 9f2c1ab Change price to 0\n# 4e7d002 Add checkout page\ngit revert 9f2c1ab\ngit log --oneline\n# 1b8e9c3 Revert \"Change price to 0\"\n# 9f2c1ab Change price to 0\n# 4e7d002 Add checkout page",
+              "note": "The bad commit is still in history. A new commit on top puts the price back."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Do not reset a shared branch",
+              "text": "The common mistake is git reset --hard 4e7d002 followed by a force push. Everyone who already pulled 9f2c1ab now has a history the server no longer has, and their next pull either fails or brings the bad commit back."
+            },
+            {
+              "type": "check",
+              "q": "After git revert 9f2c1ab, how many commits does git log show?",
+              "options": ["2", "3", "1"],
+              "answer": 1,
+              "explain": "The revert adds a commit and deletes nothing.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-no-practice",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the reader never has to answer, predict or explain anything",
+      "topic": "Percent change",
+      "goal": "Spreadsheet users with no statistics background learn to report changes correctly.",
+      "summary": "Percent change divides the difference by the starting value.",
+      "sections": [
+        {
+          "id": "percent",
+          "title": "Dividing by the right number",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can work out the percent change between two monthly totals and say whether it rose or fell."
+            },
+            {
+              "type": "p",
+              "text": "Sales went from 50 to 60. The difference is 10. Divide by the starting value, 50, and you get 0.2, which is a 20% rise."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Dividing by the new value",
+              "text": "Dividing 10 by 60 instead gives 16.7%. People do this all the time when the numbers fall: from 60 to 50 is a 16.7% drop, not 20%, and reports that mix the two up overstate losses."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-closures-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "objective, traced example with output, quiz and the var-in-a-loop mistake with its output",
+      "topic": "Closures in loops",
+      "goal": "Front-end developers who write JavaScript every day learn why callbacks see the wrong loop value.",
+      "summary": "A callback keeps the variable, not its value at the time.",
+      "sections": [
+        {
+          "id": "capture",
+          "title": "Callbacks keep the variable",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can predict what callbacks created inside a loop print, and fix a loop that prints the wrong numbers."
+            },
+            {
+              "type": "code",
+              "lang": "javascript",
+              "code": "for (let i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i));\n}",
+              "expectedOutput": "0\n1\n2\n",
+              "note": "let makes a new i for each pass, so each callback keeps its own."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "The var trap",
+              "text": "Swap let for var and the same loop prints 3, 3, 3: there is only one i, and by the time the callbacks run it has reached 3. This is the bug behind many \"every button opens the last item\" reports."
+            },
+            {
+              "type": "check",
+              "q": "The loop uses var and the bound is 2 instead of 3. What is printed?",
+              "options": ["0 1", "2 2", "1 1"],
+              "answer": 1,
+              "explain": "With var there is one i, which ends at 2.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-generic-warning",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the only mistake section is a generic \"be careful\", which the rubric scores 2",
+      "topic": "HTTP caching headers",
+      "goal": "Backend developers who build APIs learn to make browsers reuse responses.",
+      "summary": "Cache-Control tells the browser how long a response stays fresh.",
+      "sections": [
+        {
+          "id": "max-age",
+          "title": "How long a response stays fresh",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can set a header that lets the browser reuse an API response for five minutes without asking again."
+            },
+            {
+              "type": "code",
+              "lang": "http",
+              "code": "GET /prices HTTP/1.1\n\nHTTP/1.1 200 OK\nCache-Control: max-age=300\n\n{\"apple\": 1.2}",
+              "note": "For the next 300 seconds the browser answers GET /prices from its cache with no request at all."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "text": "Be careful with caching. It can cause problems if you are not sure what you are doing."
+            },
+            {
+              "type": "check",
+              "q": "A response has Cache-Control: max-age=300. The page asks again after 120 seconds. What happens?",
+              "options": ["The browser uses its cached copy", "The browser asks the server", "The request fails"],
+              "answer": 0,
+              "explain": "The response is still fresh.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-median-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "worked numbers, a quiz, and the mean-versus-median mistake with the wrong figure it produces",
+      "topic": "The median",
+      "goal": "People who write reports from spreadsheets learn to describe a typical value honestly.",
+      "summary": "The median is the middle value once the numbers are sorted.",
+      "sections": [
+        {
+          "id": "median",
+          "title": "The middle value",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can find the median of a list of salaries and say when it describes a typical value better than the mean."
+            },
+            {
+              "type": "p",
+              "text": "Five people earn 30, 32, 35, 38 and 300 thousand. Sorted, the middle one is 35, so the median is 35 thousand. The mean is 435 divided by 5, which is 87 thousand."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Reporting the mean of skewed data",
+              "text": "The usual mistake is to report the mean here. 87 thousand is more than four of the five people earn, so a report that calls it the typical salary misleads everyone who reads it."
+            },
+            {
+              "type": "check",
+              "q": "What is the median of 4, 1, 9?",
+              "options": ["4", "1", "4.7", "9"],
+              "answer": 0,
+              "explain": "Sorted it is 1, 4, 9 and the middle value is 4.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-topic-heading-objective",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the opening is a topic heading with no statement of what the reader will be able to do",
+      "topic": "Binary search",
+      "goal": "Self-taught developers preparing for interviews learn the classic search algorithms.",
+      "summary": "Binary search.",
+      "sections": [
+        {
+          "id": "binary-search",
+          "title": "Binary search",
+          "blocks": [
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "def find(items, target):\n    low, high = 0, len(items) - 1\n    while low <= high:\n        middle = (low + high) // 2\n        if items[middle] == target:\n            return middle\n        if items[middle] < target:\n            low = middle + 1\n        else:\n            high = middle - 1\n    return -1\n\nprint(find([2, 5, 8, 12, 16], 12))",
+              "expectedOutput": "3\n",
+              "note": "It checks 8, then 12: two steps instead of four."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Searching an unsorted list",
+              "text": "Binary search on an unsorted list does not raise an error. It just returns -1 for items that are there, so the bug shows up as missing data, far from its cause."
+            },
+            {
+              "type": "check",
+              "q": "Which item does find check first in [1, 3, 5, 7, 9]?",
+              "options": ["5", "1", "9", "3"],
+              "answer": 0,
+              "explain": "The middle index is 2, which holds 5.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-specificity-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "CSS specificity",
+      "goal": "Designers who write their own CSS learn to predict which style wins.",
+      "summary": "When two rules clash, the more specific selector wins, whatever the order.",
+      "sections": [
+        {
+          "id": "specificity",
+          "title": "Which rule wins",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can look at two clashing rules and say which colour the link will be, without opening the browser."
+            },
+            {
+              "type": "code",
+              "lang": "css",
+              "code": "#nav a { color: red; }\n.menu a.link { color: blue; }\n/* <nav id=\"nav\" class=\"menu\"><a class=\"link\">Home</a></nav> */",
+              "note": "The link is red. One id outweighs any number of classes."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Moving the rule lower",
+              "text": "Most people try to fix this by moving the blue rule further down the file. Nothing changes, because order only decides between rules of equal weight, so they reach for !important and the next clash gets harder."
+            },
+            {
+              "type": "check",
+              "q": "Which wins: \".a .b\" or \"#c\"?",
+              "options": ["#c", ".a .b", "Whichever is last"],
+              "answer": 0,
+              "explain": "An id beats two classes.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-too-basic",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the course is for experienced engineers but the module explains what a variable and a function are",
+      "topic": "Memoization",
+      "goal": "Senior backend engineers learn to cut repeated work in hot code paths.",
+      "summary": "Memoization stores results so the same call is not computed twice.",
+      "sections": [
+        {
+          "id": "memo",
+          "title": "Remembering results",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can add a cache to a slow pure function and measure the speed-up."
+            },
+            {
+              "type": "p",
+              "text": "First, a variable is a name that holds a value, like x = 5. A function is a block of code with a name that you can run by writing its name followed by brackets. A dictionary is a collection that maps keys to values."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "from functools import cache\n\n@cache\ndef slow_square(n):\n    print('computing', n)\n    return n * n\n\nprint(slow_square(4))\nprint(slow_square(4))",
+              "expectedOutput": "computing 4\n16\n16\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Caching a function with side effects",
+              "text": "Caching a function that reads the clock or the database returns stale answers forever, because the second call never runs the body."
+            },
+            {
+              "type": "check",
+              "q": "How many times is 'computing 4' printed above?",
+              "options": ["Once", "Twice", "Never"],
+              "answer": 0,
+              "explain": "The second call is served from the cache.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-dict-get-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Reading a missing key",
+      "goal": "Python beginners who can write loops learn to work with dictionaries safely.",
+      "summary": "d[key] raises when the key is missing; d.get(key, default) does not.",
+      "sections": [
+        {
+          "id": "get",
+          "title": "Asking for a key that is not there",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can count words in a sentence with a dictionary without your program crashing on the first new word."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "counts = {}\nfor word in 'the cat and the hat'.split():\n    counts[word] = counts.get(word, 0) + 1\nprint(counts)",
+              "expectedOutput": "{'the': 2, 'cat': 1, 'and': 1, 'hat': 1}\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Using square brackets for a new key",
+              "text": "Writing counts[word] + 1 on the right-hand side crashes with KeyError: 'the' on the very first word, because nothing has been stored yet."
+            },
+            {
+              "type": "check",
+              "q": "counts = {'a': 1}. What does counts.get('b', 0) return?",
+              "options": ["0", "KeyError", "None", "1"],
+              "answer": 0,
+              "explain": "get returns the default for a missing key.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-sketch-example",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the example is a sketch with no values and no output",
+      "topic": "Async functions",
+      "goal": "JavaScript developers who use callbacks learn to write code that waits for network calls.",
+      "summary": "await pauses an async function until a promise settles.",
+      "sections": [
+        {
+          "id": "await",
+          "title": "Waiting without blocking",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can rewrite a function that fetches two resources so it waits for each result in turn."
+            },
+            {
+              "type": "p",
+              "text": "Imagine you have some function that loads some data from somewhere. You mark it async and put await in front of the call, and then it works the way you would expect. The details depend on your code."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Forgetting await",
+              "text": "Leaving out await gives you a pending Promise object instead of the data, so user.name is undefined and the page shows a blank name."
+            },
+            {
+              "type": "check",
+              "q": "What does an async function always return?",
+              "options": ["A Promise", "The raw value", "undefined"],
+              "answer": 0,
+              "explain": "async functions wrap their result in a Promise.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-group-by-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Totals per group",
+      "goal": "Analysts who can write simple SELECT queries learn to summarise a table.",
+      "summary": "GROUP BY folds rows that share a value into one row per group.",
+      "sections": [
+        {
+          "id": "group-by",
+          "title": "One row per region",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can write a query that returns total sales for each region in one result."
+            },
+            {
+              "type": "compare",
+              "head": ["region", "amount"],
+              "rows": [["north", "10"], ["south", "5"], ["north", "7"]]
+            },
+            {
+              "type": "code",
+              "lang": "sql",
+              "code": "SELECT region, SUM(amount) AS total\nFROM sales\nGROUP BY region;\n-- north | 17\n-- south | 5"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Selecting a column you did not group",
+              "text": "Adding the amount column to SELECT without summing it is the usual mistake. Most databases refuse the query; some return one arbitrary amount per region, and the report shows a number that belongs to no one."
+            },
+            {
+              "type": "check",
+              "q": "With the table above, how many rows does the query return?",
+              "options": ["2", "3", "1"],
+              "answer": 0,
+              "explain": "There are two regions.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-no-mistake",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "it never names a mistake learners make with anchors",
+      "topic": "Anchors in regular expressions",
+      "goal": "Developers who copy regular expressions from the web learn to write their own validators.",
+      "summary": "^ and $ tie a pattern to the start and end of the text.",
+      "sections": [
+        {
+          "id": "anchors",
+          "title": "Matching the whole string",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can write a pattern that accepts a five-digit postcode and nothing else."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "import re\nprint(bool(re.search(r'^\\d{5}$', '12345')))\nprint(bool(re.search(r'^\\d{5}$', '123456')))",
+              "expectedOutput": "True\nFalse\n"
+            },
+            {
+              "type": "p",
+              "text": "The caret ties the pattern to the start, the dollar sign to the end, so the whole text has to be five digits."
+            },
+            {
+              "type": "check",
+              "q": "Does ^\\d{3}$ match '1234'?",
+              "options": ["No", "Yes", "Only the first three digits"],
+              "answer": 0,
+              "explain": "The text must be exactly three digits.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-unit-test-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "A first unit test",
+      "goal": "Developers who have shipped code but never written tests learn to protect a function from regressions.",
+      "summary": "A unit test calls one function with known input and checks the output.",
+      "sections": [
+        {
+          "id": "test",
+          "title": "Checking one function",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can write a test that fails when someone breaks your discount function, and read the failure message."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "def apply_discount(price, percent):\n    return round(price * (1 - percent / 100), 2)\n\ndef test_ten_percent_off():\n    assert apply_discount(50, 10) == 45.0\n\ntest_ten_percent_off()\nprint('passed')",
+              "expectedOutput": "passed\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Testing with the code's own formula",
+              "text": "A common mistake is to write assert apply_discount(50, 10) == round(50 * (1 - 10 / 100), 2). The test copies the bug along with the formula, so it keeps passing when the formula is wrong."
+            },
+            {
+              "type": "check",
+              "q": "Someone changes the function to price * percent / 100. What does the test do?",
+              "options": ["It fails: 5.0 is not 45.0", "It passes", "It is skipped"],
+              "answer": 0,
+              "explain": "The function now returns 5.0.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-too-advanced",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the course is for people who have never programmed, yet the module assumes pointers and the call stack",
+      "topic": "What a variable is",
+      "goal": "People who have never written code learn their first lines of Python.",
+      "summary": "Variables are references to objects.",
+      "sections": [
+        {
+          "id": "variables",
+          "title": "Names and objects",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can store a value under a name and use it again later in your program."
+            },
+            {
+              "type": "p",
+              "text": "In CPython a name is a key in the frame's locals dictionary bound to a PyObject pointer, and the reference count on the heap object is what lets the garbage collector reclaim it once the stack frame unwinds."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "a = [1]\nb = a\nb.append(2)\nprint(a)",
+              "expectedOutput": "[1, 2]\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Thinking b = a copies",
+              "text": "People expect a to stay [1], but both names point at one list, so changing it through b changes what a shows."
+            },
+            {
+              "type": "check",
+              "q": "x = 3; y = x; y = 4. What is x?",
+              "options": ["3", "4", "7"],
+              "answer": 0,
+              "explain": "y now names a different object.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-env-vars-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Configuration through the environment",
+      "goal": "Developers deploying their first service learn to keep secrets out of the code.",
+      "summary": "Read settings from environment variables so the same code runs everywhere.",
+      "sections": [
+        {
+          "id": "env",
+          "title": "Reading a setting",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can read a database address from the environment, with a safe default for your own machine."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "import os\nos.environ['DATABASE_URL'] = 'postgres://db.example/app'\nprint(os.environ.get('DATABASE_URL', 'sqlite:///local.db'))\nprint(os.environ.get('MISSING', 'sqlite:///local.db'))",
+              "expectedOutput": "postgres://db.example/app\nsqlite:///local.db\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Committing the .env file",
+              "text": "The usual slip is to commit the local .env file with the real password in it. Once it is pushed, the password is in the history for good, and the only fix is to change it."
+            },
+            {
+              "type": "explainback",
+              "conceptId": "case-concept",
+              "prompt": "Explain to a teammate why the production password should come from the environment and not from a file in the repository.",
+              "rubric": [
+                "Says the repository history keeps the password",
+                "Says the same code runs with different settings"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-vague-objective",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"learn about Big O\" states no ability the reader gains",
+      "topic": "Big O notation",
+      "goal": "Self-taught developers learn to compare the speed of two solutions before running them.",
+      "summary": "Big O describes how work grows with input size.",
+      "sections": [
+        {
+          "id": "big-o",
+          "title": "Growth, not seconds",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "In this module we will learn about Big O notation."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "def has_duplicate(items):\n    for i in range(len(items)):\n        for j in range(i + 1, len(items)):\n            if items[i] == items[j]:\n                return True\n    return False\n\nprint(has_duplicate([3, 1, 4, 1]))",
+              "expectedOutput": "True\n",
+              "note": "For n items the inner comparison runs about n * n / 2 times, so this is O(n^2)."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Counting the loops, not the work",
+              "text": "People see two loops and say O(2n). The loops are nested, not side by side, so doubling the list makes the work four times bigger, not twice."
+            },
+            {
+              "type": "check",
+              "q": "The list grows from 1,000 to 2,000 items. Roughly how much longer does has_duplicate take at worst?",
+              "options": ["4 times", "2 times", "The same"],
+              "answer": 0,
+              "explain": "n^2 grows four times when n doubles.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-float-compare-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Comparing decimals",
+      "goal": "Developers who handle prices and measurements learn why decimal sums go wrong.",
+      "summary": "Binary floats cannot store 0.1 exactly, so compare with a tolerance.",
+      "sections": [
+        {
+          "id": "floats",
+          "title": "0.1 + 0.2",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can compare two computed decimals safely and choose a money type when exact cents matter."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "import math\nprint(0.1 + 0.2)\nprint(0.1 + 0.2 == 0.3)\nprint(math.isclose(0.1 + 0.2, 0.3))",
+              "expectedOutput": "0.30000000000000004\nFalse\nTrue\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Testing floats with ==",
+              "text": "The mistake is if total == 0.3. It is False, so a cart that should be free still shows a charge, and the bug only appears for some prices."
+            },
+            {
+              "type": "check",
+              "q": "What does 0.1 * 3 == 0.3 print in Python?",
+              "options": ["False", "True", "An error"],
+              "answer": 0,
+              "explain": "0.1 * 3 is 0.30000000000000004.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-wall-of-text",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "one paragraph with no objective, no example, no practice and no mistake",
+      "topic": "Hashing passwords",
+      "goal": "Web developers building their first login form learn to store passwords safely.",
+      "summary": "Passwords are hashed.",
+      "sections": [
+        {
+          "id": "hashing",
+          "title": "Passwords",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Passwords should be hashed. Hashing turns a password into a fixed string. There are many hash functions and some are better for passwords than others. Salts are also used. Security is important and there are many things to think about when building a login system, so it is worth reading more about it."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-containers-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Where a container writes",
+      "goal": "Developers who run apps in containers locally learn why their data disappears.",
+      "summary": "Each container writes to its own thin layer, which is deleted with it.",
+      "sections": [
+        {
+          "id": "layers",
+          "title": "The writable layer",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can say where a file written inside a container lives, and keep a database's files when the container is removed."
+            },
+            {
+              "type": "code",
+              "lang": "bash",
+              "code": "docker run --name one app sh -c 'echo hi > /tmp/note'\ndocker run --name two app cat /tmp/note\n# cat: /tmp/note: No such file or directory",
+              "note": "The second container starts from the same image, without the first one's changes."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Keeping a database in the writable layer",
+              "text": "The classic mistake is to run a database container with no volume. It works for weeks, then someone removes the container to upgrade it, and every row goes with the layer."
+            },
+            {
+              "type": "check",
+              "q": "Container one writes /data/x. You remove it and start a new container from the same image. Is /data/x there?",
+              "options": ["No", "Yes", "Only if the image is rebuilt"],
+              "answer": 0,
+              "explain": "The file lived in the removed container's layer.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-reading-list",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "it points elsewhere instead of teaching: no example, no practice, no mistake",
+      "topic": "Text encoding",
+      "goal": "Developers who handle user input learn why names come out garbled.",
+      "summary": "Further reading on Unicode and UTF-8.",
+      "sections": [
+        {
+          "id": "reading",
+          "title": "Read these first",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can explain why a name like José turns into JosÃ© and fix it."
+            },
+            {
+              "type": "list",
+              "items": [
+                "An introduction to Unicode, on docs.example",
+                "The UTF-8 encoding explained, on docs.example",
+                "A guide to character sets, on docs.example"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Read the three pages above before moving on to the next module."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-utf8-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Garbled names",
+      "goal": "Developers who handle user input learn why names come out garbled.",
+      "summary": "Text decoded with the wrong encoding turns é into Ã©.",
+      "sections": [
+        {
+          "id": "mojibake",
+          "title": "Bytes and the encoding that reads them",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can explain why José turns into JosÃ© and fix the line of code that causes it."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "data = 'José'.encode('utf-8')\nprint(data)\nprint(data.decode('latin-1'))\nprint(data.decode('utf-8'))",
+              "expectedOutput": "b'Jos\\xc3\\xa9'\nJosÃ©\nJosé\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Fixing it by replacing characters",
+              "text": "The tempting fix is name.replace('Ã©', 'é'). It hides one letter and leaves every other accented name broken, because the real bug is the decode with the wrong encoding."
+            },
+            {
+              "type": "check",
+              "q": "Which line produced JosÃ© above?",
+              "options": ["The latin-1 decode", "The utf-8 encode", "The utf-8 decode"],
+              "answer": 0,
+              "explain": "Reading UTF-8 bytes as latin-1 splits é into two characters.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-example-no-output",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the code is shown but never run through: no values traced and no output, which is a sketch rather than a worked example",
+      "topic": "List comprehensions",
+      "goal": "Python beginners who can write for loops learn a shorter way to build lists.",
+      "summary": "A list comprehension builds a list in one expression.",
+      "sections": [
+        {
+          "id": "comprehension",
+          "title": "A loop in one line",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can turn a loop that builds a list into one comprehension and read one written by someone else."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "result = [f(x) for x in items if g(x)]"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Putting the filter first",
+              "text": "Beginners write [if x > 0 x for x in items] and get a SyntaxError, because the if goes after the for."
+            },
+            {
+              "type": "check",
+              "q": "Where does the if go in a comprehension?",
+              "options": ["After the for", "Before the for", "Before the expression"],
+              "answer": 0,
+              "explain": "The filter comes last.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-thin-mistake",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the mistake is named and its consequence given in one line: thin, but a 3 rather than missing",
+      "topic": "Stopping a loop early",
+      "goal": "Python beginners who can write for loops learn to control them.",
+      "summary": "break leaves the loop; continue skips to the next pass.",
+      "sections": [
+        {
+          "id": "break",
+          "title": "break and continue",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can stop a search loop as soon as it finds what it is looking for."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "for n in [4, 7, 9, 12]:\n    if n > 8:\n        print('found', n)\n        break\n    print('checked', n)",
+              "expectedOutput": "checked 4\nchecked 7\nfound 9\n"
+            },
+            {
+              "type": "p",
+              "text": "Using continue instead of break here is a common slip: the loop keeps going and also prints found 12."
+            },
+            {
+              "type": "check",
+              "q": "Swap break for continue. How many lines start with 'found'?",
+              "options": ["2", "1", "0"],
+              "answer": 0,
+              "explain": "Both 9 and 12 are over 8.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-practice-link-only",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the only practice is a pointer to exercises elsewhere; the reader produces nothing here",
+      "topic": "Inner joins",
+      "goal": "Analysts who know basic SELECT queries learn to combine two tables.",
+      "summary": "An inner join keeps only rows that match on both sides.",
+      "sections": [
+        {
+          "id": "inner-join",
+          "title": "Only the matches",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can join orders to customers and say which customers the result leaves out."
+            },
+            {
+              "type": "code",
+              "lang": "sql",
+              "code": "SELECT c.name, o.total\nFROM customers c\nJOIN orders o ON o.customer_id = c.id;\n-- Ada  | 30\n-- Ada  | 12\n-- Lin  | 8",
+              "note": "Sam has no orders, so Sam is not in the result."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Counting customers from a join",
+              "text": "Counting rows of this result to report the number of customers gives 3, but there are 2 customers with orders and 3 customers in total: the join both drops Sam and repeats Ada."
+            },
+            {
+              "type": "p",
+              "text": "For practice, see the exercises page on docs.example."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-prose-numbers-example",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the worked example is carried through in prose with real numbers and a result, not code; that still counts",
+      "topic": "Precision of a classifier",
+      "goal": "Product managers who read model reports learn what the numbers mean.",
+      "summary": "Precision is the share of flagged items that really are what the model says.",
+      "sections": [
+        {
+          "id": "precision",
+          "title": "How often a flag is right",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can read a spam filter's report and say how many of its flags you can trust."
+            },
+            {
+              "type": "p",
+              "text": "The filter flags 40 emails this week. You open them all: 30 are spam and 10 are real messages from customers. Its precision is 30 out of 40, which is 75%. One flag in four is a mistake."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Reading precision as coverage",
+              "text": "People read 75% as \"it catches 75% of spam\". It does not say that: if 200 spam emails arrived, the filter caught 30 of them, which is 15%, and the inbox is still full."
+            },
+            {
+              "type": "check",
+              "q": "A filter flags 20 emails and 5 are real messages. What is its precision?",
+              "options": ["75%", "25%", "5%"],
+              "answer": 0,
+              "explain": "15 of the 20 flags are spam.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-repeated-definition",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "it restates the definition three times and has no example, practice or mistake",
+      "topic": "Idempotent requests",
+      "goal": "Backend developers who build APIs learn to make retries safe.",
+      "summary": "An idempotent request has the same effect when sent once or many times.",
+      "sections": [
+        {
+          "id": "idempotent",
+          "title": "Safe to send twice",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can tell whether a request is safe to retry."
+            },
+            {
+              "type": "p",
+              "text": "An idempotent request is one that has the same effect whether you send it once or many times."
+            },
+            {
+              "type": "callout",
+              "kind": "rule",
+              "text": "Idempotent means sending it again changes nothing more."
+            },
+            {
+              "type": "p",
+              "text": "In other words, if a request is idempotent, repeating it leaves the system in the same state as sending it once."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-explainback-practice",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "practice is an explain-back with a rubric; the other criteria are present",
+      "topic": "Retrying safely",
+      "goal": "Backend developers who build APIs learn to make retries safe.",
+      "summary": "Retry a request only when sending it twice cannot do the work twice.",
+      "sections": [
+        {
+          "id": "retry",
+          "title": "When a retry charges twice",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can decide, for any endpoint in your API, whether a client may retry it after a timeout."
+            },
+            {
+              "type": "code",
+              "lang": "http",
+              "code": "PUT /orders/42/status  {\"status\": \"shipped\"}   -> 200, status is shipped\nPUT /orders/42/status  {\"status\": \"shipped\"}   -> 200, status is still shipped\nPOST /payments         {\"order\": 42, \"cents\": 900} -> 201, payment p1\nPOST /payments         {\"order\": 42, \"cents\": 900} -> 201, payment p2",
+              "note": "Sending the PUT twice leaves one state. Sending the POST twice makes two payments."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Retrying every timeout",
+              "text": "Client libraries that retry every timed-out request will retry the POST too. The first one often did succeed, so the customer is charged twice and support has to refund by hand."
+            },
+            {
+              "type": "explainback",
+              "conceptId": "case-concept",
+              "prompt": "A teammate wants the client to retry every request that times out. Explain which of the two calls above that is safe for, and why.",
+              "rubric": [
+                "Says the PUT is safe to repeat",
+                "Says the POST can create a second payment",
+                "Ties it to the request having the same effect when repeated"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-no-mistake-sql-index",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "objective, example and quiz are there, but no mistake is named",
+      "topic": "Adding an index",
+      "goal": "Developers whose app slows down as data grows learn to speed up queries.",
+      "summary": "An index lets the database find rows without reading the whole table.",
+      "sections": [
+        {
+          "id": "index",
+          "title": "Finding rows fast",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can add an index that makes a slow lookup by email fast, and confirm it with the query plan."
+            },
+            {
+              "type": "code",
+              "lang": "sql",
+              "code": "EXPLAIN SELECT * FROM users WHERE email = 'ada@site.example';\n-- Seq Scan on users (rows=1000000)\nCREATE INDEX users_email ON users (email);\nEXPLAIN SELECT * FROM users WHERE email = 'ada@site.example';\n-- Index Scan using users_email (rows=1)"
+            },
+            {
+              "type": "check",
+              "q": "After the index, how many rows does the plan expect to read?",
+              "options": ["1", "1000000", "0"],
+              "answer": 0,
+              "explain": "The index points straight at the one matching row.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-objective-in-summary",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the concrete objective sits in the summary and the first sentence rather than as a separate line; it is still stated",
+      "topic": "Reading a stack trace",
+      "goal": "Junior developers learn to find the cause of a crash on their own.",
+      "summary": "Read a Python traceback from the bottom up and find the line that failed.",
+      "sections": [
+        {
+          "id": "traceback",
+          "title": "Bottom up",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You will be able to point at the line that crashed and the value that caused it. Start at the last line of the traceback."
+            },
+            {
+              "type": "code",
+              "lang": "text",
+              "code": "Traceback (most recent call last):\n  File \"app.py\", line 9, in <module>\n    total = add_tax(order)\n  File \"app.py\", line 4, in add_tax\n    return order['price'] * 1.2\nKeyError: 'price'",
+              "note": "The last line names the error. The line above it is where it happened: line 4, order has no price key."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Reading from the top",
+              "text": "Beginners read the first frame, line 9, and start changing the call site. The bug is in the data reaching line 4, so the edits at line 9 change nothing and the crash comes back."
+            },
+            {
+              "type": "check",
+              "q": "Which line should you open first?",
+              "options": ["Line 4", "Line 9", "Line 1"],
+              "answer": 0,
+              "explain": "The last frame is where the error was raised.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-no-objective-no-practice",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "no objective and nothing for the reader to do",
+      "topic": "Event loop order",
+      "goal": "JavaScript developers learn to predict the order async code runs in.",
+      "summary": "Timers run after the current code finishes.",
+      "sections": [
+        {
+          "id": "event-loop",
+          "title": "The event loop",
+          "blocks": [
+            {
+              "type": "code",
+              "lang": "javascript",
+              "code": "console.log('a');\nsetTimeout(() => console.log('b'), 0);\nconsole.log('c');",
+              "expectedOutput": "a\nc\nb\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Zero does not mean now",
+              "text": "People expect a, b, c because the delay is 0. The callback still waits for the current script to finish, so code that relies on it running first reads values that are not set yet."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-regex-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Greedy matching",
+      "goal": "Developers who write regular expressions for log parsing learn to match exactly what they mean.",
+      "summary": ".* takes as much as it can; .*? takes as little as it can.",
+      "sections": [
+        {
+          "id": "greedy",
+          "title": "As much as possible",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can pull the first quoted value out of a log line without swallowing the rest of it."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "import re\nline = 'user=\"ada\" role=\"admin\"'\nprint(re.search(r'\"(.*)\"', line).group(1))\nprint(re.search(r'\"(.*?)\"', line).group(1))",
+              "expectedOutput": "ada\" role=\"admin\nada\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Greedy by default",
+              "text": "Writing \"(.*)\" and expecting the first value is the usual mistake: the star runs to the last quote on the line, so the parsed user name is ada\" role=\"admin and every lookup by user fails."
+            },
+            {
+              "type": "check",
+              "q": "What does re.search(r'<(.*)>', '<a><b>').group(1) return?",
+              "options": ["a><b", "a", "b"],
+              "answer": 0,
+              "explain": "The greedy star runs to the last >.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-wrong-concept-example",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the module teaches mutable default arguments but the worked example is about list copying, so the concept itself is never shown",
+      "topic": "Mutable default arguments",
+      "goal": "Python developers who write functions daily learn to avoid a classic bug.",
+      "summary": "A default value is created once, when the function is defined.",
+      "sections": [
+        {
+          "id": "defaults",
+          "title": "Defaults are made once",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can spot a function whose default argument leaks data between calls and fix it."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "a = [1, 2]\nb = a.copy()\nb.append(3)\nprint(a, b)",
+              "expectedOutput": "[1, 2] [1, 2, 3]\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "def add(item, items=[])",
+              "text": "Every call that leaves out items shares one list, so the second call returns the first call's item too, and a web handler leaks one user's data into the next request."
+            },
+            {
+              "type": "check",
+              "q": "When is a default argument's value created?",
+              "options": ["Once, when def runs", "On every call", "On the first call only after a restart"],
+              "answer": 0,
+              "explain": "The default is evaluated when the function is defined.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-percent-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present for a non-programmer audience",
+      "topic": "Percent change",
+      "goal": "Spreadsheet users with no statistics background learn to report changes correctly.",
+      "summary": "Percent change divides the difference by the starting value.",
+      "sections": [
+        {
+          "id": "percent",
+          "title": "Dividing by where you started",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can work out the percent change between two monthly totals in your head and in a formula."
+            },
+            {
+              "type": "p",
+              "text": "Sales went from 50 to 60. The difference is 60 - 50 = 10. Divide by where you started: 10 / 50 = 0.2, a 20% rise. In a sheet, with the old value in A2 and the new one in B2, write =(B2-A2)/A2."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Dividing by the new value",
+              "text": "Dividing by 60 instead gives 16.7%. Going back down from 60 to 50 is 10 / 60 = 16.7%, not 20%, and reports that mix the two up overstate losses."
+            },
+            {
+              "type": "check",
+              "q": "Visits went from 200 to 150. What is the percent change?",
+              "options": ["-25%", "-33%", "-50%"],
+              "answer": 0,
+              "explain": "-50 / 200 = -0.25.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-pitfalls-generic",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the pitfalls list is generic advice that names no mistake specific to this topic",
+      "topic": "Iterating over a dictionary",
+      "goal": "Python beginners who can write for loops learn to work with dictionaries.",
+      "summary": ".items() gives you each key and value together.",
+      "sections": [
+        {
+          "id": "items",
+          "title": "Keys and values together",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can print every key and value of a dictionary in one loop."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "stock = {'apples': 3, 'pears': 0}\nfor name, count in stock.items():\n    print(name, count)",
+              "expectedOutput": "apples 3\npears 0\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Common pitfalls",
+              "text": "Watch out for edge cases, test your code, and read the documentation carefully."
+            },
+            {
+              "type": "check",
+              "q": "What does the loop print first?",
+              "options": ["apples 3", "pears 0", "3 apples"],
+              "answer": 0,
+              "explain": "Dictionaries keep insertion order.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-binary-search-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Binary search",
+      "goal": "Self-taught developers preparing for interviews learn the classic search algorithms.",
+      "summary": "Halve the search range each step, so a million items take about twenty steps.",
+      "sections": [
+        {
+          "id": "binary-search",
+          "title": "Halving the range",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can write binary search from memory and trace which items it checks for a given target."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "def find(items, target):\n    low, high = 0, len(items) - 1\n    while low <= high:\n        middle = (low + high) // 2\n        print('check', items[middle])\n        if items[middle] == target:\n            return middle\n        if items[middle] < target:\n            low = middle + 1\n        else:\n            high = middle - 1\n    return -1\n\nprint(find([2, 5, 8, 12, 16], 12))",
+              "expectedOutput": "check 8\ncheck 12\n3\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "while low < high",
+              "text": "Writing < instead of <= is the classic off-by-one. When the range shrinks to one item the loop stops before checking it, so find([2, 5, 8], 8) returns -1 for an item that is there."
+            },
+            {
+              "type": "check",
+              "q": "Which items does find check for target 2 in [2, 5, 8, 12, 16]?",
+              "options": ["8, then 2", "2 only", "8, 5, then 2"],
+              "answer": 0,
+              "explain": "8 is too big, so the range shrinks to [2, 5], whose middle is 2.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-advanced-for-analysts",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "the course is for analysts with no programming, but the module assumes memory layout and vectorised CPU instructions",
+      "topic": "Why array maths is fast",
+      "goal": "Business analysts moving from spreadsheets to their first data scripts learn to work with tables of numbers.",
+      "summary": "Whole-column operations beat loops.",
+      "sections": [
+        {
+          "id": "vectorised",
+          "title": "Columns at once",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can add 10% to a whole column of prices in one line."
+            },
+            {
+              "type": "p",
+              "text": "Contiguous float64 buffers let the interpreter dispatch to SIMD kernels, avoiding per-element boxing and the dynamic dispatch overhead of the bytecode loop, which is why broadcasting beats a Python-level for over the strided memory."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "import numpy as np\nprices = np.array([10.0, 20.0, 30.0])\nprint(prices * 1.1)",
+              "expectedOutput": "[11. 22. 33.]\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Looping row by row",
+              "text": "Coming from spreadsheets, people loop over each price and append to a new list. It gives the same numbers but takes minutes on a million rows instead of milliseconds."
+            },
+            {
+              "type": "check",
+              "q": "What does np.array([1.0, 2.0]) * 2 give?",
+              "options": ["[2. 4.]", "[1. 2. 1. 2.]", "An error"],
+              "answer": 0,
+              "explain": "The multiplication applies to each item.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-stack-trace-practice-predict",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "practice is a prediction the reader is asked to make before the answer is revealed, plus a quiz; the rest is present",
+      "topic": "Off-by-one in ranges",
+      "goal": "Python beginners who can write for loops learn to loop over exactly the items they mean.",
+      "summary": "range(a, b) stops before b.",
+      "sections": [
+        {
+          "id": "range",
+          "title": "Where range stops",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can write a range that covers exactly the numbers 1 to 10 and spot one that skips the last."
+            },
+            {
+              "type": "p",
+              "text": "Before you run it, write down what this prints. Then check."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "for n in range(1, 4):\n    print(n)",
+              "expectedOutput": "1\n2\n3\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "range(1, 10) for 1 to 10",
+              "text": "The common slip is range(1, 10) to mean 1 to 10. It stops at 9, so the tenth invoice is never sent and nothing reports an error."
+            },
+            {
+              "type": "check",
+              "q": "Which range gives 1 to 10 inclusive?",
+              "options": ["range(1, 11)", "range(1, 10)", "range(0, 10)"],
+              "answer": 0,
+              "explain": "The end is not included.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-facts-list",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "a list of facts with no example carried through and no practice",
+      "topic": "HTTP status codes",
+      "goal": "Front-end developers who call APIs learn to handle every kind of response.",
+      "summary": "Status codes group into five classes.",
+      "sections": [
+        {
+          "id": "classes",
+          "title": "The five classes",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can decide what your app should do for any status code an API sends back."
+            },
+            {
+              "type": "list",
+              "items": [
+                "1xx: informational",
+                "2xx: success",
+                "3xx: redirection",
+                "4xx: client error",
+                "5xx: server error"
+              ]
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Treating every non-200 as a failure",
+              "text": "Code that checks status === 200 treats 201 Created and 204 No Content as errors, so a save that worked shows the user an error message and they submit again."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-mistake-without-consequence",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the mistake is specific but its consequence is only implied; thin, which scores 3, not missing",
+      "topic": "Equality and identity",
+      "goal": "Python developers coming from other languages learn the difference between == and is.",
+      "summary": "== compares values; is compares whether two names point at one object.",
+      "sections": [
+        {
+          "id": "is",
+          "title": "Same value, different object",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can choose between == and is for any comparison and explain the choice."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "a = [1, 2]\nb = [1, 2]\nprint(a == b)\nprint(a is b)\nprint(a is a)",
+              "expectedOutput": "True\nFalse\nTrue\n"
+            },
+            {
+              "type": "p",
+              "text": "People coming from other languages often use is to compare strings and numbers. Use == for values; keep is for None."
+            },
+            {
+              "type": "check",
+              "q": "x = [3]; y = x. What is x is y?",
+              "options": ["True", "False", "An error"],
+              "answer": 0,
+              "explain": "Both names point at one list.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-no-practice-closures",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "strong explanation and mistake, but nothing for the reader to produce",
+      "topic": "Counters with closures",
+      "goal": "JavaScript developers learn to keep private state without classes.",
+      "summary": "A function can keep a variable alive after the outer function returns.",
+      "sections": [
+        {
+          "id": "counter",
+          "title": "A counter nobody else can touch",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can write a counter function whose count cannot be changed from outside."
+            },
+            {
+              "type": "code",
+              "lang": "javascript",
+              "code": "function makeCounter() {\n  let count = 0;\n  return () => ++count;\n}\nconst next = makeCounter();\nconsole.log(next());\nconsole.log(next());",
+              "expectedOutput": "1\n2\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Calling makeCounter every time",
+              "text": "Writing makeCounter()() at each call site makes a fresh counter every time, so it prints 1 forever and the page numbers never move past the first."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-async-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Waiting for two requests",
+      "goal": "JavaScript developers who use callbacks learn to write code that waits for network calls.",
+      "summary": "await pauses an async function until a promise settles; Promise.all waits for several at once.",
+      "sections": [
+        {
+          "id": "await",
+          "title": "One after the other, or together",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can load a user and their orders in parallel and say how long it takes."
+            },
+            {
+              "type": "code",
+              "lang": "javascript",
+              "code": "const wait = (ms, value) => new Promise((done) => setTimeout(() => done(value), ms));\nconst start = Date.now();\nconst [user, orders] = await Promise.all([wait(300, 'ada'), wait(300, 3)]);\nconsole.log(user, orders, Math.round((Date.now() - start) / 100) * 100);",
+              "expectedOutput": "ada 3 300\n",
+              "note": "Both waits run at once, so the total is 300 ms, not 600."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Awaiting in a row by habit",
+              "text": "Writing const user = await getUser(); const orders = await getOrders(); waits for the first before starting the second. Two 300 ms calls take 600 ms, and a page with five such calls takes a second and a half for no reason."
+            },
+            {
+              "type": "check",
+              "q": "Three independent calls of 200 ms each are awaited one after another. Roughly how long does it take?",
+              "options": ["600 ms", "200 ms", "400 ms"],
+              "answer": 0,
+              "explain": "Each waits for the one before.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-objective-topic-only",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "\"this module covers database indexes\" is a topic, not an objective",
+      "topic": "Database indexes",
+      "goal": "Developers whose app slows down as data grows learn to speed up queries.",
+      "summary": "This module covers database indexes.",
+      "sections": [
+        {
+          "id": "indexes",
+          "title": "Indexes",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "This module covers database indexes."
+            },
+            {
+              "type": "code",
+              "lang": "sql",
+              "code": "CREATE INDEX orders_customer ON orders (customer_id);\nEXPLAIN SELECT * FROM orders WHERE customer_id = 7;\n-- Index Scan using orders_customer (rows=12)"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Indexing every column",
+              "text": "Adding an index to every column feels safe, but every insert now updates all of them, so a table that took 1,000 writes a second drops to a few hundred."
+            },
+            {
+              "type": "check",
+              "q": "What does every extra index cost?",
+              "options": ["Slower writes", "Slower reads", "Nothing"],
+              "answer": 0,
+              "explain": "Each write has to update each index.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-hash-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Hashing passwords",
+      "goal": "Web developers building their first login form learn to store passwords safely.",
+      "summary": "Store a slow, salted hash of each password, never the password.",
+      "sections": [
+        {
+          "id": "hashing",
+          "title": "Store the hash, check the hash",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can store a new user's password and check it at login without ever saving the password itself."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "import hashlib, os\nsalt = bytes(16)\nstored = hashlib.scrypt(b'hunter2', salt=salt, n=2**14, r=8, p=1).hex()[:16]\nattempt = hashlib.scrypt(b'hunter2', salt=salt, n=2**14, r=8, p=1).hex()[:16]\nprint(stored == attempt)",
+              "expectedOutput": "True\n",
+              "note": "A fixed salt keeps the output stable for this example; real code uses os.urandom(16) per user."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "One fast hash, no salt",
+              "text": "The usual first attempt is sha256(password). Two users with the same password get the same hash, and a leaked table can be cracked with a precomputed list in an afternoon."
+            },
+            {
+              "type": "check",
+              "q": "Why does each user get their own salt?",
+              "options": [
+                "So equal passwords give different hashes",
+                "So the hash is shorter",
+                "So the password can be decrypted later"
+              ],
+              "answer": 0,
+              "explain": "The salt makes each hash unique.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-no-example-trivial-quiz",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "no worked example, and the only mistake is a generic warning",
+      "topic": "Environment variables in containers",
+      "goal": "Developers deploying their first service learn to configure it without rebuilding.",
+      "summary": "Pass settings to a container at start time.",
+      "sections": [
+        {
+          "id": "env",
+          "title": "Settings at start time",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can start the same image with a test database and a live database by changing one flag."
+            },
+            {
+              "type": "p",
+              "text": "Containers can be given settings when they start. This means the same image can run in many places with different settings."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "text": "Make sure your settings are correct."
+            },
+            {
+              "type": "check",
+              "q": "Can one image run with different settings?",
+              "options": ["Yes", "No", "Only on weekends"],
+              "answer": 0,
+              "explain": "Settings are passed at start time.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-specificity-too-basic",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "the course is for experienced front-end developers, yet a third of the module explains what HTML tags and CSS rules are",
+      "topic": "Cascade layers",
+      "goal": "Experienced front-end developers learn to tame specificity in large codebases.",
+      "summary": "Layers decide which rules win before specificity is compared.",
+      "sections": [
+        {
+          "id": "layers",
+          "title": "Order before weight",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can put a third-party stylesheet in a low layer so your own simple selectors beat it."
+            },
+            {
+              "type": "p",
+              "text": "HTML pages are made of tags such as <p> and <a>. CSS is a language for styling them. A CSS rule has a selector, which picks elements, and declarations, which say how they look, such as color: red."
+            },
+            {
+              "type": "code",
+              "lang": "css",
+              "code": "@layer vendor, app;\n@layer vendor { #widget .title { color: gray; } }\n@layer app { .title { color: black; } }\n/* the title is black */",
+              "note": "A later layer wins over an earlier one, whatever the specificity inside them."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Leaving your styles unlayered",
+              "text": "Unlayered styles beat every layer. Teams that layer their own code but not the vendor's find the vendor winning everywhere and go back to !important."
+            },
+            {
+              "type": "check",
+              "q": "Layers are declared as @layer a, b. A rule in a has an id selector, a rule in b a class. Which wins?",
+              "options": ["The rule in b", "The rule in a", "Whichever is later in the file"],
+              "answer": 0,
+              "explain": "Layer order is compared before specificity.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-env-complete-explainback",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present, practice through both a quiz and an explain-back",
+      "topic": "Child processes and the environment",
+      "goal": "Developers who write shell scripts learn why a script's settings do not stick.",
+      "summary": "A child process gets a copy of the environment, so it cannot change its parent's.",
+      "sections": [
+        {
+          "id": "env-copy",
+          "title": "A copy, not a share",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can explain why running a script that sets a variable does not change your shell, and make it stick."
+            },
+            {
+              "type": "code",
+              "lang": "bash",
+              "code": "echo 'export MODE=dev' > set-mode.sh\nbash set-mode.sh\necho \"mode is $MODE\"\nsource set-mode.sh\necho \"mode is $MODE\"",
+              "expectedOutput": "mode is \nmode is dev\n"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Running the script instead of sourcing it",
+              "text": "Running bash set-mode.sh changes the copy inside a child shell, which then exits. Your shell still has no MODE, and the next command runs against the wrong settings."
+            },
+            {
+              "type": "check",
+              "q": "After bash set-mode.sh, what does echo $MODE print in your shell?",
+              "options": ["An empty line", "dev", "An error"],
+              "answer": 0,
+              "explain": "Only the child shell had MODE set.",
+              "conceptId": "case-concept"
+            },
+            {
+              "type": "explainback",
+              "conceptId": "case-concept",
+              "prompt": "Explain why source set-mode.sh works when bash set-mode.sh does not.",
+              "rubric": [
+                "Says bash starts a child process with a copy",
+                "Says source runs the lines in the current shell"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-everything-thin",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "an objective and a quiz exist, but the example is one line with no output and the warning is generic; worked example and mistake fall below 3",
+      "topic": "Sorting with a key",
+      "goal": "Python developers learn to sort records by any field.",
+      "summary": "sorted() takes a key function.",
+      "sections": [
+        {
+          "id": "key",
+          "title": "Sort by a field",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can sort a list of people by age."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "sorted(people, key=...)"
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "text": "Sorting can be tricky, so be careful."
+            },
+            {
+              "type": "check",
+              "q": "Which argument tells sorted() what to sort by?",
+              "options": ["key", "by", "order"],
+              "answer": 0,
+              "explain": "key takes a function.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tq-big-o-complete",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all five criteria are present",
+      "topic": "Big O notation",
+      "goal": "Self-taught developers learn to compare the speed of two solutions before running them.",
+      "summary": "Count how the work grows when the input doubles.",
+      "sections": [
+        {
+          "id": "big-o",
+          "title": "What doubling the input does",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By the end you can look at a function with loops and say how much slower it gets when its input doubles."
+            },
+            {
+              "type": "code",
+              "lang": "python",
+              "code": "def comparisons(n):\n    count = 0\n    for i in range(n):\n        for j in range(n):\n            count += 1\n    return count\n\nprint(comparisons(10), comparisons(20))",
+              "expectedOutput": "100 400\n",
+              "note": "Doubling n from 10 to 20 makes four times the work: that is O(n^2)."
+            },
+            {
+              "type": "callout",
+              "kind": "warn",
+              "title": "Adding nested loops",
+              "text": "Seeing two loops and calling it O(2n) is the usual mistake. A job that takes one second on 10,000 rows then takes four, not two, on 20,000, and the nightly report overruns."
+            },
+            {
+              "type": "check",
+              "q": "What does comparisons(30) return?",
+              "options": ["900", "60", "300"],
+              "answer": 0,
+              "explain": "30 times 30.",
+              "conceptId": "case-concept"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
