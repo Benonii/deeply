@@ -1,6 +1,7 @@
 import { internal } from '../_generated/api';
 import { normalizeTopic, readGoalProblem, readTopicProblem } from '../lib/courseRequests';
 import { describeCourseRequest, describeEngineState, summarizeCourseRequest } from './format';
+import { FINDER_TOOLS } from './finderTools';
 import { MODULE_TOOLS } from './moduleTools';
 import { PUBLISH_TOOLS } from './publishTools';
 import { RESEARCH_TOOLS } from './researchTools';
@@ -72,5 +73,6 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   listCourseRequests,
   ...RESEARCH_TOOLS,
   ...MODULE_TOOLS,
+  ...FINDER_TOOLS,
   ...PUBLISH_TOOLS
 ];

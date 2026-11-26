@@ -107,6 +107,7 @@ import type * as mcp_checkReport from "../mcp/checkReport.js";
 import type * as mcp_endpoint from "../mcp/endpoint.js";
 import type * as mcp_engineState from "../mcp/engineState.js";
 import type * as mcp_engineText from "../mcp/engineText.js";
+import type * as mcp_finderTools from "../mcp/finderTools.js";
 import type * as mcp_format from "../mcp/format.js";
 import type * as mcp_moduleBrief from "../mcp/moduleBrief.js";
 import type * as mcp_moduleTools from "../mcp/moduleTools.js";
@@ -227,6 +228,7 @@ declare const fullApi: ApiFromModules<{
   "mcp/endpoint": typeof mcp_endpoint;
   "mcp/engineState": typeof mcp_engineState;
   "mcp/engineText": typeof mcp_engineText;
+  "mcp/finderTools": typeof mcp_finderTools;
   "mcp/format": typeof mcp_format;
   "mcp/moduleBrief": typeof mcp_moduleBrief;
   "mcp/moduleTools": typeof mcp_moduleTools;

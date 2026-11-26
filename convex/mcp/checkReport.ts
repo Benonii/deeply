@@ -7,16 +7,20 @@ const CHECK_ID_COLUMN = 18;
 export function describeResults(results: CheckResult[]): string[] {
   return results.map((result) => {
     const verdict = result.pass ? 'pass' : 'FAIL';
-    const shadow = result.mode === 'shadow' ? ' (shadow, cannot block)' : '';
-    const count = result.problems.length > 0 ? ` ${result.problems.length} problem(s)` : '';
+    const shadow = result.mode === 'shadow' ? ', shadow so it cannot block' : '';
+    const label = result.pass ? 'note' : 'problem';
+    const count =
+      result.problems.length > 0
+        ? `, ${result.problems.length} ${label}${result.problems.length === 1 ? '' : 's'}`
+        : '';
     return `  ${result.checkId.padEnd(CHECK_ID_COLUMN)} ${verdict}${count}${shadow}`;
   });
 }
 
-export function listBlockingProblems(results: CheckResult[]): string[] {
-  return results
-    .filter((result) => result.mode === 'on' && !result.pass)
-    .flatMap((result) => result.problems.map((problem) => `${result.checkId} at ${problem.where}: ${problem.message}`));
+export function listProblems(results: CheckResult[]): string[] {
+  return results.flatMap((result) =>
+    result.problems.map((problem) => `${result.checkId} at ${problem.where}: ${problem.message}`)
+  );
 }
 
 export function describeVerdict(verdict: ModuleVerdict, moduleId: string, attempt: number): string[] {

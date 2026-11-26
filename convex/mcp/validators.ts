@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { ArticleJudgementInput, VideoJudgementInput, YouTubeID } from '../finder/validators';
 import { Source } from '../lib/conceptMapSchema';
 import { Challenge } from '../lib/courseSchema';
 import { GOAL_MAX_LENGTH, TOPIC_MAX_LENGTH, TOPIC_MIN_LENGTH } from '../lib/courseRequests';
@@ -54,6 +55,47 @@ export const submitModuleInput = z.object({
   pack: jsonObject.describe('The written module, matching the ModulePack schema the brief gives you.'),
   submission: jsonObject.describe('Your results for every check the brief lists, in one CheckSubmission object.'),
   attempt: z.number().int().min(1).optional().describe('Which rewrite this is. The server keeps its own count.')
+});
+
+const conceptId = z.string().min(1).describe('The concept id from the concept map this media teaches.');
+
+const keep = z.number().int().min(1).max(2).optional().describe('How many to keep. Two by default.');
+
+export const findVideosInput = z.object({
+  requestId,
+  conceptId,
+  searchQueries: z
+    .array(z.string().min(1))
+    .max(2)
+    .optional()
+    .describe('One or two YouTube searches. Send an empty array to vet proposedVideoIds without searching.'),
+  proposedVideoIds: z.array(YouTubeID).max(20).optional().describe('Video ids you already found by browsing.'),
+  publishedAfter: z.string().optional().describe('RFC 3339 time. Drops videos made before the version that matters.'),
+  refresh: z.boolean().optional().describe('Ignore the cache for this concept.')
+});
+
+export const scoreVideosInput = z.object({
+  requestId,
+  conceptId,
+  judgements: z
+    .array(VideoJudgementInput)
+    .min(1)
+    .describe('One per video you would accept. Ids and judgements only: Deeply holds the metrics.'),
+  keep
+});
+
+export const vetArticlesInput = z.object({
+  requestId,
+  conceptId,
+  urls: z.array(z.string().min(1)).min(1).max(12).describe('Pages you found for this concept.'),
+  refresh: z.boolean().optional().describe('Ignore the cache for this concept.')
+});
+
+export const scoreArticlesInput = z.object({
+  requestId,
+  conceptId,
+  judgements: z.array(ArticleJudgementInput).min(1).describe('One per vetted page you would accept.'),
+  keep
 });
 
 export const submitChallengesInput = z.object({

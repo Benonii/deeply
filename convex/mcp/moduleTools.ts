@@ -5,7 +5,7 @@ import { CheckSubmission } from '../checks/submissionSchema';
 import { MAX_RETRIES } from '../checks/runner';
 import { ModulePack } from '../lib/courseSchema';
 import { lintLessonV2 } from '../lib/lessonLint';
-import { describeResults, describeVerdict, listBlockingProblems } from './checkReport';
+import { describeResults, describeVerdict, listProblems } from './checkReport';
 import { listEarlierModules, readMappedState } from './engineState';
 import { numberProblems } from './engineText';
 import { buildModuleBrief, listGlossaryTerms } from './moduleBrief';
@@ -15,6 +15,13 @@ import { getModuleBriefInput, submitModuleInput } from './validators';
 import type { ConceptMap, ModulePlan } from '../lib/conceptMapSchema';
 import type { CourseModuleView } from '../lib/types';
 import type { AgentTool, AgentToolResult } from './types';
+
+function describeAttempt(attempt: number): string {
+  const allowed = MAX_RETRIES + 1;
+  return attempt <= allowed
+    ? `attempt ${attempt} of ${allowed}`
+    : `attempt ${attempt}, past the ${allowed} the policy allows`;
+}
 
 function findPlan(map: ConceptMap, moduleId: string): ModulePlan | undefined {
   return map.modules.find((plan) => plan.id === moduleId);
@@ -142,19 +149,18 @@ const submitModule = defineAgentTool({
         ? [`You called this attempt ${attempt}. The server counts it as attempt ${begun.attempt}.`]
         : [];
     const rewritesLeft = MAX_RETRIES + 1 - begun.attempt;
+    const problems = listProblems(results);
     return {
       status: 'ok',
       text: [
-        `Checks on module ${moduleId}, attempt ${begun.attempt} of ${MAX_RETRIES + 1}:`,
+        `Checks on module ${moduleId}, ${describeAttempt(begun.attempt)}:`,
         ...describeResults(results),
         '',
         ...describeVerdict(verdict, moduleId, begun.attempt),
         ...(verdict.kind === 'retry'
           ? ['', `${rewritesLeft} ${rewritesLeft === 1 ? 'rewrite' : 'rewrites'} left before it publishes unverified.`]
           : []),
-        ...(listBlockingProblems(results).length > 0
-          ? ['', 'Problems:', ...listBlockingProblems(results).map((problem) => `- ${problem}`)]
-          : []),
+        ...(problems.length > 0 ? ['', 'What the checks found:', ...problems.map((problem) => `- ${problem}`)] : []),
         ...attemptNote,
         '',
         describeNextModule(finished.modules)
