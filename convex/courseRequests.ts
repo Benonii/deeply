@@ -1,7 +1,6 @@
 import { v } from 'convex/values';
 
-import { internalMutation, internalQuery, query, type QueryCtx } from './_generated/server';
-import { currentUser } from './auth';
+import { internalMutation, internalQuery } from './_generated/server';
 import { courseRequestOrigin } from './lib/courseRequests';
 
 import type { Doc, Id } from './_generated/dataModel';
@@ -24,27 +23,16 @@ function toView(request: Doc<'courseRequests'>): CourseRequestView {
   };
 }
 
-async function listOwnedBy(context: QueryCtx, ownerId: string): Promise<CourseRequestView[]> {
-  const rows = await context.db
-    .query('courseRequests')
-    .withIndex('by_owner', (indexRange) => indexRange.eq('ownerId', ownerId))
-    .order('desc')
-    .take(LIST_LIMIT);
-  return rows.map(toView);
-}
-
-export const mine = query({
-  args: {},
-  handler: async (context): Promise<CourseRequestView[]> => {
-    const user = await currentUser(context);
-    if (!user) return [];
-    return listOwnedBy(context, String(user._id));
-  }
-});
-
 export const listForOwner = internalQuery({
   args: { ownerId: v.string() },
-  handler: (context, { ownerId }): Promise<CourseRequestView[]> => listOwnedBy(context, ownerId)
+  handler: async (context, { ownerId }): Promise<CourseRequestView[]> => {
+    const rows = await context.db
+      .query('courseRequests')
+      .withIndex('by_owner', (indexRange) => indexRange.eq('ownerId', ownerId))
+      .order('desc')
+      .take(LIST_LIMIT);
+    return rows.map(toView);
+  }
 });
 
 export const getForOwner = internalQuery({
