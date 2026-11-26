@@ -1,5 +1,6 @@
 import type { BuiltinCourse } from '../engine/course';
 import { demoCourse } from '../engine/__fixtures__/demoPack';
+import { generatorsCourse } from '../engine/__fixtures__/generatorsCourse';
 import { convexCourse } from './convex';
 import { crdtsCourse } from './crdts';
 
@@ -11,4 +12,8 @@ const fixtures = (() => {
   }
 })();
 
-export const builtinCourses: BuiltinCourse[] = [convexCourse, crdtsCourse, ...(fixtures ? [demoCourse] : [])];
+export const builtinCourses: BuiltinCourse[] = [
+  convexCourse,
+  crdtsCourse,
+  ...(fixtures ? [generatorsCourse, demoCourse] : [])
+];

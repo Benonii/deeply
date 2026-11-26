@@ -5,6 +5,7 @@
  * Server modules are imported only as types. Runtime data contains paths and methods only.
  */
 
+import type { POST as POST_chat } from "../app/api/chat/route";
 import type { POST as POST_desktop_session } from "../app/api/desktop/session/route";
 import type { POST as POST_desktop_sign_in } from "../app/api/desktop/sign-in/route";
 import type { POST as POST_mcp } from "../app/api/mcp/route";
@@ -12,6 +13,9 @@ import type { GET as GET_skill } from "../app/api/skill/route";
 
 // Type-only representation of your API routes
 export type APIRouter = {
+  chat: {
+    post: typeof POST_chat;
+  };
   desktop: {
     session: {
       post: typeof POST_desktop_session;
@@ -30,6 +34,10 @@ export type APIRouter = {
 
 // Pass this schema-free manifest to createApiClients({ routes: apiRoutes }).
 export const apiRoutes = [
+  {
+    path: "/api/chat",
+    methods: ["POST"],
+  },
   {
     path: "/api/desktop/session",
     methods: ["POST"],

@@ -1,7 +1,10 @@
 import type { Infer } from 'convex/values';
 
 import type { Id } from '../_generated/dataModel';
+import type { courseCardFilter } from './courseCards';
 import type { courseRequestOrigin, courseRequestStage, courseRequestStatus } from './courseRequests';
+import type { articleCheckInOutcome, conceptActivityDetail, conceptActivityInput } from './validators';
+import type { conceptActivityRow, masteryCard, masteryRow } from './validators';
 
 export type ModelProvider = 'openai' | 'anthropic';
 
@@ -19,6 +22,24 @@ export interface Citation {
 export interface LessonLintOptions {
   termIdsTaughtEarlier?: Set<string>;
   codeRefIds?: Set<string>;
+}
+
+export type MasteryCard = Infer<typeof masteryCard>;
+
+export interface Learner {
+  deviceId: string;
+  userId?: string;
+}
+
+export type MasteryRow = Infer<typeof masteryRow>;
+export type ConceptActivityRow = Infer<typeof conceptActivityRow>;
+export type ConceptActivityInput = Infer<typeof conceptActivityInput>;
+export type ConceptActivityDetail = Infer<typeof conceptActivityDetail>;
+export type ArticleCheckInOutcome = Infer<typeof articleCheckInOutcome>;
+
+export interface CourseLearningState {
+  concepts: MasteryRow[];
+  activity: ConceptActivityRow[];
 }
 
 export interface HttpActionInternals {
@@ -143,6 +164,47 @@ export type CreateAgentKeyResult =
   | { status: 'auth' }
   | { status: 'invalid'; message: string }
   | { status: 'rateLimited'; retryAfterMs: number };
+
+export type CourseCardFilter = Infer<typeof courseCardFilter>;
+
+export type CourseCardStatus =
+  | { kind: 'building'; stage: CourseRequestStage; stepsDone: CourseRequestStage[] }
+  | { kind: 'ready' }
+  | { kind: 'failed'; reason: string | null };
+
+export interface CourseModuleProgress {
+  total: number;
+  ready: number;
+  conceptCount: number;
+}
+
+export interface CourseCardView {
+  key: string;
+  title: string;
+  tagline: string;
+  status: CourseCardStatus;
+  href: string | null;
+  origin: CourseRequestOrigin | null;
+  requestId: Id<'courseRequests'> | null;
+  modules: CourseModuleProgress | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ChatMessageAllowance {
+  isAllowed: boolean;
+  retryAfterMs: number;
+}
+
+export type CreateCourseRequestOutcome =
+  | { kind: 'created'; requestId: string; topic: string }
+  | { kind: 'rejected'; problem: string };
+
+export interface ShowCoursesOutcome {
+  kind: 'listed';
+  filter: CourseCardFilter;
+  count: number;
+}
 
 export interface UrlProbe {
   status?: number;

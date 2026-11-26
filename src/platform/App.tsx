@@ -8,12 +8,13 @@ import { AccountButton, openSignIn } from '../account';
 import { builtinCourses } from '../courses';
 import { CodeDrawer } from '../engine/CodeDrawer';
 import { Toaster } from '../engine/kit';
+import { LessonContext, useLessonState } from '../engine/lesson';
 import { setProgressNamespace } from '../engine/progress';
 import { registerSimplifier, type SimplifyResult } from '../engine/simplify';
 import { brandVars, DEEPLY_BRAND, isLight, useBrandFonts } from '../engine/theme';
 import { trackPageView } from '../lib/analytics';
 import { redirectLegacyHashURL } from './legacyRedirect';
-import { useConvexClient } from './convexClient';
+import { deviceId, useConvexClient } from './convexClient';
 import { CourseHome, CourseNav, ModulePage, NotFound, PageView } from './CoursePages';
 import { ErrorBoundary } from './ErrorBoundary';
 import { fromBuiltin, fromGenerated, type GeneratedCourseDoc, type ShellCourse } from './model';
@@ -126,7 +127,8 @@ function PlatformNav() {
   return (
     <nav aria-label="Deeply">
       <div className="nav-label">Explore</div>
-      {item('/', 'All courses', '◇', route === '/')}
+      {item('/', 'Chat', '◈', route === '/')}
+      {item('/courses', 'All courses', '◇', route.startsWith('/courses'))}
       {item('/create', 'Create a course', '+', route.startsWith('/create'))}
       {item('/account', 'Account & credits', '◎', route.startsWith('/account'))}
       <div className="nav-label">Courses</div>
@@ -137,33 +139,47 @@ function PlatformNav() {
 
 function CourseRoutes({ course, section }: { course: ShellCourse; section?: CourseSection }) {
   const route = usePathname();
+  const learnerDeviceID = useMemo(deviceId, []);
   setProgressNamespace(course.id);
+  const lesson = useLessonState({
+    courseId: course.id,
+    basePath: course.base,
+    moduleId: section?.id ?? 'home',
+    modules: course.modules,
+    deviceId: learnerDeviceID
+  });
   let body: React.ReactNode;
   if (!section) body = <CourseHome course={course} />;
   else if (section.kind === 'm') body = <ModulePage course={course} moduleId={section.id} />;
   else body = <PageView course={course} pageId={section.id} />;
   return (
-    <Shell
-      brand={course.brand}
-      nav={
-        <>
-          <CourseNav course={course} route={route} />
-          <nav aria-label="Deeply">
-            <div className="nav-label">Deeply</div>
-            <Link href="/" className="nav-item">
-              <span className="nav-n">◇</span>
-              <span className="nav-t">All courses</span>
-            </Link>
-            <Link href="/create" className="nav-item">
-              <span className="nav-n">+</span>
-              <span className="nav-t">Create a course</span>
-            </Link>
-          </nav>
-        </>
-      }
-    >
-      {body}
-    </Shell>
+    <LessonContext.Provider value={lesson}>
+      <Shell
+        brand={course.brand}
+        nav={
+          <>
+            <CourseNav course={course} route={route} />
+            <nav aria-label="Deeply">
+              <div className="nav-label">Deeply</div>
+              <Link href="/" className="nav-item">
+                <span className="nav-n">◈</span>
+                <span className="nav-t">Chat</span>
+              </Link>
+              <Link href="/courses" className="nav-item">
+                <span className="nav-n">◇</span>
+                <span className="nav-t">All courses</span>
+              </Link>
+              <Link href="/create" className="nav-item">
+                <span className="nav-n">+</span>
+                <span className="nav-t">Create a course</span>
+              </Link>
+            </nav>
+          </>
+        }
+      >
+        {body}
+      </Shell>
+    </LessonContext.Provider>
   );
 }
 

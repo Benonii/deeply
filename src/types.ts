@@ -1,5 +1,6 @@
 import type { convexBetterAuth } from '@farm.js/convex/better-auth';
-import type { Challenge } from '../convex/lib/courseSchema';
+import type { Block, Challenge } from '../convex/lib/courseSchema';
+import type { ConceptActivityInput, ConceptActivityRow, MasteryRow } from '../convex/lib/types';
 
 export interface GeneratedCourseMeta {
   title?: string;
@@ -159,6 +160,53 @@ export interface RoutedFlowEdge {
 export interface MarkdownSegment {
   kind: 'prose' | 'code';
   text: string;
+}
+
+export type InlineToken =
+  | { kind: 'text'; text: string }
+  | { kind: 'code'; text: string }
+  | { kind: 'bold'; text: string }
+  | { kind: 'emphasis'; text: string }
+  | { kind: 'citation'; text: string }
+  | { kind: 'term'; text: string; termId: string }
+  | { kind: 'link'; text: string; href: string };
+
+export type VideoBlockData = Extract<Block, { type: 'video' }>;
+export type ArticleBlockData = Extract<Block, { type: 'article' }>;
+export type ExplainBackBlockData = Extract<Block, { type: 'explainback' }>;
+
+export interface LessonTerm {
+  id: string;
+  term: string;
+  definition: string;
+  moduleId: string;
+  moduleNumber: number;
+  moduleTitle: string;
+}
+
+export interface CourseConcept {
+  conceptId: string;
+  name: string;
+  moduleId: string;
+}
+
+export type ConceptStatus = 'untouched' | 'attempted' | 'passed';
+
+export interface LessonActivity {
+  conceptId: string;
+  subjectId: string;
+  detail: ConceptActivityInput;
+}
+
+export interface LessonState {
+  courseId: string;
+  basePath: string;
+  moduleId: string;
+  terms: Map<string, LessonTerm>;
+  concepts: CourseConcept[];
+  masteryByConcept: Map<string, MasteryRow>;
+  activityBySubject: Map<string, ConceptActivityRow>;
+  recordActivity: (activity: LessonActivity) => void;
 }
 
 export type ConvexBetterAuth = ReturnType<typeof convexBetterAuth>;

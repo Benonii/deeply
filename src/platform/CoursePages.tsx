@@ -1,21 +1,20 @@
 import { Link } from '@farm.js/core/client';
+import { ConceptProgress } from '../engine/ConceptProgress';
 import { buildPrompt, CopyBtn, ModuleCtx } from '../engine/kit';
 import { PackChallenges } from '../engine/PackChallenges';
 import { PackModule } from '../engine/PackModule';
 import { useProgress } from '../engine/progress';
 import { BrandShader } from './BrandShader';
+import type React from 'react';
 import type { ShellCourse, ShellModule } from './model';
 
 const padTwoDigits = (digits: number) => String(digits).padStart(2, '0');
 
-export function coursePages(course: ShellCourse) {
-  const pages = [...course.pages];
-  if (course.challenges?.length)
-    pages.push({
-      id: 'challenges',
-      label: 'Challenges',
-      Component: () => <PackChallenges challenges={course.challenges!} course={course.title} subject={course.subject} />
-    });
+type CourseNavPage = { id: string; label: string; badge?: string; Component?: React.FC };
+
+export function coursePages(course: ShellCourse): CourseNavPage[] {
+  const pages: CourseNavPage[] = [...course.pages];
+  if (course.challenges?.length) pages.push({ id: 'challenges', label: 'Challenges' });
   return pages;
 }
 
@@ -69,6 +68,7 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
           );
         })}
       </nav>
+      <ConceptProgress />
     </>
   );
 }
@@ -302,7 +302,11 @@ export function PageView({ course, pageId }: { course: ShellCourse; pageId: stri
   if (!page) return <NotFound what="page" back={`#${course.base}`} />;
   return (
     <ModuleCtx.Provider value={{ title: page.label, course: course.title, subject: course.subject }}>
-      <page.Component />
+      {page.Component ? (
+        <page.Component />
+      ) : (
+        <PackChallenges challenges={course.challenges ?? []} course={course.title} subject={course.subject} />
+      )}
     </ModuleCtx.Provider>
   );
 }

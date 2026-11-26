@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Challenge } from '../../convex/lib/courseSchema';
 import { buildPrompt, Code, CopyBtn } from './kit';
+import { useLesson } from './lesson';
 import { Inline } from './md';
 import { useProgress } from './progress';
 
@@ -20,6 +21,7 @@ function Card({
   subject: string;
 }) {
   const [pick, setPick] = useState<number | null>(null);
+  const { recordActivity } = useLesson();
   const copy = () =>
     buildPrompt(
       subject,
@@ -52,6 +54,12 @@ function Card({
             onClick={() => {
               setPick(index);
               if (index === c.answer) onSolve();
+              if (c.conceptId)
+                recordActivity({
+                  conceptId: c.conceptId,
+                  subjectId: `challenge:${c.id}`,
+                  detail: { kind: 'quizAnswer', choice: index, isCorrect: index === c.answer }
+                });
             }}
           >
             <span className="opt-letter">{optionLetter(index)}</span>
