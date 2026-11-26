@@ -13,7 +13,7 @@ is what you send.
 ## 1. code-runs
 
 ```sh
-python3 <skill>/scripts/pack.py code module-1.json
+python3 <this skill folder>/scripts/pack.py code module-1.json
 ```
 
 It finds the runnable blocks in order, runs each one in a fresh temporary directory with the
@@ -30,7 +30,7 @@ appear across sections, counting only blocks that have a `runnable` field.
 ## 2. answer-keys
 
 ```sh
-python3 <skill>/scripts/pack.py quiz module-1.json
+python3 <this skill folder>/scripts/pack.py quiz module-1.json
 ```
 
 This prints every quiz with its options and without its `answer` or `explain`. Answer from that
