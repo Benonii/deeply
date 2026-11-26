@@ -55,9 +55,7 @@ export type YouTubeCommentThreadsResponse = z.infer<typeof YouTubeCommentThreads
 
 export const YouTubeChannelFacts = z.object({
   id: z.string(),
-  statistics: z
-    .object({ subscriberCount: CountString, viewCount: CountString, videoCount: CountString })
-    .optional()
+  statistics: z.object({ subscriberCount: CountString, viewCount: CountString, videoCount: CountString }).optional()
 });
 export type YouTubeChannelFacts = z.infer<typeof YouTubeChannelFacts>;
 

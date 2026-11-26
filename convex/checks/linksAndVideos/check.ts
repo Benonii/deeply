@@ -4,7 +4,6 @@ import { describeFailure, isLive, probeUrl } from '../../lib/webFetch';
 import { parseIsoDuration, probeYouTubeOEmbed, YOUTUBE_API_BASE } from '../../lib/youtube';
 import { YouTubeVideoListResponse } from '../../lib/youtubeSchema';
 import type { YouTubeVideoFacts } from '../../lib/youtubeSchema';
-import type { UrlProbe } from '../../lib/types';
 import type { ModulePack } from '../../lib/courseSchema';
 import type { CheckInput, CheckModule, CheckOutcome, CheckProblem, VideoTarget } from '../types';
 
