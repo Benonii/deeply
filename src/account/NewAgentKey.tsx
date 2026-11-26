@@ -43,10 +43,10 @@ export function NewAgentKey({ secret, mcpURL, keyName }: NewAgentKeyProps) {
       </div>
       <p className="acc-fine">
         In the Claude desktop app, add a connector with the same URL and the same Authorization header.{' '}
-        <a href="/api/skill" download="SKILL.md">
+        <a href="/api/skill" download="deeply-skill.zip">
           Get the Claude skill
-        </a>{' '}
-        and save it as <code>.claude/skills/deeply/SKILL.md</code>, then ask for a course on any topic.
+        </a>
+        , unzip it into <code>.claude/skills/</code> or upload it as a skill, then ask for a course on any topic.
       </p>
     </div>
   );
