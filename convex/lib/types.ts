@@ -146,6 +146,8 @@ export type PublishCourseResult =
   | { status: 'modulesPending'; pending: CourseModuleView[] }
   | { status: 'alreadyPublished'; slug: string };
 
+export type BearerSecretReading = { kind: 'missing' } | { kind: 'malformed' } | { kind: 'present'; secret: string };
+
 export interface AgentKeyView {
   id: Id<'agentKeys'>;
   name: string;

@@ -1,3 +1,5 @@
+import type { BearerSecretReading } from './types';
+
 const SECRET_BYTES = 24;
 const SECRET_LABEL = 'dk_';
 const DISPLAYED_SECRET_CHARACTERS = 6;
@@ -25,8 +27,8 @@ export function readAgentKeyPrefix(secret: string): string {
   return secret.slice(0, SECRET_LABEL.length + DISPLAYED_SECRET_CHARACTERS);
 }
 
-export function readBearerSecret(authorization: string | null): string | null {
-  const match = authorization ? /^Bearer\s+(\S+)$/i.exec(authorization) : null;
-  const secret = match?.[1] ?? null;
-  return secret && AGENT_KEY_PATTERN.test(secret) ? secret : null;
+export function readBearerSecret(authorization: string | null): BearerSecretReading {
+  const secret = authorization ? (/^Bearer\s+(.*)$/i.exec(authorization.trim())?.[1] ?? '') : '';
+  if (secret.length === 0) return { kind: 'missing' };
+  return AGENT_KEY_PATTERN.test(secret) ? { kind: 'present', secret } : { kind: 'malformed' };
 }
