@@ -1,6 +1,15 @@
 import { z } from 'zod';
+import { ConceptID, KEBAB_ID } from './conceptMapSchema';
 
 export const Tone = z.enum(['yellow', 'red', 'purple', 'plain']);
+
+export const GlossaryTerm = z.object({
+  id: z.string().regex(KEBAB_ID).describe('the key used in [[id]] and [[id|display]] marks'),
+  term: z.string().min(1).describe('the canonical industry term'),
+  definition: z.string().min(1).describe('one plain sentence'),
+  taughtIn: z.string().optional().describe('module id that teaches it, when not this module')
+});
+export type GlossaryTerm = z.infer<typeof GlossaryTerm>;
 
 export const FlowNode = z.object({
   id: z.string(),
@@ -31,6 +40,32 @@ export const FlowStep = z.object({
   edges: z.array(z.string()).optional()
 });
 
+export const VideoBlock = z.object({
+  type: z.literal('video'),
+  youtubeId: z.string().regex(/^[A-Za-z0-9_-]{11}$/),
+  title: z.string().min(1),
+  channel: z.string().min(1),
+  startSec: z.number().int().min(0),
+  endSec: z.number().int().min(0),
+  conceptId: ConceptID
+});
+
+export const ArticleBlock = z.object({
+  type: z.literal('article'),
+  url: z.url(),
+  title: z.string().min(1),
+  site: z.string().min(1),
+  conceptId: ConceptID,
+  minutes: z.number().int().min(1)
+});
+
+export const ExplainBackBlock = z.object({
+  type: z.literal('explainback'),
+  conceptId: ConceptID,
+  prompt: z.string().min(1),
+  rubric: z.array(z.string().min(1)).min(1).max(5).describe('points a passing answer must make')
+});
+
 export const Block = z.discriminatedUnion('type', [
   z.object({ type: z.literal('p'), text: z.string() }),
   z.object({ type: z.literal('h3'), text: z.string() }),
@@ -53,7 +88,9 @@ export const Block = z.discriminatedUnion('type', [
     title: z.string().optional(),
     lang: z.string(),
     code: z.string(),
-    note: z.string().optional()
+    note: z.string().optional(),
+    runnable: z.enum(['python', 'javascript']).optional().describe('set to run this block in the browser'),
+    expectedOutput: z.string().optional().describe('exact stdout the block prints')
   }),
   z.object({
     type: z.literal('flow'),
@@ -69,12 +106,21 @@ export const Block = z.discriminatedUnion('type', [
     q: z.string(),
     options: z.array(z.string()).min(2).max(5),
     answer: z.number().int().min(0),
-    explain: z.string()
-  })
+    explain: z.string(),
+    conceptId: ConceptID.optional().describe('required in schemaVersion 2')
+  }),
+  VideoBlock,
+  ArticleBlock,
+  ExplainBackBlock
 ]);
 export type Block = z.infer<typeof Block>;
 
-export const Section = z.object({ id: z.string(), title: z.string(), blocks: z.array(Block).min(1) });
+export const Section = z.object({
+  id: z.string(),
+  title: z.string(),
+  blocks: z.array(Block).min(1),
+  conceptIds: z.array(ConceptID).optional()
+});
 export type Section = z.infer<typeof Section>;
 
 export const ModulePack = z.object({
@@ -84,7 +130,10 @@ export const ModulePack = z.object({
   kicker: z.string(),
   minutes: z.number(),
   summary: z.string(),
-  sections: z.array(Section).min(1)
+  sections: z.array(Section).min(1),
+  schemaVersion: z.literal(2).optional().describe('absent means version 1'),
+  conceptIds: z.array(ConceptID).optional().describe('new concepts this module teaches, in teaching order'),
+  glossary: z.array(GlossaryTerm).optional().describe('terms this module introduces')
 });
 export type ModulePack = z.infer<typeof ModulePack>;
 
@@ -98,7 +147,8 @@ export const Challenge = z.object({
   options: z.array(z.string()).min(2).max(5),
   answer: z.number().int().min(0),
   explain: z.string(),
-  boss: z.boolean().optional()
+  boss: z.boolean().optional(),
+  conceptId: ConceptID.optional().describe('required in schemaVersion 2')
 });
 export type Challenge = z.infer<typeof Challenge>;
 
@@ -153,7 +203,8 @@ export const CourseMeta = z.object({
   kind: z.enum(['concept', 'repo']),
   brand: Brand,
   challenges: z.array(Challenge),
-  codeRefs: z.record(z.string(), CodeRefSchema).optional()
+  codeRefs: z.record(z.string(), CodeRefSchema).optional(),
+  schemaVersion: z.literal(2).optional().describe('absent means version 1')
 });
 export type CourseMeta = z.infer<typeof CourseMeta>;
 

@@ -2,7 +2,7 @@
 
 import { ClientOnly } from '../components/ClientOnly';
 import { readCourseSection } from '../lib/routes';
-import { CourseScreen } from '../platform/App';
+import { GeneratedCourseScreen } from '../platform/GeneratedCourseScreen';
 
 import type { CourseRouteParams } from '../types';
 
@@ -12,6 +12,6 @@ interface GeneratedCoursePageProps {
 
 export const GeneratedCoursePage = ({ params }: GeneratedCoursePageProps) => (
   <ClientOnly>
-    <CourseScreen source="g" courseID={params.course} section={readCourseSection(params)} />
+    <GeneratedCourseScreen slug={params.course} section={readCourseSection(params)} />
   </ClientOnly>
 );

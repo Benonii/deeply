@@ -5,6 +5,8 @@
       "src/**",
       "convex/**",
       "scripts/**",
+      "evals/**",
+      "!evals/reports",
       "*.ts",
       "!convex/_generated",
       "!src/courses/convex/code",
@@ -33,7 +35,7 @@
     "formatter": { "trailingCommas": "none" }
   },
   "linter": {
-    "rules": { "recommended": true }
+    "rules": { "preset": "recommended" }
   },
   "overrides": [
     {

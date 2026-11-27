@@ -1,21 +1,24 @@
+import { useRef } from 'react';
 import { Link } from '@farm.js/core/client';
+import { openSignIn } from '../account';
+import { AskLayer } from '../engine/AskLayer';
+import { ConceptProgress } from '../engine/ConceptProgress';
 import { buildPrompt, CopyBtn, ModuleCtx } from '../engine/kit';
 import { PackChallenges } from '../engine/PackChallenges';
 import { PackModule } from '../engine/PackModule';
 import { useProgress } from '../engine/progress';
 import { BrandShader } from './BrandShader';
+import { NotFound } from './NotFound';
+import type React from 'react';
 import type { ShellCourse, ShellModule } from './model';
 
 const padTwoDigits = (digits: number) => String(digits).padStart(2, '0');
 
-export function coursePages(course: ShellCourse) {
-  const pages = [...course.pages];
-  if (course.challenges?.length)
-    pages.push({
-      id: 'challenges',
-      label: 'Challenges',
-      Component: () => <PackChallenges challenges={course.challenges!} course={course.title} subject={course.subject} />
-    });
+type CourseNavPage = { id: string; label: string; badge?: string; Component?: React.FC };
+
+export function coursePages(course: ShellCourse): CourseNavPage[] {
+  const pages: CourseNavPage[] = [...course.pages];
+  if (course.challenges?.length) pages.push({ id: 'challenges', label: 'Challenges' });
   return pages;
 }
 
@@ -69,6 +72,7 @@ export function CourseNav({ course, route }: { course: ShellCourse; route: strin
           );
         })}
       </nav>
+      <ConceptProgress />
     </>
   );
 }
@@ -227,6 +231,7 @@ function ModuleBody({ courseModule: m }: { courseModule: ShellModule }) {
 export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId: string }) {
   const index = course.modules.findIndex((courseModule) => courseModule.id === moduleId);
   const { progress, markModule } = useProgress(course.id);
+  const proseRef = useRef<HTMLDivElement>(null);
   if (index < 0) return <NotFound what="module" back={`#${course.base}`} />;
   const courseModule = course.modules[index];
   const next = course.modules.slice(index + 1).find((courseModule) => courseModule.status === 'ready');
@@ -248,14 +253,25 @@ export function ModulePage({ course, moduleId }: { course: ShellCourse; moduleId
             <div className="eyebrow">
               Module {padTwoDigits(courseModule.n)}
               {courseModule.kicker ? ` · ${courseModule.kicker}` : ''} · {courseModule.minutes} min
+              {courseModule.isUnverified && (
+                <span className="muted" title="Some checks on this module did not pass before it was published.">
+                  {' '}
+                  · unverified
+                </span>
+              )}
             </div>
             <h1>{courseModule.title}</h1>
             <p className="lede">{courseModule.summary}</p>
           </div>
         </header>
-        <div className="module-body" key={courseModule.id}>
+        <div className="module-body" key={courseModule.id} ref={proseRef}>
           <ModuleBody courseModule={courseModule} />
         </div>
+        <AskLayer
+          key={`ask-${courseModule.id}`}
+          proseRef={proseRef}
+          onSignIn={() => openSignIn('Sign in to ask about a passage.')}
+        />
         <footer className="module-foot">
           <div className="module-foot-shader" aria-hidden>
             <BrandShader brand={course.brand} role="foot" />
@@ -296,19 +312,11 @@ export function PageView({ course, pageId }: { course: ShellCourse; pageId: stri
   if (!page) return <NotFound what="page" back={`#${course.base}`} />;
   return (
     <ModuleCtx.Provider value={{ title: page.label, course: course.title, subject: course.subject }}>
-      <page.Component />
+      {page.Component ? (
+        <page.Component />
+      ) : (
+        <PackChallenges challenges={course.challenges ?? []} course={course.title} subject={course.subject} />
+      )}
     </ModuleCtx.Provider>
-  );
-}
-
-export function NotFound({ what, back }: { what: string; back: string }) {
-  return (
-    <div className="page-head">
-      <div className="eyebrow">Not found</div>
-      <h1>That {what} doesn't exist.</h1>
-      <p className="lede">
-        <Link href={back}>Go back</Link>
-      </p>
-    </div>
   );
 }

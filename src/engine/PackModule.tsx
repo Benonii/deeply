@@ -1,12 +1,24 @@
 import type { Block, ModulePack } from '../../convex/lib/courseSchema';
+import { ArticleCard } from './ArticleCard';
+import { ExplainBack } from './ExplainBack';
 import { FLOW_NODE_HEIGHT, FLOW_NODE_WIDTH } from './flowGeometry';
 import { measureWidestLabelWord } from './flowLabels';
 import { Callout, Check, Code } from './kit';
 import { Compare, Copyable, Flow } from './kit';
 import { KeyTerms, Section } from './kit';
+import { useLesson } from './lesson';
 import { Inline } from './md';
+import { VideoCard } from './VideoCard';
 
 import type { FlowEdge, FlowNode } from '../types';
+
+const MAXIMUM_SUBJECT_LENGTH = 200;
+
+export function readSubjectID(block: Block, blockPath: string) {
+  if (block.type === 'article') return `article:${block.url}`.slice(0, MAXIMUM_SUBJECT_LENGTH);
+  if (block.type === 'video') return `video:${block.youtubeId}:${block.startSec}`;
+  return `${block.type}:${blockPath}`.slice(0, MAXIMUM_SUBJECT_LENGTH);
+}
 
 export function PackModule({ pack }: { pack: ModulePack }) {
   return (
@@ -14,7 +26,7 @@ export function PackModule({ pack }: { pack: ModulePack }) {
       {pack.sections.map((section) => (
         <Section key={section.id} id={section.id} title={section.title}>
           {section.blocks.map((block, index) => (
-            <PackBlock key={index} block={block} />
+            <PackBlock key={index} block={block} blockPath={`${pack.id}/${section.id}/${index}`} />
           ))}
         </Section>
       ))}
@@ -61,7 +73,9 @@ export function layoutFlow(
   return { nodes: placed, width: canvasWidth, height: Math.max(240, bottom + 36) };
 }
 
-export function PackBlock({ block: b }: { block: Block }) {
+export function PackBlock({ block: b, blockPath = '' }: { block: Block; blockPath?: string }) {
+  const { recordActivity } = useLesson();
+  const subjectID = readSubjectID(b, blockPath);
   switch (b.type) {
     case 'p':
       return (
@@ -102,7 +116,16 @@ export function PackBlock({ block: b }: { block: Block }) {
         />
       );
     case 'code':
-      return <Code title={b.title} lang={b.lang} code={b.code} note={b.note ? <Inline text={b.note} /> : undefined} />;
+      return (
+        <Code
+          title={b.title}
+          lang={b.lang}
+          code={b.code}
+          note={b.note ? <Inline text={b.note} /> : undefined}
+          runnable={b.runnable}
+          expectedOutput={b.expectedOutput}
+        />
+      );
     case 'flow': {
       const { nodes, width, height } = layoutFlow(b.nodes, b.edges);
       return (
@@ -117,8 +140,29 @@ export function PackBlock({ block: b }: { block: Block }) {
         />
       );
     }
-    case 'check':
-      return <Check question={b.q} options={b.options} answer={b.answer} explain={b.explain} />;
+    case 'check': {
+      const conceptId = b.conceptId;
+      return (
+        <Check
+          question={b.q}
+          options={b.options}
+          answer={b.answer}
+          explain={b.explain}
+          onAnswer={
+            conceptId
+              ? (choice, isCorrect) =>
+                  recordActivity({ conceptId, subjectId: subjectID, detail: { kind: 'quizAnswer', choice, isCorrect } })
+              : undefined
+          }
+        />
+      );
+    }
+    case 'video':
+      return <VideoCard block={b} subjectId={subjectID} />;
+    case 'article':
+      return <ArticleCard block={b} subjectId={subjectID} />;
+    case 'explainback':
+      return <ExplainBack block={b} subjectId={subjectID} />;
     default:
       return (
         <Copyable label="Unsupported block">

@@ -4,6 +4,8 @@ import { httpAction } from './_generated/server';
 import { authComponent, createAuth } from './auth';
 import { creditsForOrder, polar } from './billing';
 import { resignPolarWebhook } from './lib/polarWebhook';
+import { handleChatRequest } from './chat/endpoint';
+import { handleAgentRequest, rejectAgentStream } from './mcp/endpoint';
 
 import type { HttpActionInternals } from './lib/types';
 
@@ -45,5 +47,11 @@ http.route({
     return handlePolarEvent(context, verifiedRequest);
   })
 });
+
+http.route({ path: '/chat', method: 'POST', handler: handleChatRequest });
+
+http.route({ path: '/mcp', method: 'POST', handler: handleAgentRequest });
+http.route({ path: '/mcp', method: 'GET', handler: rejectAgentStream });
+http.route({ path: '/mcp', method: 'DELETE', handler: rejectAgentStream });
 
 export default http;

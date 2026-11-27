@@ -1,0 +1,670 @@
+{
+  "checkId": "jargon",
+  "cases": [
+    {
+      "id": "jg-wal-marked",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the one term of art is marked and defined",
+      "topic": "Surviving a crash",
+      "text": [
+        "Before the database changes its data files, it appends a note about the change to the [[wal|write-ahead log]]. After a crash it reads that log back and redoes every change, so nothing that was saved is lost."
+      ],
+      "glossary": [
+        {
+          "id": "wal",
+          "term": "write-ahead log",
+          "definition": "An append-only file where the database records each change before it applies it."
+        }
+      ]
+    },
+    {
+      "id": "jg-wal-unmarked",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "write-ahead log is a term of art with no mark and no definition",
+      "topic": "Surviving a crash",
+      "text": [
+        "Before the database changes its data files, it appends a note about the change to the write-ahead log. After a crash it reads that log back and redoes every change, so nothing that was saved is lost."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-plain-settings",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "plain instructions a programmer already understands",
+      "topic": "Changing the port",
+      "text": [
+        "Open the settings file, change the port number to 8080 and restart the server. The app now listens on the new port."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-jwt-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "JWT is an acronym used as if known, and claims has a narrower meaning here",
+      "topic": "Signing users in",
+      "text": [
+        "Each request carries a JWT in its Authorization header, and the server checks the signature before it reads the claims."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-jwt-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the acronym is marked and defined, the rest is plain",
+      "topic": "Signing users in",
+      "text": [
+        "Each request carries a [[jwt|JWT]] in its Authorization header. The server checks that the token was signed with its own key before it trusts what the token says about the user."
+      ],
+      "glossary": [
+        {
+          "id": "jwt",
+          "term": "JWT",
+          "definition": "JSON Web Token: a signed string that carries facts about the user, such as their id."
+        }
+      ]
+    },
+    {
+      "id": "jg-idempotent-inline",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "idempotent is defined in the same sentence, which the rules exempt",
+      "topic": "Retrying requests",
+      "text": [
+        "A request is idempotent when sending it twice has the same effect as sending it once, and only idempotent requests are safe to retry blindly."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-quorum-unmarked",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "quorum is in the glossary but never marked, and replica is not defined",
+      "topic": "Writing to several servers",
+      "text": ["A write succeeds once a quorum of replicas confirm it."],
+      "glossary": [
+        {
+          "id": "quorum",
+          "term": "quorum",
+          "definition": "The smallest number of copies that must agree, usually more than half."
+        }
+      ]
+    },
+    {
+      "id": "jg-quorum-marked",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "both terms are marked and defined",
+      "topic": "Writing to several servers",
+      "text": ["A write succeeds once a [[quorum]] of [[replica|replicas]] confirm it."],
+      "glossary": [
+        {
+          "id": "quorum",
+          "term": "quorum",
+          "definition": "The smallest number of copies that must agree, usually more than half."
+        },
+        { "id": "replica", "term": "replica", "definition": "One copy of the data, kept on its own server." }
+      ]
+    },
+    {
+      "id": "jg-p-value-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "p-value and null hypothesis are statistics terms of art, undefined",
+      "topic": "Reading an experiment",
+      "text": ["The test gave a p-value of 0.03, so we reject the null hypothesis and ship the new button."],
+      "glossary": []
+    },
+    {
+      "id": "jg-p-value-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "both terms are marked and defined",
+      "topic": "Reading an experiment",
+      "text": [
+        "The test gave a [[p-value]] of 0.03, so we reject the [[null-hypothesis|null hypothesis]] and ship the new button."
+      ],
+      "glossary": [
+        {
+          "id": "p-value",
+          "term": "p-value",
+          "definition": "How likely a result at least this extreme would be if the change made no difference."
+        },
+        {
+          "id": "null-hypothesis",
+          "term": "null hypothesis",
+          "definition": "The starting assumption that the change made no difference."
+        }
+      ]
+    },
+    {
+      "id": "jg-detached-head",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "detached HEAD is a Git term of art used without a definition",
+      "topic": "Checking out old versions",
+      "text": [
+        "If you check out an old commit you end up in detached HEAD state, and new commits you make there belong to no branch."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-detached-head-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the term of art is marked and defined",
+      "topic": "Checking out old versions",
+      "text": [
+        "If you check out an old commit you end up in [[detached-head|detached HEAD]] state, and new commits you make there belong to no branch."
+      ],
+      "glossary": [
+        {
+          "id": "detached-head",
+          "term": "detached HEAD",
+          "definition": "The state where Git points at a commit directly instead of at a branch."
+        }
+      ]
+    },
+    {
+      "id": "jg-specificity-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "specificity has a narrow CSS meaning and is not defined",
+      "topic": "When two style rules clash",
+      "text": ["When two rules set the same property, the browser uses specificity to pick the winner."],
+      "glossary": []
+    },
+    {
+      "id": "jg-plain-functions",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "ordinary programming advice with no terms of art",
+      "topic": "Keeping functions small",
+      "text": [
+        "Keep each function short and give it a name that says what it does. Long functions are hard to read and hard to test, so split one as soon as it does two things."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-ttl-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "TTL is an abbreviation used on first use without a definition",
+      "topic": "Cache expiry",
+      "text": ["Every cache entry has a TTL of 60 seconds."],
+      "glossary": []
+    },
+    {
+      "id": "jg-ttl-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the abbreviation is marked and defined",
+      "topic": "Cache expiry",
+      "text": ["Every cache entry has a [[ttl|TTL]] of 60 seconds; after that the entry is thrown away."],
+      "glossary": [
+        { "id": "ttl", "term": "TTL", "definition": "Time to live: how long an entry is kept before it expires." }
+      ]
+    },
+    {
+      "id": "jg-dataframe-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "dataframe and group-by are terms of art used as if known",
+      "topic": "Summing sales by region",
+      "text": ["Load the CSV file into a dataframe, then group by the region column and sum the sales."],
+      "glossary": []
+    },
+    {
+      "id": "jg-dataframe-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "both terms are marked and defined",
+      "topic": "Summing sales by region",
+      "text": [
+        "Load the CSV file into a [[dataframe]], then [[group-by|group by]] the region column and sum the sales."
+      ],
+      "glossary": [
+        { "id": "dataframe", "term": "dataframe", "definition": "A table held in memory, with named columns." },
+        {
+          "id": "group-by",
+          "term": "group by",
+          "definition": "Split rows into groups that share a value, so you can total each group."
+        }
+      ]
+    },
+    {
+      "id": "jg-transaction-undefined",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "transaction, commit and roll back mean something narrower in databases; many programmers know them, a newcomer to databases does not",
+      "topic": "Moving money between accounts",
+      "text": ["Wrap both updates in a transaction so they commit together or roll back together."],
+      "glossary": []
+    },
+    {
+      "id": "jg-transaction-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all three terms are marked and defined",
+      "topic": "Moving money between accounts",
+      "text": [
+        "Wrap both updates in a [[transaction]] so they [[commit]] together or [[rollback|roll back]] together."
+      ],
+      "glossary": [
+        {
+          "id": "transaction",
+          "term": "transaction",
+          "definition": "A group of database changes that succeed or fail as one."
+        },
+        { "id": "commit", "term": "commit", "definition": "Make a transaction's changes permanent." },
+        { "id": "rollback", "term": "roll back", "definition": "Undo every change a transaction made." }
+      ]
+    },
+    {
+      "id": "jg-overfitting-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "overfit, validation loss and training loss are machine learning terms, undefined",
+      "topic": "Training on a small dataset",
+      "text": [
+        "With so few examples the model overfits: its validation loss climbs while its training loss keeps falling."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-overfitting-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "all three terms are marked and defined",
+      "topic": "Training on a small dataset",
+      "text": [
+        "With so few examples the model [[overfitting|overfits]]: its [[validation-loss|validation loss]] climbs while its [[training-loss|training loss]] keeps falling."
+      ],
+      "glossary": [
+        {
+          "id": "overfitting",
+          "term": "overfitting",
+          "definition": "Learning the training examples so closely that the model does worse on new data."
+        },
+        {
+          "id": "validation-loss",
+          "term": "validation loss",
+          "definition": "The model's error on examples held back from training."
+        },
+        {
+          "id": "training-loss",
+          "term": "training loss",
+          "definition": "The model's error on the examples it learns from."
+        }
+      ]
+    },
+    {
+      "id": "jg-json-http",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "JSON and HTTP are general programming knowledge, not terms of this topic",
+      "topic": "Calling the weather service",
+      "text": ["Send the city name to the weather service over HTTP. It answers with JSON that holds the temperature."],
+      "glossary": []
+    },
+    {
+      "id": "jg-left-join-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the term of art is marked and defined",
+      "topic": "Listing every customer",
+      "text": ["Use a [[left-join|left join]] when you want every customer in the result, even those with no orders."],
+      "glossary": [
+        {
+          "id": "left-join",
+          "term": "left join",
+          "definition": "A join that keeps every row of the first table, with empty values where the second has no match."
+        }
+      ]
+    },
+    {
+      "id": "jg-joins-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "left join and inner join are terms of art, undefined",
+      "topic": "Listing every customer",
+      "text": ["Use a left join when you want every customer, even those with no orders; an inner join drops them."],
+      "glossary": []
+    },
+    {
+      "id": "jg-shard-unmarked",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "shard is defined in the glossary but never marked in the text",
+      "topic": "Splitting a big table",
+      "text": ["Each shard holds a slice of the users, split by user id."],
+      "glossary": [
+        { "id": "shard", "term": "shard", "definition": "One part of a dataset that lives on its own server." }
+      ]
+    },
+    {
+      "id": "jg-shard-marked",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the term is marked and defined",
+      "topic": "Splitting a big table",
+      "text": ["Each [[shard]] holds a slice of the users, split by user id."],
+      "glossary": [
+        { "id": "shard", "term": "shard", "definition": "One part of a dataset that lives on its own server." }
+      ]
+    },
+    {
+      "id": "jg-csrf-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "CSRF is an acronym used without a definition",
+      "topic": "Protecting forms",
+      "text": ["Without a CSRF token, another site can submit this form in the user's name."],
+      "glossary": []
+    },
+    {
+      "id": "jg-csrf-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the term is marked and defined",
+      "topic": "Protecting forms",
+      "text": ["Without a [[csrf-token|CSRF token]], another site can submit this form in the user's name."],
+      "glossary": [
+        {
+          "id": "csrf-token",
+          "term": "CSRF token",
+          "definition": "A secret value the server puts in its own forms, so it can reject forms sent from other sites."
+        }
+      ]
+    },
+    {
+      "id": "jg-round-trip",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "round trip is general programming vocabulary",
+      "topic": "Why the page is slow",
+      "text": ["The page feels slow because every image needs its own round trip to the server before it can show."],
+      "glossary": []
+    },
+    {
+      "id": "jg-cluster-terms-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "deployment, pod, scheduler and node all mean something narrower here, none is defined",
+      "topic": "Running more copies of a service",
+      "text": ["Scale the deployment to three pods and the scheduler spreads them across the nodes."],
+      "glossary": []
+    },
+    {
+      "id": "jg-cluster-terms-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "every narrow term is marked and defined",
+      "topic": "Running more copies of a service",
+      "text": [
+        "Scale the [[deployment]] to three [[pod|pods]] and the [[scheduler]] spreads them across the [[node|nodes]]."
+      ],
+      "glossary": [
+        {
+          "id": "deployment",
+          "term": "deployment",
+          "definition": "The record that says which program to run and how many copies to keep."
+        },
+        { "id": "pod", "term": "pod", "definition": "One running copy of a program, with its own address." },
+        {
+          "id": "scheduler",
+          "term": "scheduler",
+          "definition": "The part of the cluster that decides which machine runs each pod."
+        },
+        { "id": "node", "term": "node", "definition": "One machine in the cluster." }
+      ]
+    },
+    {
+      "id": "jg-salt-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "salt has a narrow security meaning and is not defined",
+      "topic": "Storing passwords",
+      "text": ["Store a salt next to each password hash, so two users with the same password get different hashes."],
+      "glossary": []
+    },
+    {
+      "id": "jg-salt-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the term is marked and defined",
+      "topic": "Storing passwords",
+      "text": [
+        "Store a [[salt]] next to each password hash, so two users with the same password get different hashes."
+      ],
+      "glossary": [
+        {
+          "id": "salt",
+          "term": "salt",
+          "definition": "Random bytes mixed into a password before it is hashed."
+        }
+      ]
+    },
+    {
+      "id": "jg-bakery-queue",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "an everyday analogy with no terms of art",
+      "topic": "Serving requests in order",
+      "text": ["Think of the waiting requests as a line at a bakery: whoever arrives first is served first."],
+      "glossary": []
+    },
+    {
+      "id": "jg-audio-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "sample rate, aliasing and Nyquist frequency are audio terms of art, undefined",
+      "topic": "Recording clean audio",
+      "text": ["Raise the sample rate to 48 kHz to avoid aliasing above the Nyquist frequency."],
+      "glossary": []
+    },
+    {
+      "id": "jg-audio-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "every term of art is marked and defined",
+      "topic": "Recording clean audio",
+      "text": [
+        "Raise the [[sample-rate|sample rate]] to 48 kHz to avoid [[aliasing]] above the [[nyquist-frequency|Nyquist frequency]]."
+      ],
+      "glossary": [
+        {
+          "id": "sample-rate",
+          "term": "sample rate",
+          "definition": "How many times per second the sound is measured."
+        },
+        {
+          "id": "aliasing",
+          "term": "aliasing",
+          "definition": "False low tones that appear when a sound is measured too rarely."
+        },
+        {
+          "id": "nyquist-frequency",
+          "term": "Nyquist frequency",
+          "definition": "Half the sample rate: the highest pitch that can be recorded without aliasing."
+        }
+      ]
+    },
+    {
+      "id": "jg-stampede-unmarked",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "cache hit is handled, cache stampede is a term of art with no definition",
+      "topic": "When the cache empties",
+      "text": [
+        "Most reads are a [[cache-hit|cache hit]]. When a popular entry expires, every reader misses at once and they all hit the database together, which is called a cache stampede."
+      ],
+      "glossary": [
+        {
+          "id": "cache-hit",
+          "term": "cache hit",
+          "definition": "A read the cache can answer without asking the database."
+        }
+      ]
+    },
+    {
+      "id": "jg-regex-general",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "regular expression is general programming knowledge",
+      "topic": "Checking a form field",
+      "text": ["Check the email field against a regular expression before you save it."],
+      "glossary": []
+    },
+    {
+      "id": "jg-mutex-undefined",
+      "expected": "fail",
+      "kind": "borderline",
+      "reason": "mutex is the term of art of this topic; many programmers know it, a newcomer to concurrency does not",
+      "topic": "Two threads, one counter",
+      "text": ["Guard the counter with a mutex so two threads never update it at the same time."],
+      "glossary": []
+    },
+    {
+      "id": "jg-mutex-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the term is marked and defined",
+      "topic": "Two threads, one counter",
+      "text": ["Guard the counter with a [[mutex]] so two threads never update it at the same time."],
+      "glossary": [
+        {
+          "id": "mutex",
+          "term": "mutex",
+          "definition": "A lock that only one thread can hold at a time."
+        }
+      ]
+    },
+    {
+      "id": "jg-dns-records-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "CNAME and TTL are used as if known",
+      "topic": "Moving a site to a new server",
+      "text": ["Point the CNAME at the new server and lower the TTL a day before you switch."],
+      "glossary": []
+    },
+    {
+      "id": "jg-dns-records-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "both terms are marked and defined",
+      "topic": "Moving a site to a new server",
+      "text": ["Point the [[cname|CNAME]] at the new server and lower the [[ttl|TTL]] a day before you switch."],
+      "glossary": [
+        {
+          "id": "cname",
+          "term": "CNAME",
+          "definition": "A DNS record that says one name is another name for a second name."
+        },
+        {
+          "id": "ttl",
+          "term": "TTL",
+          "definition": "Time to live: how long other servers keep the record before they ask again."
+        }
+      ]
+    },
+    {
+      "id": "jg-generator-exhausted",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "iterator is handled, but generator and exhausted (in its narrow sense) are not defined",
+      "topic": "Looping twice over the same data",
+      "text": [
+        "An [[iterator]] remembers where it is. Once the generator is exhausted, a second loop over it prints nothing."
+      ],
+      "glossary": [
+        {
+          "id": "iterator",
+          "term": "iterator",
+          "definition": "An object that hands out the items of a stream one at a time."
+        }
+      ]
+    },
+    {
+      "id": "jg-plain-naming",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "plain advice over two paragraphs, no terms of art",
+      "topic": "Naming variables",
+      "text": [
+        "Name a variable after what it holds, not after its type. A list of unpaid invoices is unpaidInvoices, not list2.",
+        "If you cannot find a short name, the variable may be doing two jobs. Split it and name each part."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-closure-plural-marked",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "the term is marked in its plural and defined",
+      "topic": "Functions that remember",
+      "text": ["[[closure|Closures]] keep the variables of the function that created them alive after it returns."],
+      "glossary": [
+        {
+          "id": "closure",
+          "term": "closure",
+          "definition": "A function together with the variables it captured from where it was created."
+        }
+      ]
+    },
+    {
+      "id": "jg-closure-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "closure is the term of art of this topic and is not defined",
+      "topic": "Functions that remember",
+      "text": ["Closures keep the variables of the function that created them alive after it returns."],
+      "glossary": []
+    },
+    {
+      "id": "jg-tracing-undefined",
+      "expected": "fail",
+      "kind": "clear",
+      "reason": "span and trace have narrow meanings here and are not defined",
+      "topic": "Following one request",
+      "text": [
+        "Each service emits a span for every request it handles, and the spans of one request together form a trace."
+      ],
+      "glossary": []
+    },
+    {
+      "id": "jg-tracing-defined",
+      "expected": "pass",
+      "kind": "clear",
+      "reason": "both terms are marked and defined",
+      "topic": "Following one request",
+      "text": [
+        "Each service emits a [[span]] for every request it handles, and the spans of one request together form a [[trace]]."
+      ],
+      "glossary": [
+        {
+          "id": "span",
+          "term": "span",
+          "definition": "A record of one piece of work: what ran, when it started and how long it took."
+        },
+        { "id": "trace", "term": "trace", "definition": "All the spans of one request, linked in the order they ran." }
+      ]
+    },
+    {
+      "id": "jg-cdn-inline",
+      "expected": "pass",
+      "kind": "borderline",
+      "reason": "the acronym is defined in brackets in the same sentence",
+      "topic": "Serving images faster",
+      "text": [
+        "The CDN (a network of servers that keep copies of your files close to your users) serves the images, so they load from a nearby city."
+      ],
+      "glossary": []
+    }
+  ]
+}

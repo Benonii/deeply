@@ -1,5 +1,9 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { askRow } from './player/validators';
+import { checkMode } from './checks/validators';
+import { courseRequestOrigin, courseRequestStage, courseRequestStatus } from './lib/courseRequests';
+import { conceptActivityRow, masteryRow } from './lib/validators';
 
 export default defineSchema({
   progress: defineTable({
@@ -11,6 +15,16 @@ export default defineSchema({
   })
     .index('by_device', ['deviceId'])
     .index('by_user', ['userId']),
+
+  mastery: defineTable(masteryRow)
+    .index('by_device', ['deviceId', 'courseId', 'conceptId'])
+    .index('by_user', ['userId', 'courseId', 'conceptId']),
+
+  conceptActivity: defineTable(conceptActivityRow)
+    .index('by_device', ['deviceId', 'courseId', 'subjectId'])
+    .index('by_user', ['userId', 'courseId', 'subjectId']),
+
+  asks: defineTable(askRow).index('by_user_module', ['userId', 'courseId', 'moduleId']),
 
   wallets: defineTable({
     userId: v.string(),
@@ -68,6 +82,31 @@ export default defineSchema({
     .index('by_owner', ['ownerId'])
     .index('by_status_visibility', ['status', 'visibility']),
 
+  courseRequests: defineTable({
+    ownerId: v.string(),
+    topic: v.string(),
+    goal: v.optional(v.string()),
+    status: courseRequestStatus,
+    stepsDone: v.array(courseRequestStage),
+    courseId: v.optional(v.id('courses')),
+    origin: courseRequestOrigin,
+    error: v.optional(v.string()),
+    updatedAt: v.number()
+  })
+    .index('by_owner', ['ownerId'])
+    .index('by_course', ['courseId']),
+
+  agentKeys: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    prefix: v.string(),
+    secretHash: v.string(),
+    lastUsedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number())
+  })
+    .index('by_hash', ['secretHash'])
+    .index('by_user', ['userId']),
+
   courseModules: defineTable({
     courseId: v.id('courses'),
     n: v.number(),
@@ -75,8 +114,28 @@ export default defineSchema({
     outline: v.any(),
     pack: v.optional(v.any()),
     error: v.optional(v.string()),
-    attempts: v.optional(v.number())
+    attempts: v.optional(v.number()),
+    unverified: v.optional(v.boolean())
   }).index('by_course', ['courseId', 'n']),
+
+  courseBuilds: defineTable({
+    requestId: v.id('courseRequests'),
+    sources: v.optional(v.array(v.any())),
+    map: v.optional(v.any()),
+    updatedAt: v.number()
+  }).index('by_request', ['requestId']),
+
+  checkRuns: defineTable({
+    requestId: v.id('courseRequests'),
+    moduleId: v.string(),
+    attempt: v.number(),
+    checkId: v.string(),
+    version: v.string(),
+    mode: checkMode,
+    pass: v.boolean(),
+    problems: v.array(v.object({ where: v.string(), message: v.string() })),
+    fixNote: v.string()
+  }).index('by_module_attempt', ['requestId', 'moduleId', 'attempt']),
 
   generationEvents: defineTable({
     courseId: v.id('courses'),
@@ -91,6 +150,27 @@ export default defineSchema({
   })
     .index('by_hash', ['pairingHash'])
     .index('by_expiry', ['expiresAt']),
+
+  conceptMedia: defineTable({
+    conceptKey: v.string(),
+    topic: v.string(),
+    conceptName: v.string(),
+    conceptId: v.string(),
+    videoCandidates: v.optional(v.any()),
+    articleCandidates: v.optional(v.any()),
+    videos: v.optional(v.any()),
+    articles: v.optional(v.any()),
+    fetchedAt: v.number(),
+    quotaUnits: v.number()
+  }).index('by_concept_key', ['conceptKey']),
+
+  finderQuota: defineTable({
+    day: v.string(),
+    conceptKey: v.string(),
+    call: v.union(v.literal('search'), v.literal('videos'), v.literal('commentThreads'), v.literal('channels')),
+    calls: v.number(),
+    units: v.number()
+  }).index('by_day', ['day']),
 
   messages: defineTable({ room: v.string(), author: v.string(), body: v.string() }).index('by_room', ['room']),
   counters: defineTable({ name: v.string(), value: v.number() }).index('by_name', ['name'])

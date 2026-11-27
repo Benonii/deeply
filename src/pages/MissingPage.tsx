@@ -1,4 +1,4 @@
-import { NotFound } from '../platform/CoursePages';
+import { NotFound } from '../platform/NotFound';
 
 export const MissingPage = () => (
   <main className="main">

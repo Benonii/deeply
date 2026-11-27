@@ -1,4 +1,5 @@
 import type { BuiltinCourse } from '../../engine/course';
+import { CONVEX_COURSE_LINK } from '../catalog';
 import './code/index';
 import { LiveLab } from './LiveLab';
 import { modules } from './modules';
@@ -6,8 +7,7 @@ import { Playground } from './playground/Playground';
 import { SourceMap } from './SourceMap';
 
 export const convexCourse: BuiltinCourse = {
-  id: 'convex',
-  title: 'Convex, Deeply',
+  ...CONVEX_COURSE_LINK,
   tagline: 'How Convex actually works.',
   summary:
     'From the transaction log to the WebSocket. The database, the function runtime, optimistic concurrency, the subscription engine and the sync protocol, built up from first principles, then tested in a playground and against a live deployment.',
