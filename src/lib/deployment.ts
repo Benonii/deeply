@@ -1,4 +1,4 @@
-export const PRODUCTION_CONVEX_URL = 'https://focused-retriever-45.convex.cloud';
+export const PRODUCTION_CONVEX_URL = 'https://perfect-badger-312.convex.cloud';
 export const PRODUCTION_WEB_URL = 'https://learndeeply.vercel.app';
 
 export function isDesktopTarget(): boolean {
